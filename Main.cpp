@@ -2,17 +2,27 @@
 //
 
 #include "framework.h"
-#include "MyFirstGame.h"
-#include "Direct3D.h"
+#include "Main.h"
+#include "Engine/Direct3D.h"
+#include "Engine/Camera.h"
+#include "Engine/Transform.h"
+#include "Engine/Input.h"
+#include "Engine/RootJob.h"
+#include "Engine/Model.h"
+#include "Stage.h"
 
-HWND hWnd = nullptr;
+#pragma comment(lib, "winmm.lib")
+
+HWND hWnd = nullptr; // ウィンドウハンドル…ウィンドウを識別するための番号　車のナンバーみたいなもん　IDとかそこらへん
 
 #define MAX_LOADSTRING 100
 
 // グローバル変数の宣言
 const wchar_t* WIN_CLASS_NAME = L"SANPLE GAME WINDOW";
-const float WINDOW_WIDTH = 800.0f; // ウィンドウの幅
-const float WINDOW_HEIGHT = 600.0f; // ウィンドウの高さ
+const int WINDOW_WIDTH = 800;  //ウィンドウの幅
+const int WINDOW_HEIGHT = 600; //ウィンドウの高さ // SVGAサイズ
+
+RootJob* pRootJob = nullptr; //隠せなくもないけどグローバル変数で作る
 
 // グローバル変数:
 HINSTANCE hInst;                                // 現在のインターフェイス
@@ -24,6 +34,8 @@ ATOM                MyRegisterClass(HINSTANCE hInstance);
 BOOL                InitInstance(HINSTANCE, int);
 LRESULT CALLBACK    WndProc(HWND, UINT, WPARAM, LPARAM);
 INT_PTR CALLBACK    About(HWND, UINT, WPARAM, LPARAM);
+INT_PTR CALLBACK    DlgProc(HWND, UINT, WPARAM, LPARAM);
+INT_PTR CALLBACK    ManuProc(HWND, UINT, WPARAM, LPARAM);
 
 int APIENTRY wWinMain(_In_ HINSTANCE hInstance,// hInstance：実行中のアプリケーション（プロセス）のインスタンスハンドル（識別子） 
                      _In_opt_ HINSTANCE hPrevInstance, // HINSTANCE：16ビットWindowsで使用された。特に意味はない
@@ -46,41 +58,115 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,// hInstance：実行中のアプ
         return FALSE;
     }
 
-	Direct3D::Initialize(WINDOW_WIDTH, WINDOW_HEIGHT, hWnd);
+    HRESULT hr;
+    hr = Direct3D::Initialize(WINDOW_WIDTH, WINDOW_HEIGHT, hWnd);
+    if (FAILED(hr))
+    {
+        MessageBox(nullptr, L"ダイレクトxのイニシャライズに失敗しました", L"エラー", MB_OK);
+        return 0;
+    }
+
+    //DirectInputの初期化
+    Input::Initialize(hWnd); // 入力の初期化処理
+
+    Camera::Initialize(); // カメラの初期化処理
 
     HACCEL hAccelTable = LoadAccelerators(hInstance, MAKEINTRESOURCE(IDC_MYFIRSTGAME));
 
     MSG msg{};
 
-	Quad* quad = new Quad();
-	quad->Initialize(); // Quadの初期化
+    pRootJob = new RootJob(nullptr);
+    pRootJob->Initialize();
+
+    HWND hDig = CreateDialog(hInst, MAKEINTRESOURCE(IDD_DIALOG2), hWnd, ManuProc, 0);
+    ShowWindow(hDig, SW_SHOW);
 
     // メイン メッセージ ループ:
     // メッセージループは、アプリケーションがシステムからメッセージを受け取り、処理するための仕組み。
     // ユーザー操作（クリックやキー入力など）を受け取り、処理を続ける仕組み 
+//    while (GetMessage(&msg, nullptr, 0, 0))
     while (msg.message != WM_QUIT)
     {
-        //メッセージあり
-        if (PeekMessage(&msg, NULL, 0U, 0U, PM_REMOVE))
+       /* if (!TranslateAccelerator(msg.hwnd, hAccelTable, &msg))
         {
             TranslateMessage(&msg);
             DispatchMessage(&msg);
         }
+        */
+        //メッセージあり
+
+        if (PeekMessage(&msg, NULL, 0U, 0U, PM_REMOVE))
+        {
+
+            TranslateMessage(&msg);
+            DispatchMessage(&msg);
+
+        }
 
         //メッセージなし
+        else
+        {
+            timeBeginPeriod(1);
+            static DWORD countFps = 0; // FPS計測用カウンタ
 
-        //ゲームの処理
-        Direct3D::BeginDraw();
+            static DWORD startTime = timeGetTime(); // 初回の時間を保存
+            DWORD nowTime = timeGetTime(); // 現在の時間を取得
+            
+            static DWORD lastUpdateTime = nowTime;
+            timeEndPeriod(1);
 
-        quad->Draw();
+            if (nowTime - startTime >= 1000)
+            {
+                string str = "FPS:" + std::to_string(nowTime - startTime) + ", " + std::to_string(countFps);
+                SetWindowTextA(hWnd, str.c_str());
 
-        //描画処理
-        Direct3D::EndDraw();
+                countFps = 0;
+                startTime = nowTime;
+            }
+
+            if (nowTime - lastUpdateTime <= 1000.0f / 60)
+            {
+                continue;
+            }
+            lastUpdateTime = nowTime;
+
+            countFps++;
+            //startTime = nowTime;
+
+            //ゲームの処理
+            Camera::Update();
+
+            //入力情報の更新
+            Input::Update();
+
+            pRootJob->UpdateSub();
+
+            //背景の色
+            //float clearColor[4] = { 0.0f, 0.5f, 0.5f, 1.0f };//R,G,B,A
+            
+            //画面をクリア
+            Direct3D::BeginDraw();
+
+            //pRootJobから、全てのオブジェクトの描画をする
+            pRootJob->DrawSub();
+
+            if (Input::IsKey(DIK_D))
+            {
+                HRESULT hr = DialogBox(hInst, MAKEINTRESOURCE(IDD_DIALOG1), hWnd, DlgProc);
+                if (hr == IDOK)
+                {
+                    PostQuitMessage(0);
+                }
+            }
+
+            //スワップ（バックバッファを表に表示する）
+            Direct3D::EndDraw();        
+        }
     }
 
-    quad->Release();
-    SAFE_DELETE(quad);
-
+    Model::Release();
+    pRootJob->ReleaseSub();
+    Input::Release();
     Direct3D::Release();
 
     return (int) msg.wParam;
@@ -136,7 +222,7 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
    int winH = winRect.bottom - winRect.top;     //ウィンドウ高さ
 
    hWnd = CreateWindowW(szWindowClass, WIN_CLASS_NAME, WS_OVERLAPPEDWINDOW,
-       CW_USEDEFAULT, 0, winW, winH, nullptr, nullptr, hInstance, nullptr);
+       CW_USEDEFAULT, 0, winW, winH, nullptr, nullptr, hInstance, nullptr); // ウィンドウ作る　OSが勝手に番号つける　消すときこの番号必要になるから残しとく必要がある
    //HWND hWnd = CreateWindowW(szWindowClass, szTitle, WS_OVERLAPPEDWINDOW,
    // 800,600, 0, CW_USEDEFAULT, 0, nullptr, nullptr, hInstance, nullptr);
    //画像サイズ変えた
@@ -190,6 +276,7 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 //
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 //コールバック関数は、特定のイベントが発生した際にシステムから呼び出される関数。ウィンドウに届いたメッセージ（通知）を処理する関数 
+//通知の内容として、具体的にいうとマウス動いたぞーとか今起きたぞーっていう通知、ウィンドウ作ったとかも含め何かしらあったらそれを送るのがウィンドウプロシージャー
 {
     switch (message)
     {
@@ -201,7 +288,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             {
             case IDM_ABOUT:
                 DialogBox(hInst, MAKEINTRESOURCE(IDD_ABOUTBOX), hWnd, About);
-                break;
+                break; 
             case IDM_EXIT:
                 DestroyWindow(hWnd);
                 break;
@@ -220,6 +307,16 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         break;
     case WM_DESTROY:
         PostQuitMessage(0);
+        break;
+    case WM_MOUSEMOVE:
+    {
+        //Input::SetMousePosition(LOWORD(lParam), HIWORD(lParam));
+        int x = LOWORD(lParam);
+        int y = HIWORD(lParam);
+        Input::SetMousePosition(x, y);
+        OutputDebugStringA((std::to_string(x) + "," + std::to_string(y) + "\n").c_str());
+        //return 0;
+    }
         break;
     default:
         return DefWindowProc(hWnd, message, wParam, lParam);
@@ -245,4 +342,14 @@ INT_PTR CALLBACK About(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
         break;
     }
     return (INT_PTR)FALSE;
+}
+
+INT_PTR CALLBACK DlgProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
+{
+    return ((Stage*)pRootJob->FindObject("Stage"))->localProck(hWnd, message, wParam, lParam);
+}
+
+INT_PTR CALLBACK ManuProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
+{
+    return ((Stage*)pRootJob->FindObject("Stage"))->manuProck(hWnd, message, wParam, lParam);
 }
