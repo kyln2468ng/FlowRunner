@@ -1,9 +1,9 @@
 #include "PlayScene.h"
 #include "Player.h"
 #include "Enemy.h"
-#include "Engine/SceneManager.h"
+#include "../Engine/SceneManager.h"
 #include "Stage.h"
-#include "Engine/Input.h"
+#include "../Engine/Input.h"
 
 PlayScene::PlayScene(GameObject* parent)
 	:GameObject(parent, "PlayScene")

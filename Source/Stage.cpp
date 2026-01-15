@@ -1,11 +1,11 @@
 #include "Stage.h"
 #include "Player.h"
 #include "Enemy.h"
-#include "Engine/SceneManager.h"
-#include "Engine/Model.h"
-#include "Engine/Camera.h"
-#include "Engine/Input.h"
-#include "resource.h"
+#include "../Engine/SceneManager.h"
+#include "../Engine/Model.h"
+#include "../Engine/Camera.h"
+#include "../Engine/Input.h"
+#include "../resource.h"
 
 namespace
 {
@@ -36,7 +36,7 @@ void Stage::Initialize()
 
 	transform_.scale_ = { 1.0f,1.0f,1.0f };*/
 
-	//Instantiate<Player>(this);
+	Instantiate<Player>(this);
 	/*enemy_ = std::vector<Enemy*>(ENEMY_NUM);
 	for (int i = 0;i < ENEMY_NUM;i++)
 	{
@@ -114,60 +114,60 @@ void Stage::Update()
 	//}
 	// 
 	
-	//視点移動をする
-	if (Input::IsKey(DIK_RIGHT))
-	{
-		transform_.rotate_.y += 0.1f;
-	}
-	if (Input::IsKey(DIK_LEFT))
-	{
-		transform_.rotate_.y -= 0.1f;
-	}
+	////視点移動をする
+	//if (Input::IsKey(DIK_RIGHT))
+	//{
+	//	transform_.rotate_.y += 0.1f;
+	//}
+	//if (Input::IsKey(DIK_LEFT))
+	//{
+	//	transform_.rotate_.y -= 0.1f;
+	//}
 
-	XMVECTOR vPos = XMLoadFloat3(&transform_.position_);
-	XMMATRIX mRot = XMMatrixRotationRollPitchYaw(transform_.rotate_.x, transform_.rotate_.y, 0);
-	XMVECTOR vMove = { 0,0,0.1f };
-	vMove = XMVector3TransformCoord(vMove, mRot);
+	//XMVECTOR vPos = XMLoadFloat3(&transform_.position_);
+	//XMMATRIX mRot = XMMatrixRotationRollPitchYaw(transform_.rotate_.x, transform_.rotate_.y, 0);
+	//XMVECTOR vMove = { 0,0,0.1f };
+	//vMove = XMVector3TransformCoord(vMove, mRot);
 
-	if (Input::IsKey(DIK_W))
-	{
-		vPos += vMove;
-		XMStoreFloat3(&transform_.position_, vPos);
-	}
+	//if (Input::IsKey(DIK_W))
+	//{
+	//	vPos += vMove;
+	//	XMStoreFloat3(&transform_.position_, vPos);
+	//}
 
-	//XMVECTOR camPos = XMLoadFloat3(&transform_.position_);
-	//XMFLOAT3 vTarget = transform_.position_;
-	//vTarget = vTarget + camPos;
+	////XMVECTOR camPos = XMLoadFloat3(&transform_.position_);
+	////XMFLOAT3 vTarget = transform_.position_;
+	////vTarget = vTarget + camPos;
 
+	////Camera::SetPosition(camPos);
+	////Camera::SetTarget(vTarget);
+
+	//XMVECTOR vCam = { 0,5.0f,-10.0f,0 };
+	//vCam = XMVector3TransformCoord(vCam, mRot);
+	//XMFLOAT3 camPos;
+	//XMStoreFloat3(&camPos, vPos + vCam);
 	//Camera::SetPosition(camPos);
-	//Camera::SetTarget(vTarget);
 
-	XMVECTOR vCam = { 0,5.0f,-10.0f,0 };
-	vCam = XMVector3TransformCoord(vCam, mRot);
-	XMFLOAT3 camPos;
-	XMStoreFloat3(&camPos, vPos + vCam);
-	Camera::SetPosition(camPos);
-
-	XMFLOAT3 camTarget = transform_.position_;
-	Camera::SetTarget(camTarget);
+	//XMFLOAT3 camTarget = transform_.position_;
+	//Camera::SetTarget(camTarget);
 
 
-	XMVECTOR vDir = XMVectorSubtract(XMLoadFloat3(&camPos), XMLoadFloat3(&camTarget));
-	vDir = XMVector3Normalize(vDir);
-	XMStoreFloat3(&camTarget, vDir);
+	//XMVECTOR vDir = XMVectorSubtract(XMLoadFloat3(&camPos), XMLoadFloat3(&camTarget));
+	//vDir = XMVector3Normalize(vDir);
+	//XMStoreFloat3(&camTarget, vDir);
 
-	RayCastData data{
-		{ camPos.x,camPos.y,camPos.z,1 },
-		{camTarget.x,camPos.y,camPos.z,0},
-		false,
-		100
-	};
-	Model::RayCast(hModelColl_, data);
-	if (data.isHit)
-	{
-		int i = 0;
-		i++;
-	}
+	//RayCastData data{
+	//	{ camPos.x,camPos.y,camPos.z,1 },
+	//	{camTarget.x,camPos.y,camPos.z,0},
+	//	false,
+	//	100
+	//};
+	//Model::RayCast(hModelColl_, data);
+	//if (data.isHit)
+	//{
+	//	int i = 0;
+	//	i++;
+	//}
 }
 
 void Stage::Draw()
@@ -230,55 +230,4 @@ void Stage::Release()
 void Stage::OnCollision(GameObject* pTarget)
 {
 	
-}
-
-BOOL Stage::localProck(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
-{
-	switch (message) {
-	case WM_COMMAND: //コントロールの操作
-		switch (LOWORD(wParam))
-		{
-		case IDOK:
-			EndDialog(hWnd, IDOK);
-			return TRUE;
-		case IDCANCEL:
-			EndDialog(hWnd, IDCANCEL);
-			return TRUE;
-		}
-		break;
-	}
-	return FALSE;
-}
-
-BOOL Stage::manuProck(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
-{
-	switch (message) {
-	case WM_INITDIALOG:
-		SendMessage(GetDlgItem(hWnd, IDC_COMBO1), BM_SETCHECK, BST_CHECKED, 0);
-		SendMessage(GetDlgItem(hWnd, IDC_COMBO1), CB_ADDSTRING, 0, (LPARAM)L"デフォルト");
-		SendMessage(GetDlgItem(hWnd, IDC_COMBO1), CB_ADDSTRING, 0, (LPARAM)L"レンガ");
-		SendMessage(GetDlgItem(hWnd, IDC_COMBO1), CB_ADDSTRING, 0, (LPARAM)L"草地");
-		SendMessage(GetDlgItem(hWnd, IDC_COMBO1), CB_ADDSTRING, 0, (LPARAM)L"砂地");
-		SendMessage(GetDlgItem(hWnd, IDC_COMBO1), CB_ADDSTRING, 0, (LPARAM)L"水場");
-		SendMessage(GetDlgItem(hWnd, IDC_COMBO1), CB_SETCURSEL, 0, 0);
-		return TRUE;
-	case WM_COMMAND:
-		switch (wParam)
-		{
-		case IDC_RADIO1:
-			mode_ = 0;
-			return TRUE;
-		case IDC_RADIO2:
-			mode_ = 1;
-			return TRUE;
-		case IDC_RADIO3:
-			mode_ = 2;
-			return TRUE;
-		case IDC_COMBO1:
-			select_ = (int)SendMessage(GetDlgItem(hWnd, IDC_COMBO1), CB_GETCURSEL, 0, 0);
-			return TRUE;
-		}
-		return FALSE;
-	}
-	return FALSE;
 }

@@ -1,8 +1,8 @@
 #include "SceneManager.h"
-#include "../PlayScene.h"
-#include "../TestScene.h"
-#include "../ClearScene.h"
-#include "../GameOverScene.h"
+#include "../Source/PlayScene.h"
+#include "../Source/TestScene.h"
+#include "../Source/ClearScene.h"
+#include "../Source/GameOverScene.h"
 #include "Direct3D.h"
 #include "Model.h"
 

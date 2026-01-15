@@ -1,11 +1,11 @@
 #include "Player.h"
 #include "ChildOden.h"
-#include "Engine/Model.h"
-#include "Engine/Input.h"
-#include "Engine/SphereCollider.h"
+#include "../Engine/Model.h"
+#include "../Engine/Input.h"
+#include "../Engine/SphereCollider.h"
 #include "Bullet.h"
-#include "Engine/SceneManager.h"
-#include "Engine/Camera.h"
+#include "../Engine/SceneManager.h"
+#include "../Engine/Camera.h"
 
 namespace
 {
@@ -54,10 +54,10 @@ void Player::Update()
 	{
 		KillMe();
 	}*/
-	if (Input::IsKey(DIK_W))
+	/*if (Input::IsKey(DIK_W))
 	{
 		transform_.position_.z += 0.1;
-	}
+	}*/
 	if (Input::IsKey(DIK_S))
 	{
 		transform_.position_.z -= 0.1f;
@@ -81,6 +81,61 @@ void Player::Update()
 		bullet_ = (Bullet*)Instantiate<Bullet>(FindObject("PlayScene"));
 		bullet_->SetPosition(transform_.position_);
 		coolTime_ = nextTime;
+	}
+
+	//Ž‹“_ˆÚ“®‚ð‚·‚é
+	if (Input::IsKey(DIK_RIGHT))
+	{
+		transform_.rotate_.y += 0.1f;
+	}
+	if (Input::IsKey(DIK_LEFT))
+	{
+		transform_.rotate_.y -= 0.1f;
+	}
+
+	XMVECTOR vPos = XMLoadFloat3(&transform_.position_);
+	XMMATRIX mRot = XMMatrixRotationRollPitchYaw(transform_.rotate_.x, transform_.rotate_.y, 0);
+	XMVECTOR vMove = { 0,0,0.1f };
+	vMove = XMVector3TransformCoord(vMove, mRot);
+
+	if (Input::IsKey(DIK_W))
+	{
+		vPos += vMove;
+		XMStoreFloat3(&transform_.position_, vPos);
+	}
+
+	//XMVECTOR camPos = XMLoadFloat3(&transform_.position_);
+	//XMFLOAT3 vTarget = transform_.position_;
+	//vTarget = vTarget + camPos;
+
+	//Camera::SetPosition(camPos);
+	//Camera::SetTarget(vTarget);
+
+	XMVECTOR vCam = { 0,5.0f,-10.0f,0 };
+	vCam = XMVector3TransformCoord(vCam, mRot);
+	XMFLOAT3 camPos;
+	XMStoreFloat3(&camPos, vPos + vCam);
+	Camera::SetPosition(camPos);
+
+	XMFLOAT3 camTarget = transform_.position_;
+	Camera::SetTarget(camTarget);
+
+
+	XMVECTOR vDir = XMVectorSubtract(XMLoadFloat3(&camPos), XMLoadFloat3(&camTarget));
+	vDir = XMVector3Normalize(vDir);
+	XMStoreFloat3(&camTarget, vDir);
+
+	XMFLOAT3 pos = transform_.position_;
+	RayCastData data = {
+		{ pos.x, pos.y, pos.z, 1},
+		{ 0, -1, 0, 0},
+		false,
+		1.0f
+	};
+
+	Model::RayCast(hModel_, data);
+	if (data.isHit) {
+		transform_.position_.y += data.hitPos.y - transform_.position_.y;
 	}
 }
 

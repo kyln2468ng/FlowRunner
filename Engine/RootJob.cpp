@@ -1,6 +1,6 @@
 #include "RootJob.h"
 #include "SceneManager.h"
-#include "../PlayScene.h"
+#include "../Source/PlayScene.h"
 
 RootJob::RootJob(GameObject* parent)
 	:GameObject(parent,"RootJob")

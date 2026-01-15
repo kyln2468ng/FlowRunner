@@ -1,6 +1,6 @@
 #include "ChildOden.h"
-#include "Engine/Fbx.h"
-#include "Engine/Model.h"
+#include "../Engine/Fbx.h"
+#include "../Engine/Model.h"
 ChildOden::ChildOden(GameObject* parent)
 	:GameObject(parent, "ChildOden"), hModel_(-1)
 {

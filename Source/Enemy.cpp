@@ -1,8 +1,8 @@
 #include "Enemy.h"
-#include "Engine/Model.h"
-#include "Engine/Fbx.h"
-#include "Engine/SphereCollider.h"
-#include "Engine/SceneManager.h"
+#include "../Engine/Model.h"
+#include "../Engine/Fbx.h"
+#include "../Engine/SphereCollider.h"
+#include "../Engine/SceneManager.h"
 
 Enemy::Enemy(GameObject* parent)
 	:GameObject(parent,"Enemy"),pFbx_(nullptr),hModel_(-1),eDed_(false)

@@ -1,5 +1,5 @@
 #pragma once
-#include "Engine/GameObject.h"
+#include "../Engine/GameObject.h"
 #include <vector>
 #include "Windows.h"
 
@@ -41,9 +41,7 @@ public:
 	void SetBlock(BLOCK_TYPE type, int x, int z) { GetT(x, z).type = type; }
 	void SetBlockHeight(int x, int z, int height) { GetT(x, z).height = height; }
 	sData& GetT(int x, int z) { return sTable[z][x]; }
-	BOOL localProck(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
-	// 操作用のパネル用プロシージャ
-	BOOL manuProck(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
+
 private:
 	std::vector<Enemy*> enemy_;
 	int hModel_[MODEL_NUM];
