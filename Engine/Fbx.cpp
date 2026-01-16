@@ -121,6 +121,7 @@ namespace Math
 		{
 			
 			// Ray が三角形の内部にヒット
+			data = t;
 			return true;
 		}
 
@@ -164,6 +165,7 @@ namespace Math
 
 		if (t >= 0 && u >= 0 && v >= 0 && u + v <= 1)
 		{
+			data = t;
 			return true;
 		}
 		return false;
@@ -486,33 +488,82 @@ void Fbx::RayCast(RayCastData& rayData)
 
 	//XMFLOAT3 F0, F1, F2;
 
-	for (int material = 0;material < materialCount_;material++)
+
+
+
+
+
+	//for (int material = 0;material < materialCount_;material++)
+	//{
+	//	auto& indices = ppIndex_[material];
+
+	//	//全ポリゴンに対して
+	//	for (int i = 0;i < (int)indices.size();i += 3)
+	//	{
+	//		VERTEX& V0 = pVertices_[ indices[i + 0] ];
+	//		VERTEX& V1 = pVertices_[ indices[i + 1] ];
+	//		VERTEX& V2 = pVertices_[ indices[i + 2] ];
+
+	//		rayData.isHit = Math::Intersect(
+	//			XMLoadFloat4(&rayData.start),
+	//			XMLoadFloat4(&rayData.dir),
+	//			V0.position,
+	//			V1.position,
+	//			V2.position,
+	//			rayData.dist
+	//		);
+
+	//		if (rayData.isHit)
+	//		{
+	//			return;
+	//		}
+	//	}
+	//}
+	//rayData.isHit = false;
+
+
+	rayData.isHit = false;
+	rayData.dist = FLT_MAX;
+
+	XMVECTOR origin = XMLoadFloat4(&rayData.start);
+	XMVECTOR dir = XMVector3Normalize(XMLoadFloat4(&rayData.dir)); // ★必須
+
+	for (int material = 0; material < materialCount_; material++)
 	{
 		auto& indices = ppIndex_[material];
 
-		//全ポリゴンに対して
-		for (int i = 0;i < (int)indices.size();i += 3)
+		for (int i = 0; i < (int)indices.size(); i += 3)
 		{
-			VERTEX& V0 = pVertices_[ indices[i + 0] ];
-			VERTEX& V1 = pVertices_[ indices[i + 1] ];
-			VERTEX& V2 = pVertices_[ indices[i + 2] ];
+			VERTEX& V0 = pVertices_[indices[i + 0]];
+			VERTEX& V1 = pVertices_[indices[i + 1]];
+			VERTEX& V2 = pVertices_[indices[i + 2]];
 
-			rayData.isHit = Math::Intersect(
-				XMLoadFloat4(&rayData.start),
-				XMLoadFloat4(&rayData.dir),
-				V0.position,
-				V1.position,
-				V2.position,
-				rayData.dist
-			);
-
-			if (rayData.isHit)
+			float t;
+			if (Math::Intersect(origin, dir,
+				V0.position, V1.position, V2.position, t))
 			{
-				return;
+				if (t < rayData.dist)
+				{
+					rayData.dist = t;
+					rayData.isHit = true;
+
+					// ヒットポス
+					XMVECTOR hitPos = origin + dir * t;
+					XMStoreFloat3(&rayData.hitPos, hitPos);
+
+					// 法線
+					XMVECTOR normal = XMVector3Normalize(
+						XMVector3Cross(
+							V1.position - V0.position,
+							V2.position - V0.position
+						)
+					);
+					XMStoreFloat3(&rayData.normal, normal);
+				}
 			}
 		}
 	}
-	rayData.isHit = false;
+
 
 
 	//rayData.isHit = InterSects();

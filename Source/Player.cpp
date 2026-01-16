@@ -127,15 +127,16 @@ void Player::Update()
 
 	XMFLOAT3 pos = transform_.position_;
 	RayCastData data = {
-		{ pos.x, pos.y, pos.z, 1},
+		{ pos.x, pos.y+2.0f, pos.z, 1},
 		{ 0, -1, 0, 0},
-		false,
-		1.0f
+		false
 	};
 
 	Model::RayCast(hModel_, data);
 	if (data.isHit) {
-		transform_.position_.y += data.hitPos.y - transform_.position_.y;
+		float groundY = data.hitPos.y;
+		if (pos.y <= data.hitPos.y && pos.y <= groundY + 0.05)
+			transform_.position_.y = groundY;
 	}
 }
 
