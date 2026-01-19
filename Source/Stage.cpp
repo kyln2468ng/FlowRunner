@@ -175,16 +175,31 @@ void Stage::Draw()
 	/*Model::SetTransform(hModel_, transform_);
 	Model::Draw(hModel_);*/
 
+	Player* pl = (Player*)FindObject("Player"); //プレイヤーのポジションの真下にブロックを置きたいので持ってくる
+	if (!pl) return; //念のためプレイヤーが存在しているか確認
+	static XMFLOAT3 bPos = pl->GetPos();//ポジションを持ってくる
+	bPos.y = -3.0f;
+	Transform bt;
+	bt.position_.x = bPos.x;
+	bt.position_.y = bPos.y;
+	bt.position_.z = bPos.z;
+	Model::SetTransform(hModelColl_, bt);
+	Model::Draw(hModelColl_);
+
 	for (int j = 0;j < ZSIZE;j++) {
 		for (int i = 0;i < XSIZE;i++)
 		{
-			int type = BLOCK_TYPE::DEFAULT;
+			type_ = BLOCK_TYPE::DEFAULT;
 			Transform t;
 			t.position_.x = i;
 			t.position_.z = j;
+			if (i % 2 == 0 && j % 3 == 0)
+				t.position_.y = -5.0f;
+			else
+				t.position_.y = -4.0f;
 			t.scale_ = { 1.0,1.0,1.0 };
-			Model::SetTransform(hModel_[type], t);
-			Model::Draw(hModel_[type]);
+			Model::SetTransform(hModel_[type_], t);
+			Model::Draw(hModel_[type_]);
 
 			// 適当にブロックを積み上げてるコード
 			/*for (int k = 0; k < (int)(GetT(i, j).height); k++) {

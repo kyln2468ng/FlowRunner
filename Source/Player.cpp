@@ -6,6 +6,7 @@
 #include "Bullet.h"
 #include "../Engine/SceneManager.h"
 #include "../Engine/Camera.h"
+#include "Stage.h"
 
 namespace
 {
@@ -34,7 +35,7 @@ void Player::Initialize()
 	transform_.scale_.y = 0.7f;
 	transform_.scale_.z = 0.7f;
 
-	transform_.position_ = { 0.0f,8.0f,5.0f };
+	transform_.position_ = { -2.0f,8.0f,3.0f };
 
 	//子オブジェクトにChildOdenを追加する
 	pRChildOden = (ChildOden*)Instantiate<ChildOden>(this);
@@ -126,18 +127,25 @@ void Player::Update()
 	XMStoreFloat3(&camTarget, vDir);
 
 	XMFLOAT3 pos = transform_.position_;
+	float playerHeight = 2.0f;
 	RayCastData data = {
-		{ pos.x, pos.y+2.0f, pos.z, 1},
-		{ 0, -1, 0, 0},
-		false
+		{ pos.x, pos.y-playerHeight, pos.z, 1},
+		{ 0, -1, 0, 0}
 	};
+	data.maxDist = 4.0f;
 
-	Model::RayCast(hModel_, data);
-	if (data.isHit) {
-		float groundY = data.hitPos.y;
-		if (pos.y <= data.hitPos.y && pos.y <= groundY + 0.05)
-			transform_.position_.y = groundY;
+	Stage* st = (Stage*)FindObject("Stage");
+	int hStageModel = st->GetModel();
+
+	Model::RayCast(hStageModel, data);
+	//if (data.isHit) {
+	//	transform_.position_.y = data.hitPos.y;
+	//}
+	if (data.isHit && data.dist > 0.01f && data.dist <= playerHeight + 0.2f)
+	{
+		transform_.position_.y = data.hitPos.y + playerHeight;
 	}
+
 }
 
 void Player::Draw()

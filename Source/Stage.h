@@ -42,8 +42,14 @@ public:
 	void SetBlockHeight(int x, int z, int height) { GetT(x, z).height = height; }
 	sData& GetT(int x, int z) { return sTable[z][x]; }
 
+	int GetModel() const { return hModelColl_; }
+
+	//int  GetModelCount() const;
+	//int  GetModel(int index) const;
+
 private:
 	std::vector<Enemy*> enemy_;
+	int type_;
 	int hModel_[MODEL_NUM];
 	int hModelColl_;
 	sData sTable[ZSIZE][XSIZE];

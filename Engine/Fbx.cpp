@@ -523,7 +523,8 @@ void Fbx::RayCast(RayCastData& rayData)
 
 
 	rayData.isHit = false;
-	rayData.dist = FLT_MAX;
+	rayData.dist = rayData.maxDist;
+
 
 	XMVECTOR origin = XMLoadFloat4(&rayData.start);
 	XMVECTOR dir = XMVector3Normalize(XMLoadFloat4(&rayData.dir)); // ÅöïKê{
@@ -539,10 +540,22 @@ void Fbx::RayCast(RayCastData& rayData)
 			VERTEX& V2 = pVertices_[indices[i + 2]];
 
 			float t;
+			/*bool hit = false;
+
+			hit = Math::Intersect(origin, dir, V0.position, V1.position, V2.position,t);
+
+			if (hit && t < rayData.dist) {
+				rayData.isHit = true;
+				rayData.dist = t;
+			}*/
+
+
+
+
 			if (Math::Intersect(origin, dir,
 				V0.position, V1.position, V2.position, t))
 			{
-				if (t < rayData.dist)
+				if (t <= rayData.maxDist && t < rayData.dist) // ÉåÉCÇÃí∑Ç≥Çêßå¿ÇµÇΩ
 				{
 					rayData.dist = t;
 					rayData.isHit = true;

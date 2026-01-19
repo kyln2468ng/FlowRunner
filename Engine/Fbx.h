@@ -18,6 +18,7 @@ struct RayCastData
 	XMFLOAT4 dir;	//Rayの方向（正規化してあること）
 	bool isHit;		//当たったかどうか
 	float dist;		//始点からの距離
+	float maxDist; // レイの最大値
 
 	XMFLOAT3 hitPos;   //レイが当たった場所
 	XMFLOAT3 normal;   //当たった面の法線
