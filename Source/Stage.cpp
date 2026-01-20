@@ -246,3 +246,19 @@ void Stage::OnCollision(GameObject* pTarget)
 {
 	
 }
+
+bool Stage::hitObject(RayCastData& data)
+{
+	bool hit = false;
+	data.dist = data.maxDist;
+
+	for (int i = 0; i < MODEL_NUM; i++) {//ƒ‚ƒfƒ‹‚ÌID‚²‚Æ‚É”»’è
+		Model::RayCast(hModel_[i], data);
+		if (data.isHit) {
+			hit = true;
+		}
+	}
+	return hit;
+}
+
+

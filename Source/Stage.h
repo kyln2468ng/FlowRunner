@@ -2,9 +2,11 @@
 #include "../Engine/GameObject.h"
 #include <vector>
 #include "Windows.h"
+#include "../Engine/Model.h"
 
 class Enemy;
 class Player;
+
 
 namespace
 {
@@ -44,9 +46,12 @@ public:
 
 	int GetModel() const { return hModelColl_; }
 
+	bool hitObject(RayCastData& data);//オブジェクト（ブロック）と当たったかを返す
+
 	//int  GetModelCount() const;
 	//int  GetModel(int index) const;
 
+	
 private:
 	std::vector<Enemy*> enemy_;
 	int type_;

@@ -35,7 +35,7 @@ void Player::Initialize()
 	transform_.scale_.y = 0.7f;
 	transform_.scale_.z = 0.7f;
 
-	transform_.position_ = { -2.0f,8.0f,3.0f };
+	transform_.position_ = { -2.0f,9.0f,3.0f };
 
 	//子オブジェクトにChildOdenを追加する
 	pRChildOden = (ChildOden*)Instantiate<ChildOden>(this);
@@ -127,25 +127,27 @@ void Player::Update()
 	XMStoreFloat3(&camTarget, vDir);
 
 	XMFLOAT3 pos = transform_.position_;
-	float playerHeight = 2.0f;
+	float playerHeight = 0.5f;//←ここ少し調整した
 	RayCastData data = {
-		{ pos.x, pos.y-playerHeight, pos.z, 1},
+		{ pos.x, pos.y+playerHeight, pos.z, 1},
 		{ 0, -1, 0, 0}
 	};
-	data.maxDist = 4.0f;
+	data.maxDist = playerHeight + 0.3f;//←ここ少し調整した
 
 	Stage* st = (Stage*)FindObject("Stage");
-	int hStageModel = st->GetModel();
+	//int hStageModel = st->GetModel();
 
-	Model::RayCast(hStageModel, data);
+	//Model::RayCast(hStageModel, data);
 	//if (data.isHit) {
 	//	transform_.position_.y = data.hitPos.y;
 	//}
-	if (data.isHit && data.dist > 0.01f && data.dist <= playerHeight + 0.2f)
+	/*if (data.isHit && data.dist > 0.01f && data.dist <= playerHeight + 0.2f)
 	{
 		transform_.position_.y = data.hitPos.y + playerHeight;
+	}*/
+	if (st && st->hitObject(data)) {
+		transform_.position_.y = data.hitPos.y + playerHeight;
 	}
-
 }
 
 void Player::Draw()
