@@ -168,6 +168,7 @@ void Stage::Update()
 	//	int i = 0;
 	//	i++;
 	//}
+
 }
 
 void Stage::Draw()
@@ -252,12 +253,40 @@ bool Stage::hitObject(RayCastData& data)
 	bool hit = false;
 	data.dist = data.maxDist;
 
-	for (int i = 0; i < MODEL_NUM; i++) {//モデルのIDごとに判定
-		Model::RayCast(hModel_[i], data);
-		if (data.isHit) {
-			hit = true;
+	//for (int i = 0; i < MODEL_NUM; i++) {//モデルのIDごとに判定
+	//	Model::RayCast(hModel_[i], data);
+	//	if (data.isHit) {
+	//		hit = true;
+	//	}
+	//}
+	for (int j = 0; j < ZSIZE; j++)	{
+		for (int i = 0; i < XSIZE; i++)	{
+			// 今描画してるブロックと同じ transform を作る
+			Transform t;
+			t.position_.x = i;
+			t.position_.z = j;
+
+			if (i % 2 == 0 && j % 3 == 0)
+				t.position_.y = -5.0f;
+			else
+				t.position_.y = -4.0f;
+
+			t.scale_ = { 1.0f, 1.0f, 1.0f };
+
+			int type = BLOCK_TYPE::DEFAULT;
+
+			Model::SetTransform(hModel_[type], t);
+
+			// レイキャスト
+			Model::RayCast(hModel_[type], data);
+
+			if (data.isHit)
+			{
+				hit = true;
+			}
 		}
 	}
+
 	return hit;
 }
 

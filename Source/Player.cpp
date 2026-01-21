@@ -127,12 +127,12 @@ void Player::Update()
 	XMStoreFloat3(&camTarget, vDir);
 
 	XMFLOAT3 pos = transform_.position_;
-	float playerHeight = 0.5f;//©‚±‚±­‚µ’²®‚µ‚½
+	float playerHeight = 2.0f;//©‚±‚±­‚µ’²®‚µ‚½
 	RayCastData data = {
-		{ pos.x, pos.y+playerHeight, pos.z, 1},
+		{ pos.x, pos.y-playerHeight, pos.z, 1},
 		{ 0, -1, 0, 0}
 	};
-	data.maxDist = playerHeight + 0.3f;//©‚±‚±­‚µ’²®‚µ‚½
+	data.maxDist = playerHeight + 1.5f;//©‚±‚±­‚µ’²®‚µ‚½
 
 	Stage* st = (Stage*)FindObject("Stage");
 	//int hStageModel = st->GetModel();
