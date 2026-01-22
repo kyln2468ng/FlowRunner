@@ -48,9 +48,13 @@ public:
 
 	bool hitObject(RayCastData& data);//オブジェクト（ブロック）と当たったかを返す
 
+	bool CollideLine(RayCastData& data); //ステージオブジェクトとのレイキャスト取る
 	//int  GetModelCount() const;
 	//int  GetModel(int index) const;
-
+	const std::vector<StageObject*>& GetStageObjects() const
+	{
+		return stageObjects_;
+	}
 	
 private:
 	std::vector<Enemy*> enemy_;

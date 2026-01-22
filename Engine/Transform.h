@@ -28,4 +28,8 @@ public:
 	//ƒ[ƒ‹ƒhs—ñ‚ğæ“¾
 	XMMATRIX GetWorldMatrix();
 	XMMATRIX GetNormalMatrix();
+
+	void SetVectorPosition(const XMVECTOR& vPos);
+	void SetVectorRotation(const XMVECTOR& vRot);
+	void SetVectroScale(const XMVECTOR& vScl);
 };

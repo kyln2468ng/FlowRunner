@@ -3,12 +3,12 @@
 #include "Windows.h"
 
 GameObject::GameObject()
-	:pParent_(nullptr)
+	:pParent_(nullptr),hModel_(-1)
 {
 }
 
 GameObject::GameObject(GameObject* parent, const string& name)
-	:pParent_(parent), objectName_(name), isDead_(false)
+	:pParent_(parent), objectName_(name), isDead_(false),hModel_(-1)
 {
 	if (parent != nullptr)
 	{

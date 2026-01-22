@@ -53,6 +53,7 @@ protected:
 	GameObject*			pParent_;
 	string				objectName_;
 	SphereCollider*		pCollider_;
+	int hModel_;
 private:
 	bool isDead_;
 };

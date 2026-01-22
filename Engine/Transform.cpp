@@ -43,3 +43,20 @@ XMMATRIX Transform::GetNormalMatrix()
 {
     return matRotate_ * XMMatrixInverse(nullptr, matScale_);
 }
+
+void Transform::SetVectorPosition(const XMVECTOR& vPos)
+{
+    XMStoreFloat3(&position_, vPos);
+}
+
+void Transform::SetVectorRotation(const XMVECTOR& vRot)
+{
+    XMStoreFloat3(&position_, vRot);
+}
+
+void Transform::SetVectroScale(const XMVECTOR& vScl)
+{
+    XMStoreFloat3(&position_, vScl);
+}
+
+

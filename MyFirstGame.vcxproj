@@ -160,6 +160,7 @@
     <ClInclude Include="Resource.h" />
     <ClInclude Include="Engine\Sprite.h" />
     <ClInclude Include="Source\Stage.h" />
+    <ClInclude Include="Source\StageObject.h" />
     <ClInclude Include="targetver.h" />
     <ClInclude Include="Engine\Texture.h" />
     <ClInclude Include="Engine\Transform.h" />
@@ -188,6 +189,7 @@
     <ClCompile Include="Source\Player.cpp" />
     <ClCompile Include="Source\PlayScene.cpp" />
     <ClCompile Include="Source\Stage.cpp" />
+    <ClCompile Include="Source\StageObject.cpp" />
     <ClCompile Include="Source\TestScene.cpp" />
   </ItemGroup>
   <ItemGroup>

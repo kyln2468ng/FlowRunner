@@ -6,6 +6,7 @@
 #include "../Engine/Camera.h"
 #include "../Engine/Input.h"
 #include "../resource.h"
+#include "StageObject.h"
 
 namespace
 {
@@ -176,16 +177,16 @@ void Stage::Draw()
 	/*Model::SetTransform(hModel_, transform_);
 	Model::Draw(hModel_);*/
 
-	Player* pl = (Player*)FindObject("Player"); //プレイヤーのポジションの真下にブロックを置きたいので持ってくる
-	if (!pl) return; //念のためプレイヤーが存在しているか確認
-	static XMFLOAT3 bPos = pl->GetPos();//ポジションを持ってくる
-	bPos.y = -3.0f;
-	Transform bt;
-	bt.position_.x = bPos.x;
-	bt.position_.y = bPos.y;
-	bt.position_.z = bPos.z;
-	Model::SetTransform(hModelColl_, bt);
-	Model::Draw(hModelColl_);
+	//Player* pl = (Player*)FindObject("Player"); //プレイヤーのポジションの真下にブロックを置きたいので持ってくる
+	//if (!pl) return; //念のためプレイヤーが存在しているか確認
+	//static XMFLOAT3 bPos = pl->GetPos();//ポジションを持ってくる
+	//bPos.y = -3.0f;
+	//Transform bt;
+	//bt.position_.x = bPos.x;
+	//bt.position_.y = bPos.y;
+	//bt.position_.z = bPos.z;
+	//Model::SetTransform(hModelColl_, bt);
+	//Model::Draw(hModelColl_);
 
 	for (int j = 0;j < ZSIZE;j++) {
 		for (int i = 0;i < XSIZE;i++)
@@ -259,7 +260,8 @@ bool Stage::hitObject(RayCastData& data)
 	//		hit = true;
 	//	}
 	//}
-	for (int j = 0; j < ZSIZE; j++)	{
+
+	/*for (int j = 0; j < ZSIZE; j++) {
 		for (int i = 0; i < XSIZE; i++)	{
 			// 今描画してるブロックと同じ transform を作る
 			Transform t;
@@ -285,9 +287,32 @@ bool Stage::hitObject(RayCastData& data)
 				hit = true;
 			}
 		}
-	}
+	}*/
 
+	
+	Transform t;
+	t.position_.x = data.start.x;
+	t.position_.y = data.start.y;
+	t.position_.z = data.start.z;
+	int type = BLOCK_TYPE::WATER;
+	Model::SetTransform(hModel_[type], t);
+
+	Model::RayCast(hModel_[BLOCK_TYPE::DEFAULT], data);
+	if (data.isHit) {
+		hit = true;
+	}
 	return hit;
+}
+
+bool Stage::CollideLine(RayCastData& data)
+{
+	bool found = false;
+	std::vector<StageObject*> objs = (StageObject*)FindObject("StageObject");
+	auto& objs = stage->GetStageObjects();
+	for (StageObject* obj : objs)
+	{
+		obj->RayCast(data);
+	}
 }
 
 
