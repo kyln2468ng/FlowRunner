@@ -18,4 +18,6 @@ namespace Model
 	void Release();
 
 	void RayCast(int hModel,RayCastData& data);
+	bool RayCastAll(int hModel, RayCastData& data,int& outModel);
+
 }

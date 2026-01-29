@@ -522,60 +522,99 @@ void Fbx::RayCast(RayCastData& rayData)
 	//rayData.isHit = false;
 
 
-	rayData.isHit = false;
-	rayData.dist = rayData.maxDist;
+	////////
+	//rayData.isHit = false;
+	//rayData.dist = rayData.maxDist;
 
 
-	XMVECTOR origin = XMLoadFloat4(&rayData.start);
-	XMVECTOR dir = XMVector3Normalize(XMLoadFloat4(&rayData.dir)); // ★必須
+	//XMVECTOR origin = XMLoadFloat4(&rayData.start);
+	//XMVECTOR dir = XMVector3Normalize(XMLoadFloat4(&rayData.dir)); // ★必須
 
-	for (int material = 0; material < materialCount_; material++)
+	//for (int material = 0; material < materialCount_; material++)
+	//{
+	//	auto& indices = ppIndex_[material];
+
+	//	for (int i = 0; i < (int)indices.size(); i += 3)
+	//	{
+	//		VERTEX& V0 = pVertices_[indices[i + 0]];
+	//		VERTEX& V1 = pVertices_[indices[i + 1]];
+	//		VERTEX& V2 = pVertices_[indices[i + 2]];
+
+	//		float t;
+	//		/*bool hit = false;
+
+	//		hit = Math::Intersect(origin, dir, V0.position, V1.position, V2.position,t);
+
+	//		if (hit && t < rayData.dist) {
+	//			rayData.isHit = true;
+	//			rayData.dist = t;
+	//		}*/
+
+
+
+
+	//		if (Math::Intersect(origin, dir,
+	//			V0.position, V1.position, V2.position, t))
+	//		{
+	//			if (t <= rayData.maxDist && t < rayData.dist) // レイの長さを制限した
+	//			{
+	//				rayData.dist = t;
+	//				rayData.isHit = true;
+
+	//				// ヒットポス
+	//				XMVECTOR hitPos = origin + dir * t;
+	//				XMStoreFloat3(&rayData.hitPos, hitPos);
+
+	//				// 法線
+	//				XMVECTOR normal = XMVector3Normalize(
+	//					XMVector3Cross(
+	//						V1.position - V0.position,
+	//						V2.position - V0.position
+	//					)
+	//				);
+	//				XMStoreFloat3(&rayData.normal, normal);
+	//			}
+	//		}
+	//	}
+	//}
+
+//////////
+
+for (int material = 0; material < materialCount_; material++)
+{
+	auto& indices = ppIndex_[material];
+	//全ポリゴンに対して
+	for (int i = 0; i < (int)indices.size(); i += 3)
 	{
-		auto& indices = ppIndex_[material];
+		VERTEX& V0 = pVertices_[indices[i + 0]];
+		VERTEX& V1 = pVertices_[indices[i + 1]];
+		VERTEX& V2 = pVertices_[indices[i + 2]];
 
-		for (int i = 0; i < (int)indices.size(); i += 3)
-		{
-			VERTEX& V0 = pVertices_[indices[i + 0]];
-			VERTEX& V1 = pVertices_[indices[i + 1]];
-			VERTEX& V2 = pVertices_[indices[i + 2]];
+		rayData.isHit = TriangleTests::Intersects(
+			XMLoadFloat4(&rayData.start),
+			XMLoadFloat4(&rayData.dir),
+			V0.position,
+			V1.position,
+			V2.position,
+			rayData.dist
+		);
 
-			float t;
-			/*bool hit = false;
-
-			hit = Math::Intersect(origin, dir, V0.position, V1.position, V2.position,t);
-
-			if (hit && t < rayData.dist) {
-				rayData.isHit = true;
-				rayData.dist = t;
-			}*/
-
-
-
-
-			if (Math::Intersect(origin, dir,
-				V0.position, V1.position, V2.position, t))
-			{
-				if (t <= rayData.maxDist && t < rayData.dist) // レイの長さを制限した
-				{
-					rayData.dist = t;
-					rayData.isHit = true;
-
-					// ヒットポス
-					XMVECTOR hitPos = origin + dir * t;
-					XMStoreFloat3(&rayData.hitPos, hitPos);
-
-					// 法線
-					XMVECTOR normal = XMVector3Normalize(
-						XMVector3Cross(
+		XMVECTOR normal = XMVector3Normalize(XMVector3Cross(
 							V1.position - V0.position,
-							V2.position - V0.position
-						)
-					);
-					XMStoreFloat3(&rayData.normal, normal);
-				}
-			}
+							V2.position - V0.position));
+
+		//rayData.isHit = InterSects(V0, V1, V2, レイキャストのデータ);
+		if (rayData.isHit)
+		{
+			//XMVECTOR hitPos = rayData.start + rayData.dir * rayData.dist;
+			//XMStoreFloat3(&rayData.hitPos, hitPos);
+			return;
 		}
 	}
+}
+rayData.isHit = false;
+
+
 
 
 

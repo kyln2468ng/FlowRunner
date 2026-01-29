@@ -50,7 +50,7 @@ void Player::Initialize()
 void Player::Update()
 {
 	//transform_.rotate_.y += 1.0f;
-	transform_.position_.y -= 0.1f;
+	//transform_.position_.y -= 0.1f;//////
 	/*if (transform_.rotate_.y >= 720.0f)
 	{
 		KillMe();
@@ -73,7 +73,7 @@ void Player::Update()
 	}
 	if (Input::IsKey(DIK_E))
 	{
-		transform_.position_.y += 1.0f;
+		transform_.position_.y -= 0.1f;
 	}
 
 	coolTime_ -= deltatime_;
@@ -130,11 +130,9 @@ void Player::Update()
 	float playerHeight = 1.0f;//©‚±‚±­‚µ’²®‚µ‚½
 	RayCastData data = {
 		{ pos.x, pos.y + playerHeight, pos.z, 1},
-		{ pos.x,pos.y,pos.z,0},
-		false,
-		100
+		{0.0f,-10.0f,0.0f,0.0f}
 	};
-	data.maxDist = playerHeight + 1.5f;//©‚±‚±­‚µ’²®‚µ‚½
+	//data.maxDist = playerHeight + 1.5f;//©‚±‚±­‚µ’²®‚µ‚½
 
 	Stage* st = (Stage*)FindObject("Stage");
 	//int hStageModel = st->GetModel();

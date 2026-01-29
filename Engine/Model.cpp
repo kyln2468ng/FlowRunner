@@ -67,6 +67,10 @@ void Model::Release()
 
 void Model::RayCast(int hModel, RayCastData& data)
 {
+    /*
+    * 
+    * 改善前
+    * 
     //その時点での対象モデルのトランスフォームをカリキュレーション
     modelList[hModel]->transform_.Calculation();
 
@@ -98,4 +102,51 @@ void Model::RayCast(int hModel, RayCastData& data)
 
     //指定したモデル番号のFBXにレイキャスト！
     modelList[hModel]->pfbx_->RayCast(data);
+    */
+
+    //改善後
+    RayCastData local = data;
+
+    modelList[hModel]->transform_.Calculation();
+
+    XMMATRIX wInv = XMMatrixInverse(nullptr, modelList[hModel]->transform_.GetWorldMatrix());
+    
+    XMVECTOR vstart = XMVector3Transform(XMLoadFloat4(&local.start), wInv);
+
+    XMVECTOR vDirVec = XMVectorAdd(XMLoadFloat4(&data.start), XMLoadFloat4(&data.dir));
+
+    vDirVec = XMVector3Transform(vDirVec, wInv);
+
+    XMVECTOR dirAtLocal = XMVectorSubtract(vDirVec, vstart);
+    dirAtLocal = XMVector4Normalize(dirAtLocal); //正規化
+
+    XMStoreFloat4(&local.start, vstart);
+    XMStoreFloat4(&local.dir, dirAtLocal);
+
+    modelList[hModel]->pfbx_->RayCast(data);   
+    
+    data = local;
+}
+
+bool Model::RayCastAll(int hModel, RayCastData& data,int& outModel)
+{
+    bool hit = false;
+    float closest = FLT_MAX;
+
+    for (int i = 0;i < modelList.size();i++) {
+        RayCastData rayData = data;
+
+        Model::RayCast(i, rayData);
+
+        if (!rayData.isHit)
+            continue;
+
+        if (rayData.dist < closest) {
+            closest = rayData.dist;
+            data = rayData;
+            outModel = i;
+            hit = true;
+        }
+    }
+    return hit;
 }

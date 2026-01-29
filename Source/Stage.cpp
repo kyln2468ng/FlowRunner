@@ -67,6 +67,44 @@ void Stage::Initialize()
 		assert(hModel_[i] >= 0);
 	}
 	hModelColl_ = Model::Load("BoxDefault.fbx");
+
+	/*for (int j = 0;j < ZSIZE;j++) {
+		for (int i = 0;i < XSIZE;i++) {
+			Transform t;
+			t.position_ = { i,0,j };
+			if (j % 2 && i % 3)
+			{
+				t.position_.y = 1;
+			}
+			t.rotate_ = { 0,0,0 };
+			t.scale_ = { 1.0f,1.0f,1.0f };
+			t.Calculation();
+			Model::SetTransform(hModel_[BLOCK_TYPE::DEFAULT], t);
+			models_.push_back(hModel_[BLOCK_TYPE::DEFAULT]);
+		}
+	}*/
+
+	
+	
+	for (int j = 0; j < ZSIZE; j++) {
+		for (int i = 0; i < XSIZE; i++) {
+
+			int h = Model::Load("BoxDefault.fbx");
+			assert(h >= 0);
+
+			Transform t;
+			t.position_ = { (float)i, 0.0f, (float)j };
+			if (j % 2 == 0 && i % 3 == 0) {
+				t.position_.y = 1.0f;
+			}
+			t.scale_ = { 1,1,1 };
+			t.rotate_ = { 0,0,0 };
+			t.Calculation();
+
+			Model::SetTransform(h, t);
+			models_.push_back({h,t});
+		}
+	}
 }
 
 void Stage::Update()
@@ -188,55 +226,67 @@ void Stage::Draw()
 	//Model::SetTransform(hModelColl_, bt);
 	//Model::Draw(hModelColl_);
 
-	for (int j = 0;j < ZSIZE;j++) {
-		for (int i = 0;i < XSIZE;i++)
-		{
-			type_ = BLOCK_TYPE::DEFAULT;
-			Transform t;
-			t.position_.x = i;
-			t.position_.z = j;
-			if (i % 2 == 0 && j % 3 == 0)
-				t.position_.y = -5.0f;
-			else
-				t.position_.y = -4.0f;
-			t.scale_ = { 1.0,1.0,1.0 };
-			Model::SetTransform(hModel_[type_], t);
-			Model::Draw(hModel_[type_]);
 
-			// 適当にブロックを積み上げてるコード
-			/*for (int k = 0; k < (int)(GetT(i, j).height); k++) {
-				int type = (int)(GetT(i, j).type);
-				Transform t;
-				t.position_.x = i - 15 / 2.0;
-				t.position_.z = j;
-				t.position_.y = k - 15;
-				t.scale_ = { 0.95, 0.95, 0.95 };
-				Model::SetTransform(hModel_[type], t);
-				Model::Draw(hModel_[type]);
-			}*/ 
-		}
+	/////////////
+	
+	//for (int j = 0;j < ZSIZE;j++) {
+	//	for (int i = 0;i < XSIZE;i++)
+	//	{
+	//		type_ = BLOCK_TYPE::DEFAULT;
+	//		Transform t;
+	//		t.position_.x = i;
+	//		t.position_.z = j;
+	//		if (i % 2 == 0 && j % 3 == 0)
+	//			t.position_.y = 1.0f;
+	//		else
+	//			t.position_.y = 0.0f;
+	//		t.scale_ = { 1.0,1.0,1.0 };
+	//		Model::SetTransform(hModel_[type_], t);
+	//		Model::Draw(hModel_[type_]);
+
+	//		// 適当にブロックを積み上げてるコード
+	//		/*for (int k = 0; k < (int)(GetT(i, j).height); k++) {
+	//			int type = (int)(GetT(i, j).type);
+	//			Transform t;
+	//			t.position_.x = i - 15 / 2.0;
+	//			t.position_.z = j;
+	//			t.position_.y = k - 15;
+	//			t.scale_ = { 0.95, 0.95, 0.95 };
+	//			Model::SetTransform(hModel_[type], t);
+	//			Model::Draw(hModel_[type]);
+	//		}*/ 
+	//	}
+	//}
+
+	/////////////
+
+	for (auto& b : models_) {
+		Model::SetTransform(b.type, b.transform);
+		Model::Draw(b.type);
 	}
 
-	//Transform t;
-	//t.position_.x = 5;
-	//t.position_.z = 5;
-	//t.position_.y = 0;
-	//t.scale_ = { 0.95, 0.95, 0.95 };
-	//int type = BLOCK_TYPE::WATER;
-	//Model::SetTransform(hModel_[type], t);
-	//Model::Draw(hModel_[type]);
 
-	//RayCastData rayData{
-	//	{ 5.0f, 0.0f, 5.0f,1.0f },
-	//	{ 0.0f,-1.0f, 0.0f,0.0f },
-	//	false,
-	//	100.0f
-	//};
-	//Model::RayCast(hModel_[type], rayData);
-	//if (rayData.isHit)
-	//{
-	//	//MessageBoxA(NULL, "Hit", "Info", MB_OK);
-	//}
+
+	Transform t;
+	t.position_.x = 5;
+	t.position_.z = 5;
+	t.position_.y = 5;
+	t.scale_ = { 0.95, 0.95, 0.95 };
+	int type = BLOCK_TYPE::WATER;
+	Model::SetTransform(hModel_[type], t);
+	Model::Draw(hModel_[type]);
+
+	RayCastData rayData{
+		{ 5.0f, 0.0f, 5.0f,1.0f },
+		{ 0.0f,-1.0f, 0.0f,0.0f },
+		false,
+		100.0f
+	};
+	Model::RayCast(hModel_[BLOCK_TYPE::DEFAULT], rayData);
+	if (rayData.isHit)
+	{
+		MessageBoxA(NULL, "Hit", "Info", MB_OK);
+	}
 }
 
 void Stage::Release()
@@ -251,8 +301,17 @@ void Stage::OnCollision(GameObject* pTarget)
 
 bool Stage::hitObject(RayCastData& data)
 {
-	bool hit = false;
-	data.dist = data.maxDist;
+	int mol = 0;
+	int hitModel;
+	if (Model::RayCastAll(mol, data, hitModel)) {
+		return true;
+	}
+	else
+		return false;
+
+
+	//bool hit = false;
+	//data.dist = data.maxDist+10.0f;
 
 	//for (int i = 0; i < MODEL_NUM; i++) {//モデルのIDごとに判定
 	//	Model::RayCast(hModel_[i], data);
@@ -290,7 +349,7 @@ bool Stage::hitObject(RayCastData& data)
 	}*/
 
 	
-	Transform t;
+	/*Transform t;
 	t.position_.x = data.start.x;
 	t.position_.y = data.start.y;
 	t.position_.z = data.start.z;
@@ -301,18 +360,26 @@ bool Stage::hitObject(RayCastData& data)
 	if (data.isHit) {
 		hit = true;
 	}
-	return hit;
-}
+	return hit;*/
 
-bool Stage::CollideLine(RayCastData& data)
-{
-	bool found = false;
-	std::vector<StageObject*> objs = (StageObject*)FindObject("StageObject");
-	auto& objs = stage->GetStageObjects();
-	for (StageObject* obj : objs)
-	{
-		obj->RayCast(data);
+	/*for (auto& h : models_) {
+		Model::RayCast(h.type, data);
 	}
+	if (data.isHit) {
+		hit = true;
+	}
+	return hit;*/
 }
 
+//bool Stage::CollideLine(RayCastData& data)
+//{
+//	bool found = false;
+//	std::vector<StageObject*> objs = (StageObject*)FindObject("StageObject");
+//	auto& objs = stage->GetStageObjects();
+//	for (StageObject* obj : objs)
+//	{
+//		obj->RayCast(data);
+//	}
+//}
 
+// スフィアコライダーやら関係

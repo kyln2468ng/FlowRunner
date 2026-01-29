@@ -28,6 +28,13 @@ struct sData
 	int height;//ブロックを積む高さ
 };
 
+struct Block
+{
+	int type;
+	Transform transform;
+
+};
+
 class Stage : public GameObject
 {
 public:
@@ -51,10 +58,10 @@ public:
 	bool CollideLine(RayCastData& data); //ステージオブジェクトとのレイキャスト取る
 	//int  GetModelCount() const;
 	//int  GetModel(int index) const;
-	const std::vector<StageObject*>& GetStageObjects() const
+	/*const std::vector<StageObject*>& GetStageObjects() const
 	{
 		return stageObjects_;
-	}
+	}*/
 	
 private:
 	std::vector<Enemy*> enemy_;
@@ -64,4 +71,6 @@ private:
 	sData sTable[ZSIZE][XSIZE];
 	int mode_; // 0：上げる　1：下げる　2：種類変更
 	int select_; //ボックスの種類
+
+	std::vector<Block> models_;
 };
