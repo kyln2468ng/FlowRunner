@@ -93,9 +93,9 @@ void Stage::Initialize()
 			assert(h >= 0);
 
 			Transform t;
-			t.position_ = { (float)i, 0.0f, (float)j };
+			t.position_ = { (float)i, -5.0f, (float)j };
 			if (j % 2 == 0 && i % 3 == 0) {
-				t.position_.y = 1.0f;
+				t.position_.y = -8.0f;
 			}
 			t.scale_ = { 1,1,1 };
 			t.rotate_ = { 0,0,0 };
@@ -267,26 +267,26 @@ void Stage::Draw()
 
 
 
-	Transform t;
-	t.position_.x = 5;
-	t.position_.z = 5;
-	t.position_.y = 5;
-	t.scale_ = { 0.95, 0.95, 0.95 };
-	int type = BLOCK_TYPE::WATER;
-	Model::SetTransform(hModel_[type], t);
-	Model::Draw(hModel_[type]);
+	//Transform t;
+	//t.position_.x = 5;
+	//t.position_.z = 5;
+	//t.position_.y = 5;
+	//t.scale_ = { 0.95, 0.95, 0.95 };
+	//int type = BLOCK_TYPE::WATER;
+	//Model::SetTransform(hModel_[type], t);
+	//Model::Draw(hModel_[type]);
 
-	RayCastData rayData{
-		{ 5.0f, 0.0f, 5.0f,1.0f },
-		{ 0.0f,-1.0f, 0.0f,0.0f },
-		false,
-		100.0f
-	};
-	Model::RayCast(hModel_[BLOCK_TYPE::DEFAULT], rayData);
-	if (rayData.isHit)
-	{
-		MessageBoxA(NULL, "Hit", "Info", MB_OK);
-	}
+	//RayCastData rayData{
+	//	{ 5.0f, 0.0f, 5.0f,1.0f },
+	//	{ 0.0f,-1.0f, 0.0f,0.0f },
+	//	false,
+	//	100.0f
+	//};
+	//Model::RayCast(hModel_[BLOCK_TYPE::DEFAULT], rayData);
+	//if (rayData.isHit)
+	//{
+	//	MessageBoxA(NULL, "Hit", "Info", MB_OK);
+	//}
 }
 
 void Stage::Release()

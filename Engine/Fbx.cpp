@@ -606,8 +606,11 @@ for (int material = 0; material < materialCount_; material++)
 		//rayData.isHit = InterSects(V0, V1, V2, レイキャストのデータ);
 		if (rayData.isHit)
 		{
-			//XMVECTOR hitPos = rayData.start + rayData.dir * rayData.dist;
-			//XMStoreFloat3(&rayData.hitPos, hitPos);
+			XMVECTOR origin = XMLoadFloat4(&rayData.start);
+			XMVECTOR dir = XMVector3Normalize(XMLoadFloat4(&rayData.dir));
+			XMVECTOR localHitPos = origin + dir * rayData.dist;
+			XMStoreFloat3(&rayData.localHit, localHitPos);
+			
 			return;
 		}
 	}

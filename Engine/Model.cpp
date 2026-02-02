@@ -109,7 +109,9 @@ void Model::RayCast(int hModel, RayCastData& data)
 
     modelList[hModel]->transform_.Calculation();
 
-    XMMATRIX wInv = XMMatrixInverse(nullptr, modelList[hModel]->transform_.GetWorldMatrix());
+    XMMATRIX world = modelList[hModel]->transform_.GetWorldMatrix();
+
+    XMMATRIX wInv = XMMatrixInverse(nullptr, world);
     
     XMVECTOR vstart = XMVector3Transform(XMLoadFloat4(&local.start), wInv);
 
@@ -123,9 +125,22 @@ void Model::RayCast(int hModel, RayCastData& data)
     XMStoreFloat4(&local.start, vstart);
     XMStoreFloat4(&local.dir, dirAtLocal);
 
-    modelList[hModel]->pfbx_->RayCast(data);   
+    modelList[hModel]->pfbx_->RayCast(local);   
     
-    data = local;
+    if (local.isHit)
+    {
+        XMVECTOR localHit = XMLoadFloat3(&local.localHit);
+
+        XMVECTOR worldHit = XMVector3TransformCoord(localHit, world);
+
+        XMStoreFloat3(&data.hitPos, worldHit);
+        data.dist = local.dist;
+        data.isHit = true;
+    }
+    else
+    {
+        data.isHit = false;
+    }
 }
 
 bool Model::RayCastAll(int hModel, RayCastData& data,int& outModel)

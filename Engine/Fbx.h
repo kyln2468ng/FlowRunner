@@ -21,6 +21,7 @@ struct RayCastData
 	float maxDist; // レイの最大値
 
 	XMFLOAT3 hitPos;   //レイが当たった場所
+	XMFLOAT3 localHit;
 	XMFLOAT3 normal;   //当たった面の法線
 };
 

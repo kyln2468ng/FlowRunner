@@ -35,7 +35,7 @@ void Player::Initialize()
 	transform_.scale_.y = 0.7f;
 	transform_.scale_.z = 0.7f;
 
-	transform_.position_ = { -2.0f,9.0f,3.0f };
+	transform_.position_ = { -2.0f,10.0f,3.0f };
 
 	//子オブジェクトにChildOdenを追加する
 	pRChildOden = (ChildOden*)Instantiate<ChildOden>(this);
@@ -146,7 +146,9 @@ void Player::Update()
 		transform_.position_.y = data.hitPos.y + playerHeight;
 	}*/
 	if (st && st->hitObject(data)) {
-		transform_.position_.y = data.hitPos.y + playerHeight;
+		//transform_.position_.y = data.hitPos.y + playerHeight;
+		int i = 0;
+		i++;
 	}
 }
 
