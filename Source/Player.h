@@ -17,6 +17,7 @@ public:
 	void OnCollision(GameObject* pTarget) override;
 
 	XMFLOAT3 GetPos() { return transform_.position_; }
+	int GetHandle() { return hModel_; }
 
 private:
 	ChildOden* pRChildOden;

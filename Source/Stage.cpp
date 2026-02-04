@@ -301,7 +301,8 @@ void Stage::OnCollision(GameObject* pTarget)
 
 bool Stage::hitObject(RayCastData& data)
 {
-	int mol = 0;
+	Player* p = (Player*)FindObject("Player");
+	int mol = p->GetHandle();
 	int hitModel;
 	if (Model::RayCastAll(mol, data, hitModel)) {
 		return true;

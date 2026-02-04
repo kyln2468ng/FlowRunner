@@ -31,9 +31,9 @@ void Player::Initialize()
 	//pFbx_->Load("OdenA.fbx");
 	hModel_ = Model::Load("OdenA.fbx");
 	assert(hModel_ >= 0);
-	transform_.scale_.x = 0.7f;
-	transform_.scale_.y = 0.7f;
-	transform_.scale_.z = 0.7f;
+	transform_.scale_.x = 1.0f;
+	transform_.scale_.y = 1.0f;
+	transform_.scale_.z = 1.0f;
 
 	transform_.position_ = { -2.0f,10.0f,3.0f };
 
@@ -127,9 +127,9 @@ void Player::Update()
 	XMStoreFloat3(&camTarget, vDir);
 
 	XMFLOAT3 pos = transform_.position_;
-	float playerHeight = 1.0f;//Å©Ç±Ç±è≠Çµí≤êÆÇµÇΩ
+	float playerHeight = 2.05f;//Å©Ç±Ç±è≠Çµí≤êÆÇµÇΩ
 	RayCastData data = {
-		{ pos.x, pos.y + playerHeight, pos.z, 1},
+		{ pos.x, pos.y - playerHeight, pos.z, 1},
 		{0.0f,-10.0f,0.0f,0.0f}
 	};
 	//data.maxDist = playerHeight + 1.5f;//Å©Ç±Ç±è≠Çµí≤êÆÇµÇΩ

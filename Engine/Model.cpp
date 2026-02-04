@@ -149,6 +149,9 @@ bool Model::RayCastAll(int hModel, RayCastData& data,int& outModel)
     float closest = FLT_MAX;
 
     for (int i = 0;i < modelList.size();i++) {
+        if (i == hModel)
+            continue;
+
         RayCastData rayData = data;
 
         Model::RayCast(i, rayData);
