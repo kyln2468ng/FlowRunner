@@ -13,6 +13,7 @@ namespace
 	float coolTime_ = 0.0f;
 	const float nextTime = 0.5f;
 	const float deltatime_ = 0.016;
+	float gravity_ = 0.1f;
 }
 
 Player::Player(GameObject* parent)
@@ -35,7 +36,7 @@ void Player::Initialize()
 	transform_.scale_.y = 1.0f;
 	transform_.scale_.z = 1.0f;
 
-	transform_.position_ = { -2.0f,10.0f,3.0f };
+	transform_.position_ = { 0.0f,10.0f,3.0f };
 
 	//子オブジェクトにChildOdenを追加する
 	pRChildOden = (ChildOden*)Instantiate<ChildOden>(this);
@@ -45,12 +46,17 @@ void Player::Initialize()
 
 	SphereCollider* col = new SphereCollider(0.5f);
 	AddCollider(col);
+
+
+
+	onGround_ = false;
+	velocityY = 0.0f;
 }
 
 void Player::Update()
 {
 	//transform_.rotate_.y += 1.0f;
-	//transform_.position_.y -= 0.1f;//////
+	//transform_.position_.y -= 0.1f;
 	/*if (transform_.rotate_.y >= 720.0f)
 	{
 		KillMe();
@@ -59,6 +65,9 @@ void Player::Update()
 	{
 		transform_.position_.z += 0.1;
 	}*/
+
+	onGround_ = false;
+
 	if (Input::IsKey(DIK_S))
 	{
 		transform_.position_.z -= 0.1f;
@@ -112,7 +121,7 @@ void Player::Update()
 	//Camera::SetPosition(camPos);
 	//Camera::SetTarget(vTarget);
 
-	XMVECTOR vCam = { 0,5.0f,-10.0f,0 };
+	XMVECTOR vCam = { 0,5.0f,-13.0f,0 };
 	vCam = XMVector3TransformCoord(vCam, mRot);
 	XMFLOAT3 camPos;
 	XMStoreFloat3(&camPos, vPos + vCam);
@@ -126,14 +135,16 @@ void Player::Update()
 	vDir = XMVector3Normalize(vDir);
 	XMStoreFloat3(&camTarget, vDir);
 
-	XMFLOAT3 pos = transform_.position_;
-	float playerHeight = 2.05f;//←ここ少し調整した
-	RayCastData data = {
-		{ pos.x, pos.y - playerHeight, pos.z, 1},
-		{0.0f,-10.0f,0.0f,0.0f}
-	};
-	//data.maxDist = playerHeight + 1.5f;//←ここ少し調整した
+	//transform_.position_.y -= gravity_;
 
+	XMFLOAT3 pos = transform_.position_;
+	float playerHeight = 1.0f;
+	RayCastData data = {
+		{ pos.x, pos.y - playerHeight+0.1f, pos.z, 1},
+		{0.0f,-1.0f,0.0f,0.0f}
+	};
+	data.maxDist = playerHeight + 0.2f;
+	
 	Stage* st = (Stage*)FindObject("Stage");
 	//int hStageModel = st->GetModel();
 
@@ -145,11 +156,36 @@ void Player::Update()
 	{
 		transform_.position_.y = data.hitPos.y + playerHeight;
 	}*/
+
 	if (st && st->hitObject(data)) {
-		//transform_.position_.y = data.hitPos.y + playerHeight;
-		int i = 0;
-		i++;
+		if (data.isHit && data.dist <= data.maxDist) {
+
+			onGround_ = true;
+		}
 	}
+
+	if (onGround_) {
+		float groundY = data.hitPos.y;
+		if (velocityY <= 0.0f) {
+			transform_.position_.y = groundY + playerHeight;
+			velocityY = 0.0f;
+			onGround_ = true;
+		}
+	}
+
+
+
+	//if (onGround_) {
+	//	transform_.position_.y = data.hitPos.y + playerHeight;
+	//	gravity_ = 0.0f;
+	//}
+	//else
+	//	gravity_ = 0.1f;
+
+
+	velocityY = gravity_;
+	transform_.position_.y -= velocityY;
+
 }
 
 void Player::Draw()
@@ -158,6 +194,7 @@ void Player::Draw()
 	{
 		pFbx_->Draw(transform_);
 	}*/
+			
 	Model::SetTransform(hModel_, transform_);
 	Model::Draw(hModel_);
 }

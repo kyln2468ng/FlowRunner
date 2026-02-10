@@ -24,5 +24,7 @@ private:
 	ChildOden* pLChildOden;
 	Bullet* bullet_;
 	int hModel_;
+	bool onGround_;
+	float velocityY;
 };
 
