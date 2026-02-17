@@ -13,7 +13,11 @@ namespace
 	float coolTime_ = 0.0f;
 	const float nextTime = 0.5f;
 	const float deltatime_ = 0.016;
-	float gravity_ = 0.1f;
+	float gravity_ = 0.01f;
+	float JumpTime = 1.0f;
+	float distortion = 1.0f;
+	float JumpHeight = 3.0f;
+	float JumpV0 = 0;
 }
 
 Player::Player(GameObject* parent)
@@ -36,7 +40,7 @@ void Player::Initialize()
 	transform_.scale_.y = 1.0f;
 	transform_.scale_.z = 1.0f;
 
-	transform_.position_ = { 0.0f,10.0f,3.0f };
+	transform_.position_ = { 0.0f,-1.0,3.0f };
 
 	//子オブジェクトにChildOdenを追加する
 	pRChildOden = (ChildOden*)Instantiate<ChildOden>(this);
@@ -48,7 +52,7 @@ void Player::Initialize()
 	AddCollider(col);
 
 
-
+	JumpV0 = -sqrtf(2.0f * gravity_ * JumpHeight);
 	onGround_ = false;
 	velocityY = 0.0f;
 }
@@ -66,7 +70,7 @@ void Player::Update()
 		transform_.position_.z += 0.1;
 	}*/
 
-	onGround_ = false;
+	//onGround_ = false;
 
 	if (Input::IsKey(DIK_S))
 	{
@@ -85,13 +89,23 @@ void Player::Update()
 		transform_.position_.y -= 0.1f;
 	}
 
-	coolTime_ -= deltatime_;
-	if (Input::IsKeyDown(DIK_SPACE) && coolTime_ < 0.0f)
+	//coolTime_ -= deltatime_;
+	if (Input::IsKeyDown(DIK_SPACE) && onGround_)// && coolTime_ < 0.0f)
 	{
-		bullet_ = (Bullet*)Instantiate<Bullet>(FindObject("PlayScene"));
+		velocityY = JumpV0;
+		onGround_ = false;
+
+
+		/*bullet_ = (Bullet*)Instantiate<Bullet>(FindObject("PlayScene"));
 		bullet_->SetPosition(transform_.position_);
-		coolTime_ = nextTime;
+		coolTime_ = nextTime;*/
+		/*float jumpV0 = (1.0f - pow(1.0f - sin(3.1415926535 * JumpTime), distortion)) * JumpHeight;
+		velocityY = abs(jumpV0);*/
+
 	}
+
+	velocityY -= gravity_;
+	transform_.position_.y += velocityY;
 
 	//視点移動をする
 	if (Input::IsKey(DIK_RIGHT))
@@ -143,7 +157,7 @@ void Player::Update()
 		{ pos.x, pos.y - playerHeight+0.1f, pos.z, 1},
 		{0.0f,-1.0f,0.0f,0.0f}
 	};
-	data.maxDist = playerHeight + 0.2f;
+	data.maxDist = playerHeight + fabs(velocityY) + 0.2f;
 	
 	Stage* st = (Stage*)FindObject("Stage");
 	//int hStageModel = st->GetModel();
@@ -157,23 +171,61 @@ void Player::Update()
 		transform_.position_.y = data.hitPos.y + playerHeight;
 	}*/
 
+	float groundY = 0.0f;
+	bool isGround = false;
+
 	if (st && st->hitObject(data)) {
 		if (data.isHit && data.dist <= data.maxDist) {
-
-			onGround_ = true;
-		}
-	}
-
-	if (onGround_) {
-		float groundY = data.hitPos.y;
-		if (velocityY <= 0.0f) {
-			transform_.position_.y = groundY + playerHeight;
-			velocityY = 0.0f;
-			onGround_ = true;
+			if (velocityY <= 0.0f) {
+				groundY = data.hitPos.y;
+				isGround = true;
+			}
 		}
 	}
 
 
+	// 重力はすでに velocity に反映済みとする
+	float nextY = transform_.position_.y + velocityY;
+	float nextFoot = nextY - playerHeight;
+
+	// 落下中 & 地面を超えるなら
+	if (velocityY < 0.0f && nextFoot <= groundY && isGround)
+	{
+		// 着地
+		transform_.position_.y = groundY + playerHeight;
+		velocityY = 0.0f;
+		onGround_ = true;
+	}
+	else
+	{
+		transform_.position_.y = nextY;
+		onGround_ = false;
+	}
+
+	//if (onGround_) {
+	//	float groundY = data.hitPos.y;
+	///*	if (velocityY <= 0.0f) {
+	//		transform_.position_.y = groundY + playerHeight;
+	//		velocityY = 0.0f;
+	//		gravity_ = 0.0f;
+	//	}*/
+	//	gravity_ = 0.0f;
+	//	velocityY = 0.0f;
+	//	if (transform_.position_.y - playerHeight-velocityY <= groundY) {
+	//		transform_.position_.y = groundY + playerHeight;
+	//		gravity_ = 0.0f;
+	//	}
+	//	else if (transform_.position_.y < -6.0) {
+	//		transform_.position_.y = groundY + playerHeight;
+	//		gravity_ = 0.0f;
+	//		velocityY = 0.0f;
+	//	}
+
+	//}
+	//else
+	//	gravity_ = 0.1f;
+
+	
 
 	//if (onGround_) {
 	//	transform_.position_.y = data.hitPos.y + playerHeight;
@@ -183,8 +235,7 @@ void Player::Update()
 	//	gravity_ = 0.1f;
 
 
-	velocityY = gravity_;
-	transform_.position_.y -= velocityY;
+	
 
 }
 
@@ -197,6 +248,8 @@ void Player::Draw()
 			
 	Model::SetTransform(hModel_, transform_);
 	Model::Draw(hModel_);
+	
+	
 }
 
 void Player::Release()
