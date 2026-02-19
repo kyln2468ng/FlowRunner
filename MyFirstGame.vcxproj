@@ -156,6 +156,7 @@
     <ClInclude Include="Main.h" />
     <ClInclude Include="Engine\Quad.h" />
     <ClInclude Include="Source\Player.h" />
+    <ClInclude Include="Source\PlayerParamConfig.h" />
     <ClInclude Include="Source\PlayScene.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="Engine\Sprite.h" />
@@ -187,6 +188,7 @@
     <ClCompile Include="Engine\Texture.cpp" />
     <ClCompile Include="Engine\Transform.cpp" />
     <ClCompile Include="Source\Player.cpp" />
+    <ClCompile Include="Source\PlayerParmConfig.cpp" />
     <ClCompile Include="Source\PlayScene.cpp" />
     <ClCompile Include="Source\Stage.cpp" />
     <ClCompile Include="Source\StageObject.cpp" />

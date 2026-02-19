@@ -11,6 +11,11 @@
 namespace
 {
 	const int ENEMY_NUM = 2;
+	//ステージ側が欲しいパラメータ
+	// ジャンプした時の最大のｙ
+	// ジャンプした時の最大距離
+	// 穴の距離
+
 }
 
 Stage::Stage(GameObject* parent)

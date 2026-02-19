@@ -114,6 +114,9 @@
     <ClInclude Include="Source\StageObject.h">
       <Filter>Library</Filter>
     </ClInclude>
+    <ClInclude Include="Source\PlayerParamConfig.h">
+      <Filter>ソース ファイル\Scene\Play</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Engine\Camera.cpp">
@@ -186,6 +189,9 @@
       <Filter>ソース ファイル\Scene\GameOver</Filter>
     </ClCompile>
     <ClCompile Include="Source\StageObject.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\PlayerParmConfig.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
   </ItemGroup>
