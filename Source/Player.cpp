@@ -13,7 +13,7 @@ namespace
 	float coolTime_ = 0.0f;
 	const float nextTime = 0.5f;
 	const float deltatime_ = 0.016;
-	float gravity_ = 0.01f;
+	float gravity_ = 0.001f;
 	float JumpTime = 1.0f;
 	float distortion = 1.0f;
 	float JumpHeight = 3.0f;
@@ -52,7 +52,7 @@ void Player::Initialize()
 	AddCollider(col);
 
 
-	JumpV0 = -sqrtf(2.0f * gravity_ * JumpHeight);
+	JumpV0 = sqrtf(2.0f * gravity_ * JumpHeight);
 	onGround_ = false;
 	velocityY = 0.0f;
 }
@@ -154,7 +154,7 @@ void Player::Update()
 	XMFLOAT3 pos = transform_.position_;
 	float playerHeight = 1.0f;
 	RayCastData data = {
-		{ pos.x, pos.y - playerHeight+0.1f, pos.z, 1},
+		{ pos.x, pos.y, pos.z, 1},
 		{0.0f,-1.0f,0.0f,0.0f}
 	};
 	data.maxDist = playerHeight + fabs(velocityY) + 0.2f;
@@ -171,6 +171,8 @@ void Player::Update()
 		transform_.position_.y = data.hitPos.y + playerHeight;
 	}*/
 
+
+	////着地回りや物理部分は一旦後に持っていく、先にステージの生成を作ってその後やっていく感じにする////
 	float groundY = 0.0f;
 	bool isGround = false;
 
