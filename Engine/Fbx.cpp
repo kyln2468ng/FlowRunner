@@ -579,7 +579,9 @@ void Fbx::RayCast(RayCastData& rayData)
 	//}
 
 //////////
-
+rayData.dist = FLT_MAX;
+float closest = rayData.dist;
+bool hit = false;
 for (int material = 0; material < materialCount_; material++)
 {
 	auto& indices = ppIndex_[material];
@@ -590,34 +592,47 @@ for (int material = 0; material < materialCount_; material++)
 		VERTEX& V1 = pVertices_[indices[i + 1]];
 		VERTEX& V2 = pVertices_[indices[i + 2]];
 
-		rayData.isHit = TriangleTests::Intersects(
+		float t;
+		bool result = TriangleTests::Intersects(
 			XMLoadFloat4(&rayData.start),
 			XMLoadFloat4(&rayData.dir),
 			V0.position,
 			V1.position,
 			V2.position,
-			rayData.dist
+			t
 		);
+
+
+		if (result && t < closest)
+		{
+			closest = t;
+			hit = true;
+
+			XMVECTOR origin = XMLoadFloat4(&rayData.start);
+			XMVECTOR dir = XMVector3Normalize(XMLoadFloat4(&rayData.dir));
+			XMVECTOR localHitPos = origin + dir * t;
+			XMStoreFloat3(&rayData.localHit, localHitPos);
+		}
 
 		XMVECTOR normal = XMVector3Normalize(XMVector3Cross(
 							V1.position - V0.position,
 							V2.position - V0.position));
 
 		//rayData.isHit = InterSects(V0, V1, V2, レイキャストのデータ);
-		if (rayData.isHit)
-		{
-			XMVECTOR origin = XMLoadFloat4(&rayData.start);
-			XMVECTOR dir = XMVector3Normalize(XMLoadFloat4(&rayData.dir));
-			XMVECTOR localHitPos = origin + dir * rayData.dist;
-			XMStoreFloat3(&rayData.localHit, localHitPos);
-			
-			return;
-		}
+		//if (rayData.isHit)
+		//{
+		//	XMVECTOR origin = XMLoadFloat4(&rayData.start);
+		//	XMVECTOR dir = XMVector3Normalize(XMLoadFloat4(&rayData.dir));
+		//	XMVECTOR localHitPos = origin + dir * rayData.dist;
+		//	XMStoreFloat3(&rayData.localHit, localHitPos);
+		//	
+		//	return;
+		//}
 	}
 }
-rayData.isHit = false;
+rayData.isHit = hit;
 
-
+rayData.dist = closest;
 
 
 

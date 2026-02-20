@@ -110,6 +110,15 @@ void Stage::Initialize()
 			models_.push_back({h,t});
 		}
 	}
+
+	int h = Model::Load("BoxDefault.fbx");
+	Transform t;
+	t.position_ = { 0,-15,30 };
+	t.scale_ = { 6,10,6 };
+	t.rotate_ = { 0,0,0 };
+	t.Calculation();
+	Model::SetTransform(h, t);
+	models_.push_back({ h,t });
 }
 
 void Stage::Update()
