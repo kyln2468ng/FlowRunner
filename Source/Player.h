@@ -1,5 +1,6 @@
 #pragma once
 #include "../Engine/GameObject.h"
+#include "PlayerParamConfig.h"
 
 class ChildOden;
 class Bullet;
@@ -26,5 +27,6 @@ private:
 	int hModel_;
 	bool onGround_;
 	float velocityY;
+	PlayerParamConfig param_;
 };
 

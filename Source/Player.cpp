@@ -8,20 +8,21 @@
 #include "../Engine/Camera.h"
 #include "Stage.h"
 
+
 namespace
 {
 	float coolTime_ = 0.0f;
 	const float nextTime = 0.5f;
 	const float deltatime_ = 0.016;
-	float gravity_ = 0.001f;
+	//float gravity_ = 0.001f;
 	float JumpTime = 1.0f;
 	float distortion = 1.0f;
-	float JumpHeight = 3.0f;
+	//float JumpHeight = 3.0f;
 	float JumpV0 = 0;
 }
 
 Player::Player(GameObject* parent)
-	:GameObject(parent, "Player"), hModel_(-1)
+	:GameObject(parent, "Player"), hModel_(-1),param_(GetPlayerParamConfig())
 {
 }
 
@@ -52,7 +53,7 @@ void Player::Initialize()
 	AddCollider(col);
 
 
-	JumpV0 = sqrtf(2.0f * gravity_ * JumpHeight);
+	JumpV0 = sqrtf(2.0f * param_.GRAVITY * param_.JUMP_HEIGHT);
 	onGround_ = false;
 	velocityY = 0.0f;
 }
@@ -74,19 +75,19 @@ void Player::Update()
 
 	if (Input::IsKey(DIK_S))
 	{
-		transform_.position_.z -= 0.1f;
+		transform_.position_.z -= param_.MOVE_SPEED;
 	}
 	if (Input::IsKey(DIK_A))
 	{
-		transform_.position_.x -= 0.1f;
+		transform_.position_.x -= param_.MOVE_SPEED;
 	}
 	if (Input::IsKey(DIK_D))
 	{
-		transform_.position_.x += 0.1f;
+		transform_.position_.x += param_.MOVE_SPEED;
 	}
 	if (Input::IsKey(DIK_E))
 	{
-		transform_.position_.y -= 0.1f;
+		transform_.position_.y -= param_.MOVE_SPEED;
 	}
 
 	//coolTime_ -= deltatime_;
@@ -104,17 +105,17 @@ void Player::Update()
 
 	}
 
-	velocityY -= gravity_;
+	velocityY -= param_.GRAVITY;
 	transform_.position_.y += velocityY;
 
 	//Ž‹“_ˆÚ“®‚ð‚·‚é
 	if (Input::IsKey(DIK_RIGHT))
 	{
-		transform_.rotate_.y += 0.1f;
+		transform_.rotate_.y += param_.MOVE_SPEED;
 	}
 	if (Input::IsKey(DIK_LEFT))
 	{
-		transform_.rotate_.y -= 0.1f;
+		transform_.rotate_.y -= param_.MOVE_SPEED;
 	}
 
 	XMVECTOR vPos = XMLoadFloat3(&transform_.position_);

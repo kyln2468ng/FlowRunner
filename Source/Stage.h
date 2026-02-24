@@ -3,6 +3,7 @@
 #include <vector>
 #include "Windows.h"
 #include "../Engine/Model.h"
+#include "PlayerParamConfig.h"
 
 class Enemy;
 class Player;
@@ -55,7 +56,7 @@ public:
 
 	bool hitObject(RayCastData& data);//オブジェクト（ブロック）と当たったかを返す
 
-	bool CollideLine(RayCastData& data); //ステージオブジェクトとのレイキャスト取る
+	//bool CollideLine(RayCastData& data); //ステージオブジェクトとのレイキャスト取る
 	//int  GetModelCount() const;
 	//int  GetModel(int index) const;
 	/*const std::vector<StageObject*>& GetStageObjects() const
@@ -63,6 +64,8 @@ public:
 		return stageObjects_;
 	}*/
 	
+	float PlayerMaxDist(const PlayerParamConfig& param);
+
 private:
 	std::vector<Enemy*> enemy_;
 	int type_;
@@ -73,4 +76,9 @@ private:
 	int select_; //ボックスの種類
 
 	std::vector<Block> models_;
+
+	PlayerParamConfig param_;
+	float gap_; //ビルとビルとの幅
+	float pJumpV0_;
+	float airTime_;
 };

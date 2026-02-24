@@ -19,7 +19,7 @@ namespace
 }
 
 Stage::Stage(GameObject* parent)
-	:GameObject(parent, "Stage"), hModel_(-1)
+	:GameObject(parent, "Stage"), hModel_(-1),param_(GetPlayerParamConfig())
 {
 	/*for (int j = 0;j < ZSIZE;j++) {
 		for (int i = 0;i < XSIZE;i++)
@@ -119,6 +119,9 @@ void Stage::Initialize()
 	t.Calculation();
 	Model::SetTransform(h, t);
 	models_.push_back({ h,t });
+
+	float maxDist = PlayerMaxDist(param_);
+	gap_ = maxDist * 0.7f; //最大距離の70％分の長さをgap(幅)とする
 }
 
 void Stage::Update()
@@ -221,6 +224,11 @@ void Stage::Update()
 	//	int i = 0;
 	//	i++;
 	//}
+
+	//ステージの生成→最終的には生成用クラス作るが一旦ステージクラスで関数作って生成できるようになったら生成用クラスとして分離する
+	
+	
+
 
 }
 
@@ -384,6 +392,14 @@ bool Stage::hitObject(RayCastData& data)
 		hit = true;
 	}
 	return hit;*/
+}
+
+float Stage::PlayerMaxDist(const PlayerParamConfig& param)
+{
+	pJumpV0_ = sqrtf(2.0f * param.GRAVITY * param.JUMP_HEIGHT);
+	airTime_ = (2.0f * pJumpV0_) / param.GRAVITY;
+
+	return param.MOVE_SPEED * airTime_;
 }
 
 //bool Stage::CollideLine(RayCastData& data)
