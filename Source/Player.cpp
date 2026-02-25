@@ -238,6 +238,134 @@ void Player::Update()
 	//	gravity_ = 0.1f;
 
 
+	/*
+	//清書（仮）
+	void Player::Update()
+{
+	//====================
+	// ■ 入力による平面移動
+	//====================
+	if (Input::IsKey(DIK_S)) transform_.position_.z -= param_.MOVE_SPEED;
+	if (Input::IsKey(DIK_A)) transform_.position_.x -= param_.MOVE_SPEED;
+	if (Input::IsKey(DIK_D)) transform_.position_.x += param_.MOVE_SPEED;
+
+	// デバッグ用の上下移動
+	if (Input::IsKey(DIK_E)) transform_.position_.y -= param_.MOVE_SPEED;
+
+
+	//====================
+	// ■ ジャンプ入力
+	//====================
+	// 接地中のみジャンプ可能
+	if (Input::IsKeyDown(DIK_SPACE) && onGround_)
+	{
+		velocityY = JumpV0;
+		onGround_ = false;
+	}
+
+
+	//====================
+	// ■ 回転処理
+	//====================
+	if (Input::IsKey(DIK_RIGHT)) transform_.rotate_.y += param_.MOVE_SPEED;
+	if (Input::IsKey(DIK_LEFT))  transform_.rotate_.y -= param_.MOVE_SPEED;
+
+
+	//====================
+	// ■ 前方向移動（回転を考慮）
+	//====================
+	XMVECTOR vPos = XMLoadFloat3(&transform_.position_);
+	XMMATRIX mRot = XMMatrixRotationRollPitchYaw(
+		transform_.rotate_.x,
+		transform_.rotate_.y,
+		0);
+
+	XMVECTOR vMove = { 0,0,0.1f };
+	vMove = XMVector3TransformCoord(vMove, mRot);
+
+	if (Input::IsKey(DIK_W))
+	{
+		vPos += vMove;
+		XMStoreFloat3(&transform_.position_, vPos);
+	}
+
+
+	//====================
+	// ■ 重力更新
+	//====================
+	velocityY -= param_.GRAVITY;
+
+
+	//====================
+	// ■ 地面判定（Raycast）
+	//====================
+	XMFLOAT3 pos = transform_.position_;
+	float playerHeight = 1.0f;
+
+	RayCastData data = {
+		{ pos.x, pos.y, pos.z, 1 },
+		{ 0.0f,-1.0f,0.0f,0.0f }
+	};
+
+	// 落下速度分を含めてRayの長さを決定
+	// 高速落下でも地面を突き抜けないため
+	data.maxDist = playerHeight + fabs(velocityY) + 0.2f;
+
+	Stage* st = (Stage*)FindObject("Stage");
+
+	float groundY = 0.0f;
+	bool isGround = false;
+
+	if (st && st->hitObject(data))
+	{
+		if (data.isHit && data.dist <= data.maxDist)
+		{
+			// 上方向に移動中は接地しない
+			if (velocityY <= 0.0f)
+			{
+				groundY = data.hitPos.y;
+				isGround = true;
+			}
+		}
+	}
+
+
+	//====================
+	// ■ 位置更新 + 着地処理
+	//====================
+	float nextY = transform_.position_.y + velocityY;
+	float nextFoot = nextY - playerHeight;
+
+	// 落下中かつ地面に到達した場合
+	if (velocityY < 0.0f && nextFoot <= groundY && isGround)
+	{
+		// 地面にスナップさせる
+		transform_.position_.y = groundY + playerHeight;
+
+		velocityY = 0.0f;
+		onGround_ = true;
+	}
+	else
+	{
+		transform_.position_.y = nextY;
+		onGround_ = false;
+	}
+
+
+	//====================
+	// ■ カメラ更新
+	//====================
+	XMVECTOR vCam = { 0,5.0f,-13.0f,0 };
+	vCam = XMVector3TransformCoord(vCam, mRot);
+
+	XMFLOAT3 camPos;
+	XMStoreFloat3(&camPos, vPos + vCam);
+
+	Camera::SetPosition(camPos);
+	Camera::SetTarget(transform_.position_);
+}
+
+	*/
 	
 
 }
