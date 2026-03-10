@@ -111,15 +111,18 @@ void Player::Update()
 	//Ž‹“_ˆÚ“®‚ð‚·‚é
 	if (Input::IsKey(DIK_RIGHT))
 	{
-		transform_.rotate_.y += param_.MOVE_SPEED;
+		//transform_.rotate_.y += param_.MOVE_SPEED;
+		transform_.SetVectorRotation(XMFLOAT3(0, 10, 0));
 	}
 	if (Input::IsKey(DIK_LEFT))
 	{
-		transform_.rotate_.y -= param_.MOVE_SPEED;
+		//transform_.rotate_.y -= param_.MOVE_SPEED;
+		transform_.SetVectorRotation(XMFLOAT3(0, 10, 0));
 	}
 
 	XMVECTOR vPos = XMLoadFloat3(&transform_.position_);
-	XMMATRIX mRot = XMMatrixRotationRollPitchYaw(transform_.rotate_.x, transform_.rotate_.y, 0);
+	//XMMATRIX mRot = XMMatrixRotationRollPitchYaw(transform_.rotate_.x, transform_.rotate_.y, 0);
+	XMMATRIX mRot = XMMatrixRotationQuaternion(transform_.rotate_.quaternion_);
 	XMVECTOR vMove = { 0,0,0.1f };
 	vMove = XMVector3TransformCoord(vMove, mRot);
 

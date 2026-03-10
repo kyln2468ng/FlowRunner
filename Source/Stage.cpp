@@ -103,7 +103,7 @@ void Stage::Initialize()
 				t.position_.y = -8.0f;
 			}
 			t.scale_ = { 1,1,1 };
-			t.rotate_ = { 0,0,0 };
+			//t.rotate_ = { 0,0,0 };
 			t.Calculation();
 
 			Model::SetTransform(h, t);
@@ -115,7 +115,7 @@ void Stage::Initialize()
 	Transform t;
 	t.position_ = { 0,-15,30 };
 	t.scale_ = { 6,10,6 };
-	t.rotate_ = { 0,0,0 };
+	//t.rotate_ = { 0,0,0 };
 	t.Calculation();
 	Model::SetTransform(h, t);
 	models_.push_back({ h,t });

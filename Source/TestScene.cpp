@@ -33,7 +33,17 @@ void TestScene::Update()
 		sceneOb->ChangeScene(SCENE_ID_PLAY);
 	}
 
-	transform_.rotate_.y += 1.0f;
+	XMVECTOR axis = XMVectorSet(0, 1, 0, 0);
+
+	XMVECTOR q = XMQuaternionRotationAxis(
+		axis,
+		XMConvertToRadians(1.0f)
+	);
+
+	transform_.rotate_.quaternion_ =
+		XMQuaternionMultiply(transform_.rotate_.quaternion_, q);
+
+	//transform_.rotate_.y += 1.0f;
 }
 
 void TestScene::Draw()

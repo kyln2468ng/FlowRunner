@@ -10,7 +10,7 @@ StageObject::StageObject(const std::string& filename, const XMVECTOR& position, 
 {
     filename_ = filename;
     transform_.SetVectorPosition(position);
-    transform_.SetVectorRotation(rotation);
+    //transform_.SetVectorRotation(rotation);
     transform_.SetVectroScale(scale);
 }
 
