@@ -15,7 +15,7 @@ Enemy::~Enemy()
 
 void Enemy::Initialize()
 {
-	hModel_ = Model::Load("rCubes.fbx");
+	/*hModel_ = Model::Load("rCubes.fbx");
 	assert(hModel_ >= 0);
 	transform_.scale_.x = 0.7f;
 	transform_.scale_.y = 0.7f;
@@ -23,7 +23,7 @@ void Enemy::Initialize()
 	transform_.position_ = { 0.0f, 0.0f, 50.0f };
 
 	SphereCollider* col = new SphereCollider(0.5f);
-	AddCollider(col);
+	AddCollider(col);*/
 }
 
 void Enemy::Update()
@@ -33,8 +33,8 @@ void Enemy::Update()
 
 void Enemy::Draw()
 {
-	Model::SetTransform(hModel_, transform_);
-	Model::Draw(hModel_);
+	/*Model::SetTransform(hModel_, transform_);
+	Model::Draw(hModel_);*/
 }
 
 void Enemy::Release()

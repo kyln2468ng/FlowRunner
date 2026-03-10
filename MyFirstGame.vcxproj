@@ -138,6 +138,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="Engine\Quaternion.h" />
     <ClInclude Include="Source\Bullet.h" />
     <ClInclude Include="Source\ChildOden.h" />
     <ClInclude Include="Source\ClearScene.h" />

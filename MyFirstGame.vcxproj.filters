@@ -117,6 +117,9 @@
     <ClInclude Include="Source\PlayerParamConfig.h">
       <Filter>ソース ファイル\Scene\Play</Filter>
     </ClInclude>
+    <ClInclude Include="Engine\Quaternion.h">
+      <Filter>ソース ファイル\Engine</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Engine\Camera.cpp">

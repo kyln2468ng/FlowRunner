@@ -35,7 +35,7 @@ void Player::Initialize()
 	//pFbx_ = new Fbx;
 	//pFbx_がnullptrじゃなかった時のチェックあったほういい
 	//pFbx_->Load("OdenA.fbx");
-	hModel_ = Model::Load("OdenA.fbx");
+	hModel_ = Model::Load("BoxGrass.fbx");//おでんじゃなくしたら判定取れてた
 	assert(hModel_ >= 0);
 	transform_.scale_.x = 1.0f;
 	transform_.scale_.y = 1.0f;
@@ -44,10 +44,10 @@ void Player::Initialize()
 	transform_.position_ = { 0.0f,-1.0,3.0f };
 
 	//子オブジェクトにChildOdenを追加する
-	pRChildOden = (ChildOden*)Instantiate<ChildOden>(this);
-	pLChildOden = (ChildOden*)Instantiate<ChildOden>(this);
-	pRChildOden->SetPosition(2.0f, 1.0f, 0.0f);
-	pLChildOden->SetPosition(-2.0f, 1.0f, 0.0f);
+	//pRChildOden = (ChildOden*)Instantiate<ChildOden>(this);
+	//pLChildOden = (ChildOden*)Instantiate<ChildOden>(this);
+	//pRChildOden->SetPosition(2.0f, 1.0f, 0.0f);
+	//pLChildOden->SetPosition(-2.0f, 1.0f, 0.0f);
 
 	SphereCollider* col = new SphereCollider(0.5f);
 	AddCollider(col);

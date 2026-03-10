@@ -7,7 +7,7 @@ Transform::Transform()
     pParent_(nullptr)
 {
     position_ = XMFLOAT3(0.0f, 0.0f, 0.0f);
-    rotate_ = XMFLOAT3(0.0f, 0.0f, 0.0f);
+    //rotate_ = XMFLOAT4(0.0f, 0.0f, 0.0f,0.0f);
     scale_ = XMFLOAT3(1.0f, 1.0f, 1.0f);
 }
 
@@ -19,12 +19,13 @@ void Transform::Calculation()
 {
     matTranslate_= XMMatrixTranslation(position_.x, position_.y, position_.z);
     
-    XMMATRIX r1, r2, r3;
+    /*XMMATRIX r1, r2, r3;
     r1 = XMMatrixRotationZ(XMConvertToRadians(rotate_.z));
     r2 = XMMatrixRotationY(XMConvertToRadians(rotate_.y));
     r3 = XMMatrixRotationX(XMConvertToRadians(rotate_.x));
-    matRotate_ = (r1 * r2 * r3);
-    
+    matRotate_ = (r1 * r2 * r3);*/
+
+    matRotate_ = rotate_.ToMatrix();
     matScale_ = XMMatrixScaling(scale_.x, scale_.y, scale_.z);
 
 }
@@ -49,14 +50,28 @@ void Transform::SetVectorPosition(const XMVECTOR& vPos)
     XMStoreFloat3(&position_, vPos);
 }
 
-void Transform::SetVectorRotation(const XMVECTOR& vRot)
+void Transform::SetVectorRotation(const XMFLOAT3& euler)
 {
-    XMStoreFloat3(&position_, vRot);
+    rotate_.quaternion_ = XMQuaternionRotationRollPitchYaw(
+        XMConvertToRadians(euler.x),
+        XMConvertToRadians(euler.y),
+        XMConvertToRadians(euler.z)
+    );
+}
+
+//void Transform::SetVectorRotation(const XMVECTOR& vRot)
+//{
+//    rotate_.quaternion_ = vRot;
+//}
+
+void Transform::SetVectorRotation(const math::Quaternion& quaternion)
+{
+    rotate_ = quaternion;
 }
 
 void Transform::SetVectroScale(const XMVECTOR& vScl)
 {
-    XMStoreFloat3(&position_, vScl);
+    XMStoreFloat3(&scale_, vScl);
 }
 
 

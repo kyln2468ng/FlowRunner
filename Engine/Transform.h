@@ -1,5 +1,6 @@
 #pragma once
 #include <DirectXMath.h>
+#include "Quaternion.h"
 
 using namespace DirectX;
 
@@ -11,9 +12,10 @@ class Transform
 	XMMATRIX matScale_;	//拡大行列
 
 public:
-	XMFLOAT3 position_;	//位置
-	XMFLOAT3 rotate_;	//向き
-	XMFLOAT3 scale_;	//拡大率
+	XMFLOAT3 position_;			//位置
+	math::Quaternion rotate_;	//向き
+	XMFLOAT3 scale_;			//拡大率
+	
 	Transform* pParent_; //親のTransform
 
 	//コンストラクタ
@@ -30,6 +32,9 @@ public:
 	XMMATRIX GetNormalMatrix();
 
 	void SetVectorPosition(const XMVECTOR& vPos);
-	void SetVectorRotation(const XMVECTOR& vRot);
+	void SetVectorRotation(const XMFLOAT3& euler);
+	//void SetVectorRotation(const XMVECTOR& vRot);
+	void SetVectorRotation(const math::Quaternion& quaternion);
 	void SetVectroScale(const XMVECTOR& vScl);
+
 };

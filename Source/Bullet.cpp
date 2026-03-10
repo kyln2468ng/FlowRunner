@@ -13,29 +13,29 @@ Bullet::~Bullet()
 
 void Bullet::Initialize()
 {
-	hModel_ = Model::Load("Bullet.fbx");
-	assert(hModel_ >= 0);
-	transform_.scale_ = { 0.5f,0.5f,0.5f };
-	
-	SphereCollider* col = new SphereCollider(0.5f);
-	AddCollider(col);
-	life_ = 60 * 5;
+	//hModel_ = Model::Load("Bullet.fbx");
+	//assert(hModel_ >= 0);
+	//transform_.scale_ = { 0.5f,0.5f,0.5f };
+	//
+	//SphereCollider* col = new SphereCollider(0.5f);
+	//AddCollider(col);
+	//life_ = 60 * 5;
 }
 
 void Bullet::Update()
 {
-	transform_.position_.z += 0.5f;
-	life_--;
-	if (life_ < 0)
-	{
-		this->Release();
-	}
+	//transform_.position_.z += 0.5f;
+	//life_--;
+	//if (life_ < 0)
+	//{
+	//	this->Release();
+	//}
 }
 
 void Bullet::Draw()
 {
-	Model::SetTransform(hModel_, transform_);
-	Model::Draw(hModel_);
+	//Model::SetTransform(hModel_, transform_);
+	//Model::Draw(hModel_);
 }
 
 void Bullet::Release()
