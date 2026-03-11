@@ -169,6 +169,7 @@
     <ClInclude Include="Source\TestScene.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Engine\Quaternion.cpp" />
     <ClCompile Include="Source\Bullet.cpp" />
     <ClCompile Include="Source\ChildOden.cpp" />
     <ClCompile Include="Source\ClearScene.cpp" />
