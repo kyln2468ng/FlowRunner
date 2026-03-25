@@ -28,5 +28,8 @@ private:
 	bool onGround_;
 	float velocityY;
 	PlayerParamConfig param_;
+
+	bool isWall_;
+	XMFLOAT3 wallNormal_;
 };
 

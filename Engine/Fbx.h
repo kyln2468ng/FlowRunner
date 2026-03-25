@@ -22,7 +22,9 @@ struct RayCastData
 
 	XMFLOAT3 hitPos;   //レイが当たった場所
 	XMFLOAT3 localHit;
-	XMFLOAT3 normal;   //当たった面の法線
+	XMFLOAT3 hitNormal; // ヒットした面の法線
+
+	
 };
 
 class Fbx

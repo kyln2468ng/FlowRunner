@@ -56,6 +56,7 @@ void Player::Initialize()
 	JumpV0 = sqrtf(2.0f * param_.GRAVITY * param_.JUMP_HEIGHT);
 	onGround_ = false;
 	velocityY = 0.0f;
+	isWall_ = false;
 }
 
 void Player::Update()
@@ -72,23 +73,6 @@ void Player::Update()
 	}*/
 
 	//onGround_ = false;
-
-	if (Input::IsKey(DIK_S))
-	{
-		transform_.position_.z -= param_.MOVE_SPEED;
-	}
-	if (Input::IsKey(DIK_A))
-	{
-		transform_.position_.x -= param_.MOVE_SPEED;
-	}
-	if (Input::IsKey(DIK_D))
-	{
-		transform_.position_.x += param_.MOVE_SPEED;
-	}
-	if (Input::IsKey(DIK_E))
-	{
-		transform_.position_.y -= param_.MOVE_SPEED;
-	}
 
 	//coolTime_ -= deltatime_;
 	if (Input::IsKeyDown(DIK_SPACE) && onGround_)// && coolTime_ < 0.0f)
@@ -126,11 +110,80 @@ void Player::Update()
 	XMVECTOR vMove = { 0,0,0.1f };
 	vMove = XMVector3TransformCoord(vMove, mRot);
 
+
+	XMVECTOR forward = transform_.rotate_.Forward();
+	XMVECTOR right = transform_.rotate_.Right();
+
+	XMVECTOR move = XMVectorZero();
+
 	if (Input::IsKey(DIK_W))
 	{
-		vPos += vMove;
-		XMStoreFloat3(&transform_.position_, vPos);
+		move += forward;
 	}
+
+	if (Input::IsKey(DIK_S))
+	{
+		move -= forward;
+	}
+	if (Input::IsKey(DIK_A))
+	{
+		move -= right;
+	}
+	if (Input::IsKey(DIK_D))
+	{
+		move += right;
+	}
+
+	if (!XMVector3Equal(move, XMVectorZero()))
+	{
+		move = XMVector3Normalize(move);
+	}
+
+	move *= param_.MOVE_SPEED;
+
+	/// •ÇƒŒƒC
+	XMVECTOR posVec = XMLoadFloat3(&transform_.position_);
+	bool isWall = false;
+	XMVECTOR wallNormal = XMVectorZero();
+
+	Stage* st = (Stage*)FindObject("Stage");
+
+	if (!XMVector3Equal(move, XMVectorZero()))
+	{
+		XMVECTOR moveDir = XMVector3Normalize(move);
+
+		RayCastData wallRay = {
+			{ XMVectorGetX(vPos), XMVectorGetY(vPos), XMVectorGetZ(vPos), 1 },
+			{ XMVectorGetX(moveDir), XMVectorGetY(moveDir), XMVectorGetZ(moveDir), 0 }
+		};
+
+		wallRay.maxDist = XMVectorGetX(XMVector3Length(move)) + 0.6f;
+
+		if (st && st->hitObject(wallRay) && wallRay.isHit)
+		{
+ 			isWall = true;
+
+			wallNormal = XMLoadFloat3(&wallRay.hitNormal);
+			wallNormal = XMVectorSetY(wallNormal, 0.0f);
+			wallNormal = XMVector3Normalize(wallNormal);
+
+			float dot = XMVectorGetX(XMVector3Dot(move, wallNormal));
+
+			if (dot != 0.0f)
+			{
+				move -= wallNormal * dot;
+			}
+
+			int i = 0;
+  			i++;
+		}
+
+	}
+	
+	// ÅŒã‚ÉˆÚ“®
+	vPos += move;
+
+	XMStoreFloat3(&transform_.position_, vPos);
 
 	//XMVECTOR camPos = XMLoadFloat3(&transform_.position_);
 	//XMFLOAT3 vTarget = transform_.position_;
@@ -139,19 +192,13 @@ void Player::Update()
 	//Camera::SetPosition(camPos);
 	//Camera::SetTarget(vTarget);
 
-	XMVECTOR vCam = { 0,5.0f,-13.0f,0 };
-	vCam = XMVector3TransformCoord(vCam, mRot);
+	XMVECTOR camOffset = transform_.rotate_.Up() * 5.0f + (-transform_.rotate_.Forward() * 13.0f);
+
 	XMFLOAT3 camPos;
-	XMStoreFloat3(&camPos, vPos + vCam);
+	XMStoreFloat3(&camPos, vPos + camOffset);
+
 	Camera::SetPosition(camPos);
-
-	XMFLOAT3 camTarget = transform_.position_;
-	Camera::SetTarget(camTarget);
-
-
-	XMVECTOR vDir = XMVectorSubtract(XMLoadFloat3(&camPos), XMLoadFloat3(&camTarget));
-	vDir = XMVector3Normalize(vDir);
-	XMStoreFloat3(&camTarget, vDir);
+	Camera::SetTarget(transform_.position_);
 
 	//transform_.position_.y -= gravity_;
 
@@ -163,7 +210,6 @@ void Player::Update()
 	};
 	data.maxDist = playerHeight + fabs(velocityY) + 0.2f;
 	
-	Stage* st = (Stage*)FindObject("Stage");
 	//int hStageModel = st->GetModel();
 
 	//Model::RayCast(hStageModel, data);
@@ -207,6 +253,9 @@ void Player::Update()
 		transform_.position_.y = nextY;
 		onGround_ = false;
 	}
+
+
+
 
 	//if (onGround_) {
 	//	float groundY = data.hitPos.y;

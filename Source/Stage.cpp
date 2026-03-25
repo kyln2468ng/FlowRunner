@@ -107,7 +107,7 @@ void Stage::Initialize()
 			t.Calculation();
 
 			Model::SetTransform(h, t);
-			models_.push_back({h,t});
+			models_.push_back({h, t});
 		}
 	}
 
@@ -118,10 +118,21 @@ void Stage::Initialize()
 	//t.rotate_ = { 0,0,0 };
 	t.Calculation();
 	Model::SetTransform(h, t);
-	models_.push_back({ h,t });
+	models_.push_back({ h, t });
 
 	float maxDist = PlayerMaxDist(param_);
 	gap_ = maxDist * 0.7f; //Å‘å‹——£‚Ì70“•ª‚Ì’·‚³‚ğgap(•)‚Æ‚·‚é
+
+	
+	for (int num = 0; num < 3; num++) {
+		int mol = Model::Load("BoxDefault.fbx");
+		Transform t;
+		t.position_ = { 5 + (float)num * 5,0,10 };
+		t.scale_ = { 2,5,2 };
+		t.Calculation();
+		Model::SetTransform(mol, t);
+		models_.push_back({ mol, t });
+	}
 }
 
 void Stage::Update()
