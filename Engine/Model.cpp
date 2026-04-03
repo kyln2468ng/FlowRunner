@@ -134,6 +134,13 @@ void Model::RayCast(int hModel, RayCastData& data)
         XMVECTOR worldHit = XMVector3TransformCoord(localHit, world);
 
         XMStoreFloat3(&data.hitPos, worldHit);
+
+        XMVECTOR localNormal = XMLoadFloat3(&local.hitNormal);
+        XMVECTOR worldNormal = XMVector3TransformNormal(localNormal, world);
+        worldNormal = XMVector3Normalize(worldNormal);
+
+        XMStoreFloat3(&data.hitNormal, worldNormal);
+
         data.dist = local.dist;
         data.isHit = true;
     }

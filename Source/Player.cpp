@@ -157,7 +157,7 @@ void Player::Update()
 			{ XMVectorGetX(moveDir), XMVectorGetY(moveDir), XMVectorGetZ(moveDir), 0 }
 		};
 
-		wallRay.maxDist = XMVectorGetX(XMVector3Length(move)) + 0.6f;
+		wallRay.maxDist = XMVectorGetX(XMVector3Length(move)) + 0.1f;
 
 		if (st && st->hitObject(wallRay) && wallRay.isHit)
 		{
@@ -165,17 +165,19 @@ void Player::Update()
 
 			wallNormal = XMLoadFloat3(&wallRay.hitNormal);
 			wallNormal = XMVectorSetY(wallNormal, 0.0f);
-			wallNormal = XMVector3Normalize(wallNormal);
+			if (!XMVector3Equal(wallNormal, XMVectorZero()))
+			{
+				wallNormal = XMVector3Normalize(wallNormal);
+			}
 
 			float dot = XMVectorGetX(XMVector3Dot(move, wallNormal));
 
-			if (dot != 0.0f)
+			if (dot < 0.0f)
 			{
 				move -= wallNormal * dot;
+				move += wallNormal * -0.01f * XMVectorGetX(XMVector3Length(move));
 			}
 
-			int i = 0;
-  			i++;
 		}
 
 	}
