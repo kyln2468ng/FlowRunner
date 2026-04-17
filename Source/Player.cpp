@@ -93,13 +93,11 @@ void Player::Update()
 	transform_.position_.y += velocityY;
 
 	//Ž‹“_ˆÚ“®‚ð‚·‚é
-	if (Input::IsKey(DIK_RIGHT))
-	{
+	if (Input::IsKey(DIK_RIGHT)) {
 		//transform_.rotate_.y += param_.MOVE_SPEED;
 		transform_.SetVectorRotation(XMFLOAT3(0, 10, 0));
 	}
-	if (Input::IsKey(DIK_LEFT))
-	{
+	if (Input::IsKey(DIK_LEFT)) {
 		//transform_.rotate_.y -= param_.MOVE_SPEED;
 		transform_.SetVectorRotation(XMFLOAT3(0, 10, 0));
 	}
@@ -116,26 +114,21 @@ void Player::Update()
 
 	XMVECTOR move = XMVectorZero();
 
-	if (Input::IsKey(DIK_W))
-	{
+	if (Input::IsKey(DIK_W)) {
 		move += forward;
 	}
 
-	if (Input::IsKey(DIK_S))
-	{
+	if (Input::IsKey(DIK_S)) {
 		move -= forward;
 	}
-	if (Input::IsKey(DIK_A))
-	{
+	if (Input::IsKey(DIK_A)) {
 		move -= right;
 	}
-	if (Input::IsKey(DIK_D))
-	{
+	if (Input::IsKey(DIK_D)) {
 		move += right;
 	}
 
-	if (!XMVector3Equal(move, XMVectorZero()))
-	{
+	if (!XMVector3Equal(move, XMVectorZero())) {
 		move = XMVector3Normalize(move);
 	}
 
@@ -143,13 +136,12 @@ void Player::Update()
 
 	/// •ÇƒŒƒC
 	XMVECTOR posVec = XMLoadFloat3(&transform_.position_);
-	bool isWall = false;
+	bool hit = false;
 	XMVECTOR wallNormal = XMVectorZero();
 
 	Stage* st = (Stage*)FindObject("Stage");
 
-	if (!XMVector3Equal(move, XMVectorZero()))
-	{
+	if (!XMVector3Equal(move, XMVectorZero())) {
 		XMVECTOR moveDir = XMVector3Normalize(move);
 
 		RayCastData wallRay = {
@@ -159,25 +151,41 @@ void Player::Update()
 
 		wallRay.maxDist = XMVectorGetX(XMVector3Length(move)) + 0.1f;
 
-		if (st && st->hitObject(wallRay) && wallRay.isHit)
-		{
- 			isWall = true;
+
+		if (st && st->hitObject(wallRay) && wallRay.isHit) {
+ 			hit = true;
 
 			wallNormal = XMLoadFloat3(&wallRay.hitNormal);
 			wallNormal = XMVectorSetY(wallNormal, 0.0f);
-			if (!XMVector3Equal(wallNormal, XMVectorZero()))
-			{
+			if (!XMVector3Equal(wallNormal, XMVectorZero())) {
 				wallNormal = XMVector3Normalize(wallNormal);
 			}
 
 			float dot = XMVectorGetX(XMVector3Dot(move, wallNormal));
 
-			if (dot < 0.0f)
-			{
+			if (dot < 0.0f)	{
 				move -= wallNormal * dot;
 				move += wallNormal * -0.01f * XMVectorGetX(XMVector3Length(move));
 			}
 
+			if (wallRay.dist < 0.2f) {
+				isWall_ = true;
+			}
+			else if (wallRay.dist > 0.3f) {
+				isWall_ = false;
+			}
+		}
+
+		if (isWall_) {
+			//•Ç‚É‹z’…‚·‚é
+			//‰¼pg
+			XMVECTOR hitPos = XMLoadFloat3(&wallRay.hitPos);
+			XMVECTOR normal = XMLoadFloat3(&wallRay.hitNormal);
+
+			float offset = 0.05f;
+
+			XMVECTOR newPos = hitPos - normal * offset;
+			XMStoreFloat3(&transform_.position_, newPos);
 		}
 
 	}
