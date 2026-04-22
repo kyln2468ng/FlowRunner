@@ -89,8 +89,6 @@ void Player::Update()
 
 	}
 
-	velocityY -= param_.GRAVITY;
-	transform_.position_.y += velocityY;
 
 	//視点移動をする
 	if (Input::IsKey(DIK_RIGHT)) {
@@ -105,19 +103,18 @@ void Player::Update()
 	XMVECTOR vPos = XMLoadFloat3(&transform_.position_);
 	//XMMATRIX mRot = XMMatrixRotationRollPitchYaw(transform_.rotate_.x, transform_.rotate_.y, 0);
 	XMMATRIX mRot = XMMatrixRotationQuaternion(transform_.rotate_.quaternion_);
-	XMVECTOR vMove = { 0,0,0.1f };
-	vMove = XMVector3TransformCoord(vMove, mRot);
-
 
 	XMVECTOR forward = transform_.rotate_.Forward();
 	XMVECTOR right = transform_.rotate_.Right();
+
+	forward = XMVectorSetY(forward,0.0f);
+	right = XMVectorSetY(right, 0.0f);
 
 	XMVECTOR move = XMVectorZero();
 
 	if (Input::IsKey(DIK_W)) {
 		move += forward;
 	}
-
 	if (Input::IsKey(DIK_S)) {
 		move -= forward;
 	}
@@ -134,21 +131,22 @@ void Player::Update()
 
 	move *= param_.MOVE_SPEED;
 
-	/// 壁レイ
+	/// プレイヤーから見たレイで壁を認識
 	XMVECTOR posVec = XMLoadFloat3(&transform_.position_);
 	bool hit = false;
 	XMVECTOR wallNormal = XMVectorZero();
 
 	Stage* st = (Stage*)FindObject("Stage");
 
+	XMVECTOR moveDir = move;
 	if (!XMVector3Equal(move, XMVectorZero())) {
-		XMVECTOR moveDir = XMVector3Normalize(move);
-
+		moveDir = transform_.rotate_.Forward();
 		RayCastData wallRay = {
 			{ XMVectorGetX(vPos), XMVectorGetY(vPos), XMVectorGetZ(vPos), 1 },
 			{ XMVectorGetX(moveDir), XMVectorGetY(moveDir), XMVectorGetZ(moveDir), 0 }
 		};
-
+		wallRay.maxDist = 0.5f;
+		moveDir = XMVector3Normalize(moveDir);
 		wallRay.maxDist = XMVectorGetX(XMVector3Length(move)) + 0.1f;
 
 
@@ -177,7 +175,7 @@ void Player::Update()
 		}
 
 		if (isWall_) {
-			//壁に吸着する
+			//壁に吸着する　////壁に吸着するパターンと重力のベクトルを壁方向に帰れる場所
 			//仮pg
 			XMVECTOR hitPos = XMLoadFloat3(&wallRay.hitPos);
 			XMVECTOR normal = XMLoadFloat3(&wallRay.hitNormal);
@@ -186,6 +184,10 @@ void Player::Update()
 
 			XMVECTOR newPos = hitPos - normal * offset;
 			XMStoreFloat3(&transform_.position_, newPos);
+			velocityY = 0.0f;
+		}
+		else {
+			velocityY -= param_.GRAVITY;
 		}
 
 	}
@@ -232,7 +234,6 @@ void Player::Update()
 	}*/
 
 
-	////着地回りや物理部分は一旦後に持っていく、先にステージの生成を作ってその後やっていく感じにする////
 	float groundY = 0.0f;
 	bool isGround = false;
 
@@ -265,6 +266,8 @@ void Player::Update()
 	}
 
 
+	velocityY -= param_.GRAVITY;
+	transform_.position_.y += velocityY;
 
 
 	//if (onGround_) {

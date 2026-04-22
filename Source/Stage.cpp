@@ -6,7 +6,6 @@
 #include "../Engine/Camera.h"
 #include "../Engine/Input.h"
 #include "../resource.h"
-#include "StageObject.h"
 
 namespace
 {
@@ -99,9 +98,9 @@ void Stage::Initialize()
 
 			Transform t;
 			t.position_ = { (float)i, -5.0f, (float)j };
-			if (j % 2 == 0 && i % 3 == 0) {
-				t.position_.y = -8.0f;
-			}
+			//if (j % 2 == 0 && i % 3 == 0) {
+			//	t.position_.y = -8.0f;
+			//}
 			t.scale_ = { 1,1,1 };
 			//t.rotate_ = { 0,0,0 };
 			t.Calculation();

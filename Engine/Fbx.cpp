@@ -605,7 +605,7 @@ void Fbx::RayCast(RayCastData& rayData)
 			);
 	
 	
-			if (result && t < closest)
+			if (result && t < closest && t < rayData.maxDist)
 			{
 				closest = t;
 				hit = true;

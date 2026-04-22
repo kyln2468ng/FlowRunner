@@ -115,11 +115,11 @@ void Model::RayCast(int hModel, RayCastData& data)
     
     XMVECTOR vstart = XMVector3Transform(XMLoadFloat4(&local.start), wInv);
 
-    XMVECTOR vDirVec = XMVectorAdd(XMLoadFloat4(&data.start), XMLoadFloat4(&data.dir));
+    XMVECTOR dir = XMVectorAdd(XMLoadFloat4(&data.start), XMLoadFloat4(&data.dir));
 
-    vDirVec = XMVector3Transform(vDirVec, wInv);
+    dir = XMVector3Transform(dir, wInv);
 
-    XMVECTOR dirAtLocal = XMVectorSubtract(vDirVec, vstart);
+    XMVECTOR dirAtLocal = XMVectorSubtract(dir, vstart);
     dirAtLocal = XMVector4Normalize(dirAtLocal); //ê≥ãKâª
 
     XMStoreFloat4(&local.start, vstart);
@@ -141,7 +141,15 @@ void Model::RayCast(int hModel, RayCastData& data)
 
         XMStoreFloat3(&data.hitNormal, worldNormal);
 
-        data.dist = local.dist;
+        //////ïœçX
+        XMVECTOR worldStart = XMLoadFloat4(&data.start);
+        XMVECTOR worldHitPos = XMLoadFloat3(&data.hitPos);
+
+        float worldDist = XMVectorGetX(XMVector3Length(worldHitPos - worldStart));
+
+        data.dist = worldDist;
+        //////
+
         data.isHit = true;
     }
     else
