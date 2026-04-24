@@ -200,11 +200,20 @@ void Player::Update()
 		XMVECTOR normal = XMLoadFloat3(&wallRay.hitNormal);
 
 		float offset = 0.05f;
+		XMVECTOR target = hitPos - normal * offset;
 
-		XMVECTOR newPos = hitPos - normal * offset;
+		XMVECTOR current = XMLoadFloat3(&transform_.position_);
+		XMVECTOR newPos = XMVectorLerp(current, target, 0.5f);
+		//XMVECTOR newPos = hitPos - normal * offset;
 		DirectX::XMStoreFloat3(&transform_.position_, newPos);
 		velocityY = 0.0f;
 		
+		///•ÇƒXƒ‰ƒCƒh
+		float dot = XMVectorGetX(XMVector3Dot(move, normal));
+
+		if (dot < 0.0f) {
+			move = move - normal * dot;
+		}
 	}
 	else {
 		// ÅŒã‚ÉˆÚ“®
