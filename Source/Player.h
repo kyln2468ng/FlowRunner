@@ -21,6 +21,10 @@ public:
 	int GetHandle() { return hModel_; }
 
 private:
+	void WallCling(DirectX::XMVECTOR hitPos_,DirectX::XMVECTOR normal_); //壁の吸着
+	void WallSlide(DirectX::XMVECTOR move_,DirectX::XMVECTOR normal_); //壁のめり込み防止
+	void WallMove(DirectX::XMVECTOR move_, DirectX::XMVECTOR normal_); //壁移動
+
 	ChildOden* pRChildOden;
 	ChildOden* pLChildOden;
 	Bullet* bullet_;

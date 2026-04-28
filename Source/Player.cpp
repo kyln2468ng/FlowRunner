@@ -21,6 +21,7 @@ namespace
 	float JumpV0 = 0;
 
 	float drawDist = 0;
+	XMVECTOR m;
 }
 
 Player::Player(GameObject* parent)
@@ -193,33 +194,34 @@ void Player::Update()
 		}
 	}
 
+	XMVECTOR hitPos = XMLoadFloat3(&wallRay.hitPos);
+	XMVECTOR normal = XMLoadFloat3(&wallRay.hitNormal);
 	if (isWall_) {
 		//壁に吸着する　////壁に吸着するパターンと重力のベクトルを壁方向に帰れる場所
-		//仮pg
-		XMVECTOR hitPos = XMLoadFloat3(&wallRay.hitPos);
-		XMVECTOR normal = XMLoadFloat3(&wallRay.hitNormal);
 
-		float offset = 0.05f;
-		XMVECTOR target = hitPos - normal * offset;
-
-		XMVECTOR current = XMLoadFloat3(&transform_.position_);
-		XMVECTOR newPos = XMVectorLerp(current, target, 0.5f);
-		//XMVECTOR newPos = hitPos - normal * offset;
-		DirectX::XMStoreFloat3(&transform_.position_, newPos);
-		velocityY = 0.0f;
-		
-		///壁スライド
+		WallCling(hitPos, normal);
+		//壁スライド(めり込み防止）
 		float dot = XMVectorGetX(XMVector3Dot(move, normal));
 
 		if (dot < 0.0f) {
-			move = move - normal * dot;
+			move = move - normal* dot;
 		}
+		float push = 0.01f;
+		move += normal * push;
+
+		WallMove(move, normal);
+		WallSlide(move, normal);
 	}
-	else {
-		// 最後に移動
-		vPos += move;
+	//else {
+	//	// 最後に移動
+	//	vPos += move;
+	//}
+
+	vPos += move;
+
+	if (isWall_) {
+		WallCling(hitPos, normal);
 	}
-	
 
 	DirectX::XMStoreFloat3(&transform_.position_, vPos);
 
@@ -294,7 +296,7 @@ void Player::Update()
 	drawDist = wallRay.dist;
 
 	//transform_.position_.y += velocityY;
-
+	m = move;
 
 	//if (onGround_) {
 	//	float groundY = data.hitPos.y;
@@ -461,6 +463,44 @@ void Player::Update()
 
 }
 
+void Player::WallCling(DirectX::XMVECTOR hitPos_, DirectX::XMVECTOR normal_)
+{
+	float offset = 0.05f;
+	XMVECTOR target = hitPos_ - normal_ * offset;
+
+	XMVECTOR current = XMLoadFloat3(&transform_.position_);
+	XMVECTOR newPos = XMVectorLerp(current, target, 0.5f);
+	//XMVECTOR newPos = hitPos - normal * offset;
+	DirectX::XMStoreFloat3(&transform_.position_, newPos);
+	velocityY = 0.0f;
+}
+
+void Player::WallSlide(DirectX::XMVECTOR move_, DirectX::XMVECTOR normal_)
+{
+	//壁スライド(めり込み防止）
+	float dot = XMVectorGetX(XMVector3Dot(move_, normal_));
+
+	if (dot < 0.0f) {
+		move_ = move_ - normal_ * dot;
+	}
+}
+
+void Player::WallMove(DirectX::XMVECTOR move_, DirectX::XMVECTOR normal_)
+{
+	XMVECTOR wallRight = XMVector3Cross(normal_, XMVectorSet(0, 1, 0, 0));
+	wallRight = XMVector3Normalize(wallRight);
+
+	XMVECTOR moving = XMVectorZero();
+
+	if (Input::IsKeyDown(DIK_A)) {
+		moving -= wallRight;
+	}
+	if (Input::IsKeyDown(DIK_D)) {
+		moving += wallRight;
+	}
+	move_ = moving * param_.MOVE_SPEED;
+}
+
 void Player::Draw()
 {
 	/*if (pFbx_)
@@ -471,10 +511,16 @@ void Player::Draw()
 	Model::SetTransform(hModel_, transform_);
 	Model::Draw(hModel_);
 	
-	//char buf[128];
+	char buf[128];
 	//sprintf_s(buf, "dist: %.2f\n", drawDist);
-	//OutputDebugStringA(buf);
 	
+	XMFLOAT3 mx;
+	XMStoreFloat3(&mx, m);
+	
+	sprintf_s(buf, "move: %.2f %.2f %.2f\n", mx.x, mx.y, mx.z);
+
+	OutputDebugStringA(buf);
+
 }
 
 void Player::Release()
@@ -491,4 +537,6 @@ void Player::OnCollision(GameObject* pTarget)
 		sceneOb->ChangeScene(SCENE_ID_GAMEOVER);
 	}
 }
+
+
 
