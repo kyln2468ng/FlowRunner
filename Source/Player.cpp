@@ -115,6 +115,9 @@ void Player::Update()
 	forward = XMVectorSetY(forward,0.0f);
 	right = XMVectorSetY(right, 0.0f);
 
+	forward = XMVector3Normalize(forward);
+	right = XMVector3Normalize(right);
+
 	XMVECTOR move = XMVectorZero();
 
 	if (Input::IsKey(DIK_W)) {
@@ -139,6 +142,10 @@ void Player::Update()
 	/// プレイヤーから見たレイで壁を認識
 	XMVECTOR posVec = XMLoadFloat3(&transform_.position_);
 	bool hit = false;
+	float closeDist = FLT_MAX;
+	XMVECTOR bestNormal = XMVectorZero();
+	XMVECTOR bestHitPos = XMVectorZero();
+
 	XMVECTOR wallNormal = XMVectorZero();
 
 	Stage* st = (Stage*)FindObject("Stage");
@@ -152,65 +159,89 @@ void Player::Update()
 	}
 	float playerRadius = 0.5f;
 
-	// レイ方向に沿って前に出す
-	XMVECTOR rayStartVec = vPos + moveDir * playerRadius;
+	std::vector<XMVECTOR> offsets = {
+		XMVectorZero(),
+		right * playerRadius,
+		-right * playerRadius
+	};
 
-	RayCastData wallRay = {
+	for (auto& offset : offsets) {
+
+		// レイ方向に沿って前に出す
+		XMVECTOR rayStartVec = vPos + offset+ moveDir * playerRadius;
+
+		RayCastData wallRay = {
 			{ XMVectorGetX(rayStartVec), XMVectorGetY(rayStartVec), XMVectorGetZ(rayStartVec) , 1 },
 			{ XMVectorGetX(moveDir), XMVectorGetY(moveDir), XMVectorGetZ(moveDir), 0 }
-	};
-	wallRay.maxDist = 0.6f;
-	//moveDir = XMVector3Normalize(moveDir);
-	//wallRay.maxDist = XMVectorGetX(XMVector3Length(move)) + 0.1f;
+		};
+		wallRay.maxDist = 0.6f;
+		//moveDir = XMVector3Normalize(moveDir);
+		//wallRay.maxDist = XMVectorGetX(XMVector3Length(move)) + 0.1f;
 
 
-	if (st && st->hitObject(wallRay) && wallRay.isHit) {
-		hit = true;
+		if (st && st->hitObject(wallRay) && wallRay.isHit) {
+			hit = true;
 
-		wallNormal = XMLoadFloat3(&wallRay.hitNormal);
-		wallNormal = XMVectorSetY(wallNormal, 0.0f);
-		if (!XMVector3Equal(wallNormal, XMVectorZero())) {
-			wallNormal = XMVector3Normalize(wallNormal);
-		}
-
-		float dot = XMVectorGetX(XMVector3Dot(moveDir, wallNormal));
-
-		//if (dot < 0.0f) {
-			/////あとで使うかも
-			//move -= wallNormal * dot;
-			//move += wallNormal * -0.01f * XMVectorGetX(XMVector3Length(move));
-		//}
-
-		if (!justJumped) {
-			if (wallRay.dist < 0.5f && dot < 0.0f) {
-				isWall_ = true;
+			wallNormal = XMLoadFloat3(&wallRay.hitNormal);
+			wallNormal = XMVectorSetY(wallNormal, 0.0f);
+			if (!XMVector3Equal(wallNormal, XMVectorZero())) {
+				wallNormal = XMVector3Normalize(wallNormal);
 			}
-			else if (wallRay.dist > 0.6f) {
-				isWall_ = false;
+
+			if (wallRay.dist < closeDist) {
+				closeDist = wallRay.dist;
+
+				bestNormal = XMLoadFloat3(&wallRay.hitNormal);
+				bestHitPos = XMLoadFloat3(&wallRay.hitPos);
 			}
-			//else if (wallRay.dist < 0.5f) {
-			//	isWall_ = true;
+
+			float dot = XMVectorGetX(XMVector3Dot(moveDir, wallNormal));
+
+			//if (dot < 0.0f) {
+				/////あとで使うかも
+				//move -= wallNormal * dot;
+				//move += wallNormal * -0.01f * XMVectorGetX(XMVector3Length(move));
 			//}
+
+			if (!justJumped) {
+				if (wallRay.dist < 0.5f && dot < 0.0f) {
+					isWall_ = true;
+				}
+				else if (wallRay.dist > 0.6f) {
+					isWall_ = false;
+				}
+				//else if (wallRay.dist < 0.5f) {
+				//	isWall_ = true;
+				//}
+			}
 		}
 	}
 
-	XMVECTOR hitPos = XMLoadFloat3(&wallRay.hitPos);
-	XMVECTOR normal = XMLoadFloat3(&wallRay.hitNormal);
+	XMVECTOR hitPos = bestHitPos;
+	XMVECTOR normal = bestNormal;
+
 	if (isWall_) {
 		//壁に吸着する　////壁に吸着するパターンと重力のベクトルを壁方向に帰れる場所
 
-		WallCling(hitPos, normal);
-		//壁スライド(めり込み防止）
-		float dot = XMVectorGetX(XMVector3Dot(move, normal));
+		//WallCling(hitPos, normal);
+		
+		JudgeWall(vPos, move, normal, closeDist);
 
-		if (dot < 0.0f) {
-			move = move - normal* dot;
+		XMVECTOR wallRight = XMVector3Cross(normal, XMVectorSet(0, 1, 0, 0));
+		wallRight = XMVector3Normalize(wallRight);
+
+		XMVECTOR moving = XMVectorZero();
+
+		if (Input::IsKeyDown(DIK_A)) {
+			moving -= wallRight;
 		}
-		float push = 0.01f;
-		move += normal * push;
+		if (Input::IsKeyDown(DIK_D)) {
+			moving += wallRight;
+		}
+		move = moving * param_.MOVE_SPEED;
 
-		WallMove(move, normal);
-		WallSlide(move, normal);
+		//WallMove(move, normal); // 値送れない。後で修正
+		//WallSlide(move, normal);
 	}
 	//else {
 	//	// 最後に移動
@@ -232,235 +263,75 @@ void Player::Update()
 	//Camera::SetPosition(camPos);
 	//Camera::SetTarget(vTarget);
 
-	XMVECTOR camOffset = transform_.rotate_.Up() * 5.0f + (-transform_.rotate_.Forward() * 13.0f);
-
-	XMFLOAT3 camPos;
-	DirectX::XMStoreFloat3(&camPos, vPos + camOffset);
-
-	Camera::SetPosition(camPos);
-	Camera::SetTarget(transform_.position_);
-
-	//transform_.position_.y -= gravity_;
-
-	XMFLOAT3 pos = transform_.position_;
-	float playerHeight = 1.0f;
-	RayCastData data = {
-		{ pos.x, pos.y, pos.z, 1},
-		{0.0f,-1.0f,0.0f,0.0f}
-	};
-	data.maxDist = playerHeight + fabs(velocityY) + 0.2f;
-	
-	//int hStageModel = st->GetModel();
-
-	//Model::RayCast(hStageModel, data);
-	//if (data.isHit) {
-	//	transform_.position_.y = data.hitPos.y;
-	//}
-	/*if (data.isHit && data.dist > 0.01f && data.dist <= playerHeight + 0.2f)
 	{
-		transform_.position_.y = data.hitPos.y + playerHeight;
-	}*/
+		XMVECTOR camOffset = transform_.rotate_.Up() * 5.0f + (-transform_.rotate_.Forward() * 13.0f);
 
+		XMFLOAT3 camPos;
+		DirectX::XMStoreFloat3(&camPos, vPos + camOffset);
 
-	float groundY = 0.0f;
-	bool isGround = false;
+		Camera::SetPosition(camPos);
+		Camera::SetTarget(transform_.position_);
 
-	if (st && st->hitObject(data)) {
-		if (data.isHit && data.dist <= data.maxDist) {
-			if (velocityY <= 0.0f) {
-				groundY = data.hitPos.y;
-				isGround = true;
-			}
-		}
-	}
+		//transform_.position_.y -= gravity_;
 
-	velocityY -= param_.GRAVITY;
-	// 重力はすでに velocity に反映済みとする
-	float nextY = transform_.position_.y + velocityY;
-	float nextFoot = nextY - playerHeight;
+		XMFLOAT3 pos = transform_.position_;
+		float playerHeight = 1.0f;
+		RayCastData data = {
+			{ pos.x, pos.y, pos.z, 1},
+			{0.0f,-1.0f,0.0f,0.0f}
+		};
+		data.maxDist = playerHeight + fabs(velocityY) + 0.2f;
 
-	// 落下中 & 地面を超えるなら
-	if (velocityY < 0.0f && nextFoot <= groundY && isGround)
-	{
-		// 着地
-		transform_.position_.y = groundY + playerHeight;
-		velocityY = 0.0f;
-		onGround_ = true;
-	}
-	else
-	{
-		transform_.position_.y = nextY;
-		onGround_ = false;
-	}
+		//int hStageModel = st->GetModel();
 
-	drawDist = wallRay.dist;
-
-	//transform_.position_.y += velocityY;
-	m = move;
-
-	//if (onGround_) {
-	//	float groundY = data.hitPos.y;
-	///*	if (velocityY <= 0.0f) {
-	//		transform_.position_.y = groundY + playerHeight;
-	//		velocityY = 0.0f;
-	//		gravity_ = 0.0f;
-	//	}*/
-	//	gravity_ = 0.0f;
-	//	velocityY = 0.0f;
-	//	if (transform_.position_.y - playerHeight-velocityY <= groundY) {
-	//		transform_.position_.y = groundY + playerHeight;
-	//		gravity_ = 0.0f;
-	//	}
-	//	else if (transform_.position_.y < -6.0) {
-	//		transform_.position_.y = groundY + playerHeight;
-	//		gravity_ = 0.0f;
-	//		velocityY = 0.0f;
-	//	}
-
-	//}
-	//else
-	//	gravity_ = 0.1f;
-
-	
-
-	//if (onGround_) {
-	//	transform_.position_.y = data.hitPos.y + playerHeight;
-	//	gravity_ = 0.0f;
-	//}
-	//else
-	//	gravity_ = 0.1f;
-
-
-	/*
-	//清書（仮）
-	void Player::Update()
-{
-	//====================
-	// ■ 入力による平面移動
-	//====================
-	if (Input::IsKey(DIK_S)) transform_.position_.z -= param_.MOVE_SPEED;
-	if (Input::IsKey(DIK_A)) transform_.position_.x -= param_.MOVE_SPEED;
-	if (Input::IsKey(DIK_D)) transform_.position_.x += param_.MOVE_SPEED;
-
-	// デバッグ用の上下移動
-	if (Input::IsKey(DIK_E)) transform_.position_.y -= param_.MOVE_SPEED;
-
-
-	//====================
-	// ■ ジャンプ入力
-	//====================
-	// 接地中のみジャンプ可能
-	if (Input::IsKeyDown(DIK_SPACE) && onGround_)
-	{
-		velocityY = JumpV0;
-		onGround_ = false;
-	}
-
-
-	//====================
-	// ■ 回転処理
-	//====================
-	if (Input::IsKey(DIK_RIGHT)) transform_.rotate_.y += param_.MOVE_SPEED;
-	if (Input::IsKey(DIK_LEFT))  transform_.rotate_.y -= param_.MOVE_SPEED;
-
-
-	//====================
-	// ■ 前方向移動（回転を考慮）
-	//====================
-	XMVECTOR vPos = XMLoadFloat3(&transform_.position_);
-	XMMATRIX mRot = XMMatrixRotationRollPitchYaw(
-		transform_.rotate_.x,
-		transform_.rotate_.y,
-		0);
-
-	XMVECTOR vMove = { 0,0,0.1f };
-	vMove = XMVector3TransformCoord(vMove, mRot);
-
-	if (Input::IsKey(DIK_W))
-	{
-		vPos += vMove;
-		XMStoreFloat3(&transform_.position_, vPos);
-	}
-
-
-	//====================
-	// ■ 重力更新
-	//====================
-	velocityY -= param_.GRAVITY;
-
-
-	//====================
-	// ■ 地面判定（Raycast）
-	//====================
-	XMFLOAT3 pos = transform_.position_;
-	float playerHeight = 1.0f;
-
-	RayCastData data = {
-		{ pos.x, pos.y, pos.z, 1 },
-		{ 0.0f,-1.0f,0.0f,0.0f }
-	};
-
-	// 落下速度分を含めてRayの長さを決定
-	// 高速落下でも地面を突き抜けないため
-	data.maxDist = playerHeight + fabs(velocityY) + 0.2f;
-
-	Stage* st = (Stage*)FindObject("Stage");
-
-	float groundY = 0.0f;
-	bool isGround = false;
-
-	if (st && st->hitObject(data))
-	{
-		if (data.isHit && data.dist <= data.maxDist)
+		//Model::RayCast(hStageModel, data);
+		//if (data.isHit) {
+		//	transform_.position_.y = data.hitPos.y;
+		//}
+		/*if (data.isHit && data.dist > 0.01f && data.dist <= playerHeight + 0.2f)
 		{
-			// 上方向に移動中は接地しない
-			if (velocityY <= 0.0f)
-			{
-				groundY = data.hitPos.y;
-				isGround = true;
+			transform_.position_.y = data.hitPos.y + playerHeight;
+		}*/
+
+
+		float groundY = 0.0f;
+		bool isGround = false;
+
+		if (st && st->hitObject(data)) {
+			if (data.isHit && data.dist <= data.maxDist) {
+				if (velocityY <= 0.0f) {
+					groundY = data.hitPos.y;
+					isGround = true;
+				}
 			}
 		}
+
+		velocityY -= param_.GRAVITY;
+		// 重力はすでに velocity に反映済みとする
+		float nextY = transform_.position_.y + velocityY;
+		float nextFoot = nextY - playerHeight;
+
+		// 落下中 & 地面を超えるなら
+		if (velocityY < 0.0f && nextFoot <= groundY && isGround)
+		{
+			// 着地
+			transform_.position_.y = groundY + playerHeight;
+			velocityY = 0.0f;
+			onGround_ = true;
+		}
+		else
+		{
+			transform_.position_.y = nextY;
+			onGround_ = false;
+		}
+
+		drawDist = closeDist;
+
+		//transform_.position_.y += velocityY;
+		//m = move;
+
 	}
-
-
-	//====================
-	// ■ 位置更新 + 着地処理
-	//====================
-	float nextY = transform_.position_.y + velocityY;
-	float nextFoot = nextY - playerHeight;
-
-	// 落下中かつ地面に到達した場合
-	if (velocityY < 0.0f && nextFoot <= groundY && isGround)
-	{
-		// 地面にスナップさせる
-		transform_.position_.y = groundY + playerHeight;
-
-		velocityY = 0.0f;
-		onGround_ = true;
-	}
-	else
-	{
-		transform_.position_.y = nextY;
-		onGround_ = false;
-	}
-
-
-	//====================
-	// ■ カメラ更新
-	//====================
-	XMVECTOR vCam = { 0,5.0f,-13.0f,0 };
-	vCam = XMVector3TransformCoord(vCam, mRot);
-
-	XMFLOAT3 camPos;
-	XMStoreFloat3(&camPos, vPos + vCam);
-
-	Camera::SetPosition(camPos);
-	Camera::SetTarget(transform_.position_);
-}
-
-	*/
 	
-
 }
 
 void Player::WallCling(DirectX::XMVECTOR hitPos_, DirectX::XMVECTOR normal_)
@@ -469,36 +340,27 @@ void Player::WallCling(DirectX::XMVECTOR hitPos_, DirectX::XMVECTOR normal_)
 	XMVECTOR target = hitPos_ - normal_ * offset;
 
 	XMVECTOR current = XMLoadFloat3(&transform_.position_);
-	XMVECTOR newPos = XMVectorLerp(current, target, 0.5f);
+	XMVECTOR newPos = XMVectorLerp(current, target, 0.1f);
 	//XMVECTOR newPos = hitPos - normal * offset;
 	DirectX::XMStoreFloat3(&transform_.position_, newPos);
 	velocityY = 0.0f;
 }
 
-void Player::WallSlide(DirectX::XMVECTOR move_, DirectX::XMVECTOR normal_)
+void Player::JudgeWall(XMVECTOR& vPos, XMVECTOR& move, const XMVECTOR& normal, float dist)
 {
+	float playerRadius = 0.5f;
+	float penetration = playerRadius - dist;
+
+	if (penetration > 0.0f) {
+		vPos += normal * penetration;
+	}
+
 	//壁スライド(めり込み防止）
-	float dot = XMVectorGetX(XMVector3Dot(move_, normal_));
+	float dot = XMVectorGetX(XMVector3Dot(move, normal));
 
 	if (dot < 0.0f) {
-		move_ = move_ - normal_ * dot;
+		move -= normal * dot;
 	}
-}
-
-void Player::WallMove(DirectX::XMVECTOR move_, DirectX::XMVECTOR normal_)
-{
-	XMVECTOR wallRight = XMVector3Cross(normal_, XMVectorSet(0, 1, 0, 0));
-	wallRight = XMVector3Normalize(wallRight);
-
-	XMVECTOR moving = XMVectorZero();
-
-	if (Input::IsKeyDown(DIK_A)) {
-		moving -= wallRight;
-	}
-	if (Input::IsKeyDown(DIK_D)) {
-		moving += wallRight;
-	}
-	move_ = moving * param_.MOVE_SPEED;
 }
 
 void Player::Draw()

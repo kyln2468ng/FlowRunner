@@ -22,8 +22,7 @@ public:
 
 private:
 	void WallCling(DirectX::XMVECTOR hitPos_,DirectX::XMVECTOR normal_); //壁の吸着
-	void WallSlide(DirectX::XMVECTOR move_,DirectX::XMVECTOR normal_); //壁のめり込み防止
-	void WallMove(DirectX::XMVECTOR move_, DirectX::XMVECTOR normal_); //壁移動
+	void JudgeWall(XMVECTOR& vPos, XMVECTOR& move, const XMVECTOR& normal, float dist);//壁判定。めり込み防止と押し戻し
 
 	ChildOden* pRChildOden;
 	ChildOden* pLChildOden;
