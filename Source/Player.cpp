@@ -140,119 +140,24 @@ void Player::Update()
 	move *= param_.MOVE_SPEED;
 
 	/// プレイヤーから見たレイで壁を認識
-	XMVECTOR posVec = XMLoadFloat3(&transform_.position_);
-	bool hit = false;
-	float closeDist = FLT_MAX;
-	XMVECTOR bestNormal = XMVectorZero();
-	XMVECTOR bestHitPos = XMVectorZero();
+	WallHitData WallData = DetectWall(vPos, move, right);
 
-	XMVECTOR wallNormal = XMVectorZero();
-
-	Stage* st = (Stage*)FindObject("Stage");
-
-	XMVECTOR moveDir = move;
-	if (!XMVector3Equal(move, XMVectorZero())) {
-		moveDir = XMVector3Normalize(move);
-	}
-	else {
-		moveDir = transform_.rotate_.Forward();
-	}
-	float playerRadius = 0.5f;
-
-	std::vector<XMVECTOR> offsets = {
-		XMVectorZero(),
-		right * playerRadius,
-		-right * playerRadius
-	};
-
-	for (auto& offset : offsets) {
-
-		// レイ方向に沿って前に出す
-		XMVECTOR rayStartVec = vPos + offset+ moveDir * playerRadius;
-
-		RayCastData wallRay = {
-			{ XMVectorGetX(rayStartVec), XMVectorGetY(rayStartVec), XMVectorGetZ(rayStartVec) , 1 },
-			{ XMVectorGetX(moveDir), XMVectorGetY(moveDir), XMVectorGetZ(moveDir), 0 }
-		};
-		wallRay.maxDist = 0.6f;
-		//moveDir = XMVector3Normalize(moveDir);
-		//wallRay.maxDist = XMVectorGetX(XMVector3Length(move)) + 0.1f;
-
-
-		if (st && st->hitObject(wallRay) && wallRay.isHit) {
-			hit = true;
-
-			wallNormal = XMLoadFloat3(&wallRay.hitNormal);
-			wallNormal = XMVectorSetY(wallNormal, 0.0f);
-			if (!XMVector3Equal(wallNormal, XMVectorZero())) {
-				wallNormal = XMVector3Normalize(wallNormal);
-			}
-
-			if (wallRay.dist < closeDist) {
-				closeDist = wallRay.dist;
-
-				bestNormal = XMLoadFloat3(&wallRay.hitNormal);
-				bestHitPos = XMLoadFloat3(&wallRay.hitPos);
-			}
-
-			float dot = XMVectorGetX(XMVector3Dot(moveDir, wallNormal));
-
-			//if (dot < 0.0f) {
-				/////あとで使うかも
-				//move -= wallNormal * dot;
-				//move += wallNormal * -0.01f * XMVectorGetX(XMVector3Length(move));
-			//}
-
-			if (!justJumped) {
-				if (wallRay.dist < 0.5f && dot < 0.0f) {
-					isWall_ = true;
-				}
-				else if (wallRay.dist > 0.6f) {
-					isWall_ = false;
-				}
-				//else if (wallRay.dist < 0.5f) {
-				//	isWall_ = true;
-				//}
-			}
-		}
-	}
-
-	XMVECTOR hitPos = bestHitPos;
-	XMVECTOR normal = bestNormal;
-
-	if (isWall_) {
+	if (WallData.isHit) {
 		//壁に吸着する　////壁に吸着するパターンと重力のベクトルを壁方向に帰れる場所
-
-		//WallCling(hitPos, normal);
 		
-		JudgeWall(vPos, move, normal, closeDist);
+		WallCollision(vPos, move, WallData);
 
-		XMVECTOR wallRight = XMVector3Cross(normal, XMVectorSet(0, 1, 0, 0));
-		wallRight = XMVector3Normalize(wallRight);
+		WallMove(move, WallData);
 
-		XMVECTOR moving = XMVectorZero();
-
-		if (Input::IsKeyDown(DIK_A)) {
-			moving -= wallRight;
-		}
-		if (Input::IsKeyDown(DIK_D)) {
-			moving += wallRight;
-		}
-		move = moving * param_.MOVE_SPEED;
-
-		//WallMove(move, normal); // 値送れない。後で修正
-		//WallSlide(move, normal);
+		WallCling(WallData);
 	}
-	//else {
-	//	// 最後に移動
-	//	vPos += move;
-	//}
 
 	vPos += move;
 
-	if (isWall_) {
-		WallCling(hitPos, normal);
-	}
+	//if (isWall_) {
+	//	WallCling(WallData);
+	//}
+
 
 	DirectX::XMStoreFloat3(&transform_.position_, vPos);
 
@@ -296,7 +201,7 @@ void Player::Update()
 
 		float groundY = 0.0f;
 		bool isGround = false;
-
+		Stage* st = (Stage*)FindObject("Stage");
 		if (st && st->hitObject(data)) {
 			if (data.isHit && data.dist <= data.maxDist) {
 				if (velocityY <= 0.0f) {
@@ -325,7 +230,8 @@ void Player::Update()
 			onGround_ = false;
 		}
 
-		drawDist = closeDist;
+		/// 値検証用変数 ///
+		//drawDist = closeDist;
 
 		//transform_.position_.y += velocityY;
 		//m = move;
@@ -334,33 +240,157 @@ void Player::Update()
 	
 }
 
-void Player::WallCling(DirectX::XMVECTOR hitPos_, DirectX::XMVECTOR normal_)
+WallHitData Player::DetectWall(const XMVECTOR& vPos, const XMVECTOR& move, const XMVECTOR& right)
 {
-	float offset = 0.05f;
-	XMVECTOR target = hitPos_ - normal_ * offset;
+	WallHitData result;
 
-	XMVECTOR current = XMLoadFloat3(&transform_.position_);
-	XMVECTOR newPos = XMVectorLerp(current, target, 0.1f);
-	//XMVECTOR newPos = hitPos - normal * offset;
-	DirectX::XMStoreFloat3(&transform_.position_, newPos);
-	velocityY = 0.0f;
+	Stage* st = (Stage*)FindObject("Stage");
+
+	//移動方向
+	XMVECTOR moveDir = move;
+
+	//if (!XMVector3Equal(move, XMVectorZero())) {
+	//	moveDir = XMVector3Normalize(move);
+	//}
+	//else {
+	//	moveDir = transform_.rotate_.Forward();
+	//}
+
+	if (isWall_) {
+		moveDir = -XMLoadFloat3(&wallNormal_);
+	}
+	else {
+		moveDir = transform_.rotate_.Forward();
+	}
+
+	moveDir = XMVectorSetY(moveDir, 0.0f);
+
+	if (!XMVector3Equal(moveDir, XMVectorZero())) {
+		moveDir = XMVector3Normalize(moveDir);
+
+	}
+
+	float playerRadius = 0.5f;
+
+	std::vector<XMVECTOR> offsets = {
+		XMVectorZero(),
+		right * playerRadius,
+		-right * playerRadius
+	};
+
+	for (auto& offset : offsets) {
+
+		// レイ方向に沿って前に出す
+		XMVECTOR rayStartVec = vPos + offset + moveDir * playerRadius;
+
+		RayCastData wallRay = {
+			{ XMVectorGetX(rayStartVec), XMVectorGetY(rayStartVec), XMVectorGetZ(rayStartVec) , 1 },
+			{ XMVectorGetX(moveDir), XMVectorGetY(moveDir), XMVectorGetZ(moveDir), 0 }
+		};
+		wallRay.maxDist = 0.6f;
+
+		if (st && st->hitObject(wallRay) && wallRay.isHit) {
+
+			XMVECTOR wallNormal = XMLoadFloat3(&wallRay.hitNormal);
+			wallNormal = XMVectorSetY(wallNormal, 0.0f);
+
+			if (!XMVector3Equal(wallNormal, XMVectorZero())) {
+				wallNormal = XMVector3Normalize(wallNormal);
+			}
+
+			float dot = XMVectorGetX(XMVector3Dot(moveDir, wallNormal));
+
+			if (dot < 0.0f) {
+				if (wallRay.dist < result.dist) {
+					result.isHit = true;
+					result.dist = wallRay.dist;
+					result.normal = wallNormal;
+					result.hitPos = XMLoadFloat3(&wallRay.hitPos);
+				}
+			}
+
+		}
+	}
+
+	if (result.isHit) {
+		XMStoreFloat3(&wallNormal_, result.normal);
+	}
+
+	return result;
 }
 
-void Player::JudgeWall(XMVECTOR& vPos, XMVECTOR& move, const XMVECTOR& normal, float dist)
+void Player::WallCling(const WallHitData& wall)
 {
-	float playerRadius = 0.5f;
-	float penetration = playerRadius - dist;
+	float offset = 0.05f;
+	XMVECTOR target = wall.hitPos - wall.normal * offset;
 
-	if (penetration > 0.0f) {
-		vPos += normal * penetration;
-	}
+	XMVECTOR current = XMLoadFloat3(&transform_.position_);
+	//XMVECTOR newPos = XMVectorLerp(current, target, 0.1f);
+	//XMVECTOR newPos = hitPos - normal * offset;
+	float dist = wall.dist - offset;
+	current -= wall.normal * dist;
+	DirectX::XMStoreFloat3(&transform_.position_, current);
+	//velocityY = 0.0f;
+}
 
-	//壁スライド(めり込み防止）
-	float dot = XMVectorGetX(XMVector3Dot(move, normal));
+void Player::WallCollision(XMVECTOR& vPos, XMVECTOR& move, const WallHitData& wall)
+{
+	float dot = XMVectorGetX(XMVector3Dot(move, wall.normal));
 
 	if (dot < 0.0f) {
-		move -= normal * dot;
+		move -= wall.normal * dot;
 	}
+
+	float playerRadius = 0.5f;
+	float penetration = playerRadius - wall.dist;
+
+	if (penetration > 0.0f) {
+		vPos += wall.normal * penetration;
+	}
+}
+
+void Player::WallMove(XMVECTOR& move, const WallHitData& wall)
+{
+	XMVECTOR wallRight = XMVector3Cross(wall.normal, XMVectorSet(0, 1, 0, 0));
+
+	wallRight =	XMVector3Normalize(wallRight);
+
+	XMVECTOR wallUp = XMVector3Cross(wallRight, wall.normal);
+
+	wallUp = XMVector3Normalize(wallUp);
+
+	XMVECTOR wallMove =	XMVectorZero();
+
+	if (Input::IsKey(DIK_W)) {
+		wallMove += wallUp;
+	}
+
+	if (Input::IsKey(DIK_S)) {
+		wallMove -= wallUp;
+	}
+
+	if (Input::IsKey(DIK_A)) {
+		wallMove -= wallRight;
+	}
+
+	if (Input::IsKey(DIK_D)) {
+		wallMove += wallRight;
+	}
+
+	if (!XMVector3Equal(
+		wallMove,
+		XMVectorZero()))
+	{
+		wallMove =
+			XMVector3Normalize(wallMove);
+	}
+
+	move = wallMove * param_.MOVE_SPEED;
+}
+
+void Player::WallJump(const WallHitData& wall)
+{
+
 }
 
 void Player::Draw()

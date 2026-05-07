@@ -5,6 +5,15 @@
 class ChildOden;
 class Bullet;
 
+struct WallHitData
+{
+	bool isHit = false;
+	float dist = FLT_MAX;
+	XMVECTOR normal = XMVectorZero();
+	XMVECTOR hitPos = XMVectorZero();
+};
+
+
 class Player : public GameObject
 {
 public:
@@ -21,8 +30,12 @@ public:
 	int GetHandle() { return hModel_; }
 
 private:
-	void WallCling(DirectX::XMVECTOR hitPos_,DirectX::XMVECTOR normal_); //壁の吸着
-	void JudgeWall(XMVECTOR& vPos, XMVECTOR& move, const XMVECTOR& normal, float dist);//壁判定。めり込み防止と押し戻し
+	WallHitData DetectWall(const XMVECTOR& vPos, const XMVECTOR& move, const XMVECTOR& right);
+	
+	void WallCling(const WallHitData& wall); //壁の吸着
+	void WallCollision(XMVECTOR& vPos, XMVECTOR& move, const WallHitData& wall);//壁判定。めり込み防止と押し戻し
+	void WallMove(XMVECTOR& move, const WallHitData& wall);
+	void WallJump(const WallHitData& wall);
 
 	ChildOden* pRChildOden;
 	ChildOden* pLChildOden;
