@@ -58,8 +58,8 @@ void Player::Initialize()
 
 	JumpV0 = sqrtf(2.0f * param_.GRAVITY * param_.JUMP_HEIGHT);
 	onGround_ = false;
-	velocityY = 0.0f;
 	isWall_ = false;
+	velocity_ = { 0.0f, 0.0f, 0.0f };
 }
 
 void Player::Update()
@@ -78,21 +78,7 @@ void Player::Update()
 	//onGround_ = false;
 
 	//coolTime_ -= deltatime_;
-	bool justJumped = false;
-	if (Input::IsKeyDown(DIK_SPACE) && onGround_)// && coolTime_ < 0.0f)
-	{
-		velocityY = JumpV0;
-		onGround_ = false;
 
-		isWall_ = false;
-		justJumped = true;
-		/*bullet_ = (Bullet*)Instantiate<Bullet>(FindObject("PlayScene"));
-		bullet_->SetPosition(transform_.position_);
-		coolTime_ = nextTime;*/
-		/*float jumpV0 = (1.0f - pow(1.0f - sin(3.1415926535 * JumpTime), distortion)) * JumpHeight;
-		velocityY = abs(jumpV0);*/
-
-	}
 
 
 	//視点移動をする
@@ -133,14 +119,33 @@ void Player::Update()
 		move += right;
 	}
 
+	/// プレイヤーから見たレイで壁を認識
+	WallHitData WallData = DetectWall(vPos, move, right);
+
+	bool justJumped = false;
+	if (Input::IsKeyDown(DIK_SPACE) && onGround_)// && coolTime_ < 0.0f)
+	{
+		velocity_.y = JumpV0;
+		onGround_ = false;
+
+		isWall_ = false;
+		WallData.isHit = false;
+		justJumped = true;
+		/*bullet_ = (Bullet*)Instantiate<Bullet>(FindObject("PlayScene"));
+		bullet_->SetPosition(transform_.position_);
+		coolTime_ = nextTime;*/
+		/*float jumpV0 = (1.0f - pow(1.0f - sin(3.1415926535 * JumpTime), distortion)) * JumpHeight;
+		velocity_.y = abs(jumpV0);*/
+
+	}
+
 	if (!XMVector3Equal(move, XMVectorZero())) {
 		move = XMVector3Normalize(move);
 	}
 
 	move *= param_.MOVE_SPEED;
 
-	/// プレイヤーから見たレイで壁を認識
-	WallHitData WallData = DetectWall(vPos, move, right);
+
 
 	if (WallData.isHit) {
 		//壁に吸着する　////壁に吸着するパターンと重力のベクトルを壁方向に帰れる場所
@@ -150,6 +155,12 @@ void Player::Update()
 		WallMove(move, WallData);
 
 		WallCling(WallData);
+	}
+
+	if (WallData.isHit && Input::IsKeyDown(DIK_S) && Input::IsKeyDown(DIK_SPACE)) {
+		WallJump(WallData);
+
+		return;
 	}
 
 	vPos += move;
@@ -185,7 +196,7 @@ void Player::Update()
 			{ pos.x, pos.y, pos.z, 1},
 			{0.0f,-1.0f,0.0f,0.0f}
 		};
-		data.maxDist = playerHeight + fabs(velocityY) + 0.2f;
+		data.maxDist = playerHeight + fabs(velocity_.y) + 0.2f;
 
 		//int hStageModel = st->GetModel();
 
@@ -204,24 +215,24 @@ void Player::Update()
 		Stage* st = (Stage*)FindObject("Stage");
 		if (st && st->hitObject(data)) {
 			if (data.isHit && data.dist <= data.maxDist) {
-				if (velocityY <= 0.0f) {
+				if (velocity_.y <= 0.0f) {
 					groundY = data.hitPos.y;
 					isGround = true;
 				}
 			}
 		}
 
-		velocityY -= param_.GRAVITY;
+		velocity_.y -= param_.GRAVITY;
 		// 重力はすでに velocity に反映済みとする
-		float nextY = transform_.position_.y + velocityY;
+		float nextY = transform_.position_.y + velocity_.y;
 		float nextFoot = nextY - playerHeight;
 
 		// 落下中 & 地面を超えるなら
-		if (velocityY < 0.0f && nextFoot <= groundY && isGround)
+		if (velocity_.y < 0.0f && nextFoot <= groundY && isGround)
 		{
 			// 着地
 			transform_.position_.y = groundY + playerHeight;
-			velocityY = 0.0f;
+			velocity_.y = 0.0f;
 			onGround_ = true;
 		}
 		else
@@ -233,7 +244,7 @@ void Player::Update()
 		/// 値検証用変数 ///
 		//drawDist = closeDist;
 
-		//transform_.position_.y += velocityY;
+		//transform_.position_.y += velocity_;
 		//m = move;
 
 	}
@@ -330,7 +341,7 @@ void Player::WallCling(const WallHitData& wall)
 	float dist = wall.dist - offset;
 	current -= wall.normal * dist;
 	DirectX::XMStoreFloat3(&transform_.position_, current);
-	//velocityY = 0.0f;
+	//velocity_ = 0.0f;
 }
 
 void Player::WallCollision(XMVECTOR& vPos, XMVECTOR& move, const WallHitData& wall)
@@ -377,6 +388,13 @@ void Player::WallMove(XMVECTOR& move, const WallHitData& wall)
 		wallMove += wallRight;
 	}
 
+	if (Input::IsKeyDown(DIK_SPACE)) {
+		XMVECTOR jumpDir = wall.normal + XMVectorSet(0, 1.0f, 0, 0);
+		jumpDir = XMVector3Normalize(jumpDir);
+		jumpDir = XMVectorScale(jumpDir, JumpV0);
+		XMStoreFloat3(&velocity_, jumpDir);
+	}
+
 	if (!XMVector3Equal(
 		wallMove,
 		XMVectorZero()))
@@ -390,7 +408,10 @@ void Player::WallMove(XMVECTOR& move, const WallHitData& wall)
 
 void Player::WallJump(const WallHitData& wall)
 {
-
+	XMVECTOR jumpDir = wall.normal + XMVectorSet(0, 1.0f, 0, 0);
+	jumpDir = XMVector3Normalize(jumpDir);
+	jumpDir = XMVectorScale(jumpDir, JumpV0);
+	XMStoreFloat3(&velocity_, jumpDir);	
 }
 
 void Player::Draw()

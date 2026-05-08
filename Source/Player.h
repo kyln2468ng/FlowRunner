@@ -42,8 +42,9 @@ private:
 	Bullet* bullet_;
 	int hModel_;
 	bool onGround_;
-	float velocityY;
+	//float velocityY;
 	PlayerParamConfig param_;
+	XMFLOAT3 velocity_;
 
 	bool isWall_;
 	XMFLOAT3 wallNormal_;
