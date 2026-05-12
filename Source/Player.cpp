@@ -94,33 +94,52 @@ void Player::Update()
 	XMVECTOR vPos = XMLoadFloat3(&transform_.position_);
 	//XMMATRIX mRot = XMMatrixRotationRollPitchYaw(transform_.rotate_.x, transform_.rotate_.y, 0);
 	XMMATRIX mRot = XMMatrixRotationQuaternion(transform_.rotate_.quaternion_);
-
-	XMVECTOR forward = transform_.rotate_.Forward();
-	XMVECTOR right = transform_.rotate_.Right();
-
-	forward = XMVectorSetY(forward,0.0f);
-	right = XMVectorSetY(right, 0.0f);
-
-	forward = XMVector3Normalize(forward);
-	right = XMVector3Normalize(right);
-
+		
 	XMVECTOR move = XMVectorZero();
 
 	float inputX = 0.0f;
 	float inputZ = 0.0f;
 
 	if (Input::IsKey(DIK_W)) {
-		move += forward;
+		inputZ += 1.0f;
 	}
 	if (Input::IsKey(DIK_S)) {
-		move -= forward;
+		inputZ -= 1.0f;
 	}
 	if (Input::IsKey(DIK_A)) {
-		move -= right;
+		inputX -= 1.0f;
 	}
 	if (Input::IsKey(DIK_D)) {
-		move += right;
+		inputX += 1.0f;
 	}
+
+	if (inputX != 0.0f || inputZ != 0.0f) {
+		float angle = atan2f(-inputX, inputZ);
+		transform_.SetVectorRotation(XMFLOAT3(0, XMConvertToDegrees(angle), 0));
+	}
+
+	XMVECTOR forward = transform_.rotate_.Forward();
+	XMVECTOR right = transform_.rotate_.Right();
+
+	forward = XMVectorSetY(forward, 0.0f);
+	right = XMVectorSetY(right, 0.0f);
+
+	forward = XMVector3Normalize(forward);
+	right = XMVector3Normalize(right);
+
+	//if (Input::IsKey(DIK_W)) {
+	//	move += forward;
+	//}
+	//if (Input::IsKey(DIK_S)) {
+	//	move -= forward;
+	//}
+	//if (Input::IsKey(DIK_A)) {
+	//	move -= right;
+	//}
+	//if (Input::IsKey(DIK_D)) {
+	//	move += right;
+	//}
+	move = XMVectorSet(inputX, 0.0f, inputZ, 0.0f);
 
 	/// プレイヤーから見たレイで壁を認識
 	WallHitData WallData = DetectWall(vPos, forward, right);
@@ -146,26 +165,7 @@ void Player::Update()
 		move = XMVector3Normalize(move);
 	}
 
-	if (Input::IsKey(DIK_W)) {
-		inputZ += 1.0f;
-	}
-	if (Input::IsKey(DIK_S)) {
-		inputZ -= 1.0f;
-	}
-	if (Input::IsKey(DIK_A)) {
-		inputX -= 1.0f;
-	}
-	if (Input::IsKey(DIK_D)) {
-		inputX += 1.0f;
-	}
-
-	if (inputX != 0.0f || inputZ != 0.0f) {
-		float angle = atan2f(-inputX,inputZ);
-		transform_.SetVectorRotation(XMFLOAT3(0, XMConvertToDegrees(angle), 0));
-	}
-
-	forward = transform_.rotate_.Forward();
-	right = transform_.rotate_.Right();
+	
 
 	move *= param_.MOVE_SPEED;
 
