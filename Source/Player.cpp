@@ -78,7 +78,7 @@ void Player::Update()
 	//onGround_ = false;
 
 	//coolTime_ -= deltatime_;
-
+	
 
 
 	//Ž‹“_ˆÚ“®‚ð‚·‚é
@@ -111,6 +111,13 @@ void Player::Update()
 	}
 	if (Input::IsKey(DIK_D)) {
 		inputX += 1.0f;
+	}
+
+	Stage* st = (Stage*)FindObject("Stage");
+	if (st && st->IsEdhitorMode()) {
+		velocity_ = {};
+		isWall_ = false;
+		return;
 	}
 
 	if (inputX != 0.0f || inputZ != 0.0f) {
@@ -165,7 +172,8 @@ void Player::Update()
 		move = XMVector3Normalize(move);
 	}
 
-	
+
+
 
 	move *= param_.MOVE_SPEED;
 
@@ -247,7 +255,7 @@ void Player::Update()
 
 	float groundY = 0.0f;
 	bool isGround = false;
-	Stage* st = (Stage*)FindObject("Stage");
+	
 	if (st && st->hitObject(data)) {
 		if (data.isHit && data.dist <= data.maxDist) {
 			if (velocity_.y <= 0.0f) {

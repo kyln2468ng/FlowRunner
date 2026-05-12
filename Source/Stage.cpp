@@ -6,6 +6,7 @@
 #include "../Engine/Camera.h"
 #include "../Engine/Input.h"
 #include "../resource.h"
+#include "../Editor/MapEditor.h"
 
 namespace
 {
@@ -42,6 +43,10 @@ void Stage::Initialize()
 	transform_.scale_ = { 1.0f,1.0f,1.0f };*/
 
 	Instantiate<Player>(this);
+
+	editor_ = new MapEditor();
+	editor_->Initialize(this);
+
 	/*enemy_ = std::vector<Enemy*>(ENEMY_NUM);
 	for (int i = 0;i < ENEMY_NUM;i++)
 	{
@@ -71,24 +76,6 @@ void Stage::Initialize()
 		assert(hModel_[i] >= 0);
 	}
 	hModelColl_ = Model::Load("BoxDefault.fbx");
-
-	/*for (int j = 0;j < ZSIZE;j++) {
-		for (int i = 0;i < XSIZE;i++) {
-			Transform t;
-			t.position_ = { i,0,j };
-			if (j % 2 && i % 3)
-			{
-				t.position_.y = 1;
-			}
-			t.rotate_ = { 0,0,0 };
-			t.scale_ = { 1.0f,1.0f,1.0f };
-			t.Calculation();
-			Model::SetTransform(hModel_[BLOCK_TYPE::DEFAULT], t);
-			models_.push_back(hModel_[BLOCK_TYPE::DEFAULT]);
-		}
-	}*/
-
-	
 	
 	for (int j = 0; j < ZSIZE; j++) {
 		for (int i = 0; i < XSIZE; i++) {
@@ -98,11 +85,7 @@ void Stage::Initialize()
 
 			Transform t;
 			t.position_ = { (float)i, -5.0f, (float)j };
-			//if (j % 2 == 0 && i % 3 == 0) {
-			//	t.position_.y = -8.0f;
-			//}
 			t.scale_ = { 1,1,1 };
-			//t.rotate_ = { 0,0,0 };
 			t.Calculation();
 
 			Model::SetTransform(h, t);
@@ -110,6 +93,7 @@ void Stage::Initialize()
 		}
 	}
 
+	/*
 	int h = Model::Load("BoxDefault.fbx");
 	Transform t;
 	t.position_ = { 0,-15,30 };
@@ -132,6 +116,9 @@ void Stage::Initialize()
 		Model::SetTransform(mol, t);
 		models_.push_back({ mol, t });
 	}
+	*/
+	
+	isEditor_ = false;
 }
 
 void Stage::Update()
@@ -237,9 +224,14 @@ void Stage::Update()
 
 	//ステージの生成→最終的には生成用クラス作るが一旦ステージクラスで関数作って生成できるようになったら生成用クラスとして分離する
 	
-	
+	if (Input::IsKeyDown(DIK_M)) {
+		isEditor_ = !isEditor_;
+	}
 
+	if (isEditor_ == true) {
 
+		editor_->Updata();
+	}	
 }
 
 void Stage::Draw()
@@ -410,6 +402,20 @@ float Stage::PlayerMaxDist(const PlayerParamConfig& param)
 	airTime_ = (2.0f * pJumpV0_) / param.GRAVITY;
 
 	return param.MOVE_SPEED * airTime_;
+}
+
+void Stage::CreateBlock(XMFLOAT3 pos)
+{
+	int h = Model::Load("BoxDefault.fbx");
+
+	Transform t;
+	t.position_ = pos;
+	t.scale_ = { 1,1,1 };
+	t.Calculation();
+
+	Model::SetTransform(h, t);
+
+	models_.push_back({ h, t });
 }
 
 //bool Stage::CollideLine(RayCastData& data)

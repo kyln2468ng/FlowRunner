@@ -31,6 +31,9 @@
     <Filter Include="ソース ファイル\Scene\GameOver">
       <UniqueIdentifier>{06c1c5d8-385a-4d41-9c14-36734a68fc59}</UniqueIdentifier>
     </Filter>
+    <Filter Include="ソース ファイル\Editor">
+      <UniqueIdentifier>{b97c90a3-f4f8-4dcf-87d9-5840b7c9947e}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Engine\Transform.h">
@@ -120,6 +123,9 @@
     <ClInclude Include="Engine\Quaternion.h">
       <Filter>ソース ファイル\Engine</Filter>
     </ClInclude>
+    <ClInclude Include="Editor\MapEditor.h">
+      <Filter>ソース ファイル\Editor</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Engine\Camera.cpp">
@@ -199,6 +205,9 @@
     </ClCompile>
     <ClCompile Include="Engine\Quaternion.cpp">
       <Filter>ソース ファイル\Engine</Filter>
+    </ClCompile>
+    <ClCompile Include="Editor\MapEditor.cpp">
+      <Filter>ソース ファイル\Editor</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

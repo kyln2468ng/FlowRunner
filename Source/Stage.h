@@ -7,7 +7,7 @@
 
 class Enemy;
 class Player;
-
+class MapEditor;
 
 namespace
 {
@@ -54,6 +54,9 @@ public:
 
 	int GetModel() const { return hModelColl_; }
 
+	bool IsEdhitorMode() const { return isEditor_; } //マップエディタのゲッター
+
+
 	bool hitObject(RayCastData& data);//オブジェクト（ブロック）と当たったかを返す
 
 	//bool CollideLine(RayCastData& data); //ステージオブジェクトとのレイキャスト取る
@@ -65,6 +68,9 @@ public:
 	}*/
 	
 	float PlayerMaxDist(const PlayerParamConfig& param);
+
+	void CreateBlock(XMFLOAT3 pos);
+
 
 private:
 	std::vector<Enemy*> enemy_;
@@ -81,4 +87,7 @@ private:
 	float gap_; //ビルとビルとの幅
 	float pJumpV0_;
 	float airTime_;
+
+	bool isEditor_;
+	MapEditor* editor_;
 };
