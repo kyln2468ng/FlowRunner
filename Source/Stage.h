@@ -56,7 +56,6 @@ public:
 
 	bool IsEdhitorMode() const { return isEditor_; } //マップエディタのゲッター
 
-
 	bool hitObject(RayCastData& data);//オブジェクト（ブロック）と当たったかを返す
 
 	//bool CollideLine(RayCastData& data); //ステージオブジェクトとのレイキャスト取る
@@ -68,6 +67,12 @@ public:
 	}*/
 	
 	float PlayerMaxDist(const PlayerParamConfig& param);
+
+	//ステージに置くオブジェクトのモデルハンドルを取れるようにする
+	//ステージに置くオブジェクトのモデルの選択
+	//選択したモデルをセッターで保存→モデルのハンドル読む
+	//当たったブロック取得
+	//指定座標にブロックあるか　ブロックの重複禁止
 
 	void CreateBlock(XMFLOAT3 pos);
 

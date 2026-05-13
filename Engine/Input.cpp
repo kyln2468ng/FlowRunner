@@ -10,6 +10,7 @@ namespace Input
 
 	LPDIRECTINPUTDEVICE8 pMouseDevice = nullptr;
 	XMVECTOR mousePosition;
+	XMVECTOR prevMousePosition;
 	DIMOUSESTATE mouseState; // マウスの状態
 	DIMOUSESTATE prevMouseState; // 前回のマウスの状態
 
@@ -39,7 +40,16 @@ namespace Input
 	
 		pMouseDevice->Acquire();
 		memcpy(&prevMouseState, &mouseState, sizeof(mouseState));
+		prevMousePosition = mousePosition;
 		pMouseDevice->GetDeviceState(sizeof(mouseState), &mouseState);
+
+		float x = XMVectorGetX(mousePosition);
+		float y = XMVectorGetY(mousePosition);
+
+		x += (float)mouseState.lX;
+		y += (float)mouseState.lY;
+
+		mousePosition = XMVectorSet(x, y, 0, 0);
 	}
 
 	bool IsKey(int keyCode)
@@ -82,6 +92,11 @@ namespace Input
 		return mousePosition;
 	}
 
+	XMVECTOR GetMouseDelta()
+	{
+		return mousePosition - prevMousePosition;
+	}
+
 	void SetMousePosition(int x, int y)
 	{
 		mousePosition = XMVectorSet((float)x, (float)y, 0, 0);
@@ -98,7 +113,7 @@ namespace Input
 
 	bool IsMouseButtonUp(int btnCode)
 	{
-		if (IsMouseButton(btnCode) && (prevMouseState.rgbButtons[btnCode] & 0x80))
+		if (!IsMouseButton(btnCode) && (prevMouseState.rgbButtons[btnCode] & 0x80))
 		{
 			return true;
 		}

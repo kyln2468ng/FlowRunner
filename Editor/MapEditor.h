@@ -22,4 +22,9 @@ private:
 	DirectX::XMFLOAT3 previewPos_;
 	RayCastData ray_;
 	bool isHit_;
+
+	XMFLOAT3 cameraPos_;
+
+	float yaw_;
+	float pitch_;
 };

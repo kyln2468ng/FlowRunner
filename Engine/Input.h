@@ -20,6 +20,7 @@ namespace Input
 	void Release();
 
 	XMVECTOR GetMousePosition();
+	XMVECTOR GetMouseDelta();
 	void SetMousePosition(int x, int y);
 	bool IsMouseButton(int btnCode);
 	bool IsMouseButtonUp(int btnCode);
