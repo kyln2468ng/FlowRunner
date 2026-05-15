@@ -13,6 +13,7 @@ namespace Input
 	XMVECTOR prevMousePosition;
 	DIMOUSESTATE mouseState; // マウスの状態
 	DIMOUSESTATE prevMouseState; // 前回のマウスの状態
+	HWND hWnd_ = nullptr;
 
 	void Initialize(HWND hWnd)//引数でhwnd持ってくるようにする
 	{
@@ -26,6 +27,8 @@ namespace Input
 		pDInput->CreateDevice(GUID_SysMouse, &pMouseDevice, nullptr);
 		pMouseDevice->SetDataFormat(&c_dfDIMouse);
 		pMouseDevice->SetCooperativeLevel(hWnd, DISCL_NONEXCLUSIVE | DISCL_FOREGROUND);
+		
+		hWnd_ = hWnd;
 	}
 
 	void Update()
@@ -43,13 +46,12 @@ namespace Input
 		prevMousePosition = mousePosition;
 		pMouseDevice->GetDeviceState(sizeof(mouseState), &mouseState);
 
-		float x = XMVectorGetX(mousePosition);
-		float y = XMVectorGetY(mousePosition);
+		POINT p;
+		GetCursorPos(&p);
 
-		x += (float)mouseState.lX;
-		y += (float)mouseState.lY;
+		ScreenToClient(hWnd_, &p);
 
-		mousePosition = XMVectorSet(x, y, 0, 0);
+		mousePosition = XMVectorSet((float)p.x,	(float)p.y,	0,0);
 	}
 
 	bool IsKey(int keyCode)
@@ -94,7 +96,12 @@ namespace Input
 
 	XMVECTOR GetMouseDelta()
 	{
-		return mousePosition - prevMousePosition;
+		return XMVectorSet(
+			(float)mouseState.lX,
+			(float)mouseState.lY,
+			0,
+			0
+		);
 	}
 
 	void SetMousePosition(int x, int y)

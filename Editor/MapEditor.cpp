@@ -12,6 +12,9 @@ void MapEditor::Initialize(Stage* stage)
 
 	yaw_ = 0.0f;
 	pitch_ = 0.0f;
+	mouse_ = XMVectorSet(400, 300, 0, 0);
+
+	debugHandle_ = Model::Load("BoxDefault.fbx");
 }
 
 void MapEditor::Updata()
@@ -31,6 +34,7 @@ void MapEditor::Updata()
 
 	PlaceBlock();
 	
+
 }
 
 void MapEditor::Draw()
@@ -39,13 +43,20 @@ void MapEditor::Draw()
 	int w = 400;
 	int h = 300;
 
+	//for (auto& d : debugRay_)
+	//{
+	//	Model::SetTransform(debugHandle_, d.transform);
+	//	Model::Draw(debugHandle_);
+	//}
+
 	Transform t;
 	t.position_ = previewPos_;
 	t.scale_ = { 1,1,1 };
 	t.Calculation();
 
-	Model::SetTransform(stage_->, t);
-	Model::Draw(stage_->);
+	Model::SetTransform(debugHandle_, t);
+
+	Model::Draw(debugHandle_);
 }
 
 void MapEditor::UpdateCamera()
@@ -112,10 +123,10 @@ void MapEditor::UpdateCamera()
 
 	Camera::SetTarget(targetPos);
 
-
-	XMVECTOR mouse = Input::GetMousePosition();
-	float mouseX = XMVectorGetX(mouse);
-	float mouseY = XMVectorGetY(mouse);
+	mouse_ = Input::GetMousePosition();
+	float mouseX = XMVectorGetX(mouse_);
+	float mouseY = XMVectorGetY(mouse_);
+	printf("%f %f\n", mouseX, mouseY);
 
 	XMVECTOR nearPos = XMVectorSet(mouseX, mouseY, 0.0f, 1.0f);
 	XMVECTOR farPos = XMVectorSet(mouseX, mouseY, 1.0f, 1.0f);
@@ -143,25 +154,69 @@ void MapEditor::UpdateCamera()
 	XMVECTOR dir = XMVector3Normalize(farWorld - nearWorld);
 	XMStoreFloat4(&ray_.dir, dir);
 	XMStoreFloat4(&ray_.start, start);
+	
+	
+	///debugchck///
+	
+	//printf("%f %f\n", mouseX, mouseY);
+
+	//char buf[128];
+	////sprintf_s(buf, "dist: %.2f\n", drawDist);
+
+	//sprintf_s(buf, "mouse: %.2f %.2f %.2f\n", mouseX,mouseY);
+
+	//OutputDebugStringA(buf);
+
+	for (int i = 0; i < 100; i++)
+	{
+		XMVECTOR p = start + dir * (float)i;
+
+		XMFLOAT3 pos;
+		XMStoreFloat3(&pos, p);
+
+		Transform t;
+		t.position_ = pos;
+		t.scale_ = { 0.001f,0.001f,0.001f };
+		t.Calculation();
+
+		DebugCube d;
+		d.transform = t;
+		d.life = 0.5f;
+		debugRay_.push_back(d);
+	}
+
+	//for (auto it = debugRay_.begin(); it != debugRay_.end(); )
+	//{
+	//	it->life -= 0.016f;
+
+	//	if (it->life <= 0)
+	//	{
+	//		it = debugRay_.erase(it);
+	//	}
+	//	else
+	//	{
+	//		++it;
+	//	}
+	//}
 
 }
 
 void MapEditor::UpdateRay()
 {
-	XMFLOAT3 camPos = Camera::GetPosition();
-	XMFLOAT3 camTarget = Camera::GetTarget();
+	//XMFLOAT3 camPos = Camera::GetPosition();
+	//XMFLOAT3 camTarget = Camera::GetTarget();
 
 
 
-	XMVECTOR start = XMLoadFloat3(&camPos);
-	XMVECTOR target = XMLoadFloat3(&camTarget);
+	//XMVECTOR start = XMLoadFloat3(&camPos);
+	//XMVECTOR target = XMLoadFloat3(&camTarget);
 
-	XMVECTOR dir = XMVector3Normalize(target - start);
+	//XMVECTOR dir = XMVector3Normalize(target - start);
 
 
 
-	XMStoreFloat4(&ray_.start, start);
-	XMStoreFloat4(&ray_.dir, dir);
+	//XMStoreFloat4(&ray_.start, start);
+	//XMStoreFloat4(&ray_.dir, dir);
 
 	ray_.maxDist = 100.0f;
 
@@ -175,7 +230,7 @@ void MapEditor::UpdatePreview()
 		XMVECTOR hitPos = XMLoadFloat3(&ray_.hitPos);
 		XMVECTOR normal = XMLoadFloat3(&ray_.hitNormal);
 
-		XMVECTOR placePos = hitPos + normal;
+		XMVECTOR placePos = hitPos + normal * 0.5f;
 
 		XMFLOAT3 pos;
 		DirectX::XMStoreFloat3(&pos, placePos);
@@ -183,8 +238,6 @@ void MapEditor::UpdatePreview()
 		pos.x = roundf(pos.x);
 		pos.y = roundf(pos.y);
 		pos.z = roundf(pos.z);
-
-		PlaceBlock();
 
 		previewPos_ = pos;
 	}

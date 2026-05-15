@@ -476,7 +476,7 @@ void Player::Draw()
 	
 	sprintf_s(buf, "move: %.2f %.2f %.2f\n", mx.x, mx.y, mx.z);
 
-	OutputDebugStringA(buf);
+	//OutputDebugStringA(buf);
 
 }
 

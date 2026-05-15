@@ -222,8 +222,7 @@ void Stage::Update()
 	//	i++;
 	//}
 
-	//ステージの生成→最終的には生成用クラス作るが一旦ステージクラスで関数作って生成できるようになったら生成用クラスとして分離する
-	
+		
 	if (Input::IsKeyDown(DIK_M)) {
 		isEditor_ = !isEditor_;
 	}
@@ -289,7 +288,10 @@ void Stage::Draw()
 		Model::Draw(b.type);
 	}
 
+	if (isEditor_ == true) {
 
+		editor_->Draw();
+	}
 
 	//Transform t;
 	//t.position_.x = 5;

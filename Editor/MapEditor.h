@@ -3,6 +3,12 @@
 #include "../Engine/Fbx.h"
 class Stage;
 
+struct DebugCube
+{
+	Transform transform;
+	float life;
+};
+
 class MapEditor
 {
 public:
@@ -22,8 +28,11 @@ private:
 	DirectX::XMFLOAT3 previewPos_;
 	RayCastData ray_;
 	bool isHit_;
-
+	XMVECTOR mouse_;
 	XMFLOAT3 cameraPos_;
+
+	int debugHandle_;
+	std::vector<DebugCube> debugRay_;
 
 	float yaw_;
 	float pitch_;
