@@ -49,14 +49,14 @@ void MapEditor::Draw()
 	//	Model::Draw(debugHandle_);
 	//}
 
-	Transform t;
-	t.position_ = previewPos_;
-	t.scale_ = { 1,1,1 };
-	t.Calculation();
+	//Transform t;
+	//t.position_ = previewPos_;
+	//t.scale_ = { 1,1,1 };
+	//t.Calculation();
 
-	Model::SetTransform(debugHandle_, t);
+	//Model::SetTransform(debugHandle_, t);
 
-	Model::Draw(debugHandle_);
+	//Model::Draw(debugHandle_);
 }
 
 void MapEditor::UpdateCamera()
@@ -167,23 +167,23 @@ void MapEditor::UpdateCamera()
 
 	//OutputDebugStringA(buf);
 
-	for (int i = 0; i < 100; i++)
-	{
-		XMVECTOR p = start + dir * (float)i;
+	//for (int i = 0; i < 100; i++)
+	//{
+	//	XMVECTOR p = start + dir * (float)i;
 
-		XMFLOAT3 pos;
-		XMStoreFloat3(&pos, p);
+	//	XMFLOAT3 pos;
+	//	XMStoreFloat3(&pos, p);
 
-		Transform t;
-		t.position_ = pos;
-		t.scale_ = { 0.001f,0.001f,0.001f };
-		t.Calculation();
+	//	Transform t;
+	//	t.position_ = pos;
+	//	t.scale_ = { 0.001f,0.001f,0.001f };
+	//	t.Calculation();
 
-		DebugCube d;
-		d.transform = t;
-		d.life = 0.5f;
-		debugRay_.push_back(d);
-	}
+	//	DebugCube d;
+	//	d.transform = t;
+	//	d.life = 0.5f;
+	//	debugRay_.push_back(d);
+	//}
 
 	//for (auto it = debugRay_.begin(); it != debugRay_.end(); )
 	//{
@@ -220,7 +220,7 @@ void MapEditor::UpdateRay()
 
 	ray_.maxDist = 100.0f;
 
-	stage_->hitObject(ray_);
+	stage_->hitObject(ray_,-1);
 }
 
 void MapEditor::UpdatePreview()
@@ -248,4 +248,11 @@ void MapEditor::PlaceBlock()
 	if (Input::IsMouseButtonDown(0)) {
 		stage_->CreateBlock(previewPos_);
 	}
+
+	if (Input::IsMouseButtonDown(1)) {
+		stage_->DeleteBlock(stage_->GetModelIndex());
+	}
+
+
+	//ブロックの切り替え
 }

@@ -256,7 +256,7 @@ void Player::Update()
 	float groundY = 0.0f;
 	bool isGround = false;
 	
-	if (st && st->hitObject(data)) {
+	if (st && st->hitObject(data,hModel_)) {
 		if (data.isHit && data.dist <= data.maxDist) {
 			if (velocity_.y <= 0.0f) {
 				groundY = data.hitPos.y;
@@ -343,7 +343,7 @@ WallHitData Player::DetectWall(const XMVECTOR& vPos, const XMVECTOR& move, const
 		};
 		wallRay.maxDist = 0.6f;
 
-		if (st && st->hitObject(wallRay) && wallRay.isHit) {
+		if (st && st->hitObject(wallRay,hModel_) && wallRay.isHit) {
 
 			XMVECTOR wallNormal = XMLoadFloat3(&wallRay.hitNormal);
 			wallNormal = XMVectorSetY(wallNormal, 0.0f);

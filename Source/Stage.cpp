@@ -47,6 +47,7 @@ void Stage::Initialize()
 	editor_ = new MapEditor();
 	editor_->Initialize(this);
 
+	hitModelIndex_ = -1;
 	/*enemy_ = std::vector<Enemy*>(ENEMY_NUM);
 	for (int i = 0;i < ENEMY_NUM;i++)
 	{
@@ -284,8 +285,11 @@ void Stage::Draw()
 	/////////////
 
 	for (auto& b : models_) {
-		Model::SetTransform(b.type, b.transform);
-		Model::Draw(b.type);
+	
+		if (models_[b.type].isAlive) {
+			Model::SetTransform(b.type, b.transform);
+			Model::Draw(b.type);
+		}
 	}
 
 	if (isEditor_ == true) {
@@ -325,16 +329,17 @@ void Stage::OnCollision(GameObject* pTarget)
 	
 }
 
-bool Stage::hitObject(RayCastData& data)
+bool Stage::hitObject(RayCastData& data,int selfHandle)
 {
-	Player* p = (Player*)FindObject("Player");
-	int mol = p->GetHandle();
 	int hitModel;
-	if (Model::RayCastAll(mol, data, hitModel)) {
+
+	if (Model::RayCastAll(selfHandle, data, hitModel))
+	{
+		hitModelIndex_ = hitModel;
 		return true;
 	}
-	else
-		return false;
+
+	return false;
 
 
 	//bool hit = false;
@@ -418,6 +423,14 @@ void Stage::CreateBlock(XMFLOAT3 pos)
 	Model::SetTransform(h, t);
 
 	models_.push_back({ h, t });
+}
+
+void Stage::DeleteBlock(int index)
+{
+	if (index < 0 || index >= models_.size())
+		return;
+
+	models_[index].isAlive = false;
 }
 
 //bool Stage::CollideLine(RayCastData& data)

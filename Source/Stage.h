@@ -34,6 +34,7 @@ struct Block
 	int type;
 	Transform transform;
 
+	bool isAlive = true;
 };
 
 class Stage : public GameObject
@@ -56,7 +57,7 @@ public:
 
 	bool IsEdhitorMode() const { return isEditor_; } //マップエディタのゲッター
 
-	bool hitObject(RayCastData& data);//オブジェクト（ブロック）と当たったかを返す
+	bool hitObject(RayCastData& data,int selfHandle);//オブジェクト（ブロック）と当たったかを返す
 
 	//bool CollideLine(RayCastData& data); //ステージオブジェクトとのレイキャスト取る
 	//int  GetModelCount() const;
@@ -74,8 +75,10 @@ public:
 	//当たったブロック取得
 	//指定座標にブロックあるか　ブロックの重複禁止
 
-	void CreateBlock(XMFLOAT3 pos);
+	int GetModelIndex() const { return hitModelIndex_; } //レイキャスト（オール）で当たったモデルを返す
 
+	void CreateBlock(XMFLOAT3 pos);
+	void DeleteBlock(int index);
 
 private:
 	std::vector<Enemy*> enemy_;
@@ -86,12 +89,13 @@ private:
 	int mode_; // 0：上げる　1：下げる　2：種類変更
 	int select_; //ボックスの種類
 
-	std::vector<Block> models_;
+	std::vector<Block> models_; //ステージのオフジェクト配列
 
 	PlayerParamConfig param_;
 	float gap_; //ビルとビルとの幅
 	float pJumpV0_;
 	float airTime_;
+	int hitModelIndex_;
 
 	bool isEditor_;
 	MapEditor* editor_;
