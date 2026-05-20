@@ -59,6 +59,7 @@ public:
 
 	bool hitObject(RayCastData& data,int selfHandle);//オブジェクト（ブロック）と当たったかを返す
 
+
 	//bool CollideLine(RayCastData& data); //ステージオブジェクトとのレイキャスト取る
 	//int  GetModelCount() const;
 	//int  GetModel(int index) const;
@@ -76,6 +77,7 @@ public:
 	//指定座標にブロックあるか　ブロックの重複禁止
 
 	int GetModelIndex() const { return hitModelIndex_; } //レイキャスト（オール）で当たったモデルを返す
+	bool HitBlock(RayCastData& data, int selfHandle);
 
 	void CreateBlock(XMFLOAT3 pos);
 	void DeleteBlock(int index);

@@ -2,6 +2,7 @@
 #include "../Engine/Input.h"
 #include "../Source/Stage.h"
 #include "../Engine/Camera.h"
+#include <fstream>
 
 void MapEditor::Initialize(Stage* stage)
 {
@@ -220,7 +221,7 @@ void MapEditor::UpdateRay()
 
 	ray_.maxDist = 100.0f;
 
-	stage_->hitObject(ray_,-1);
+	stage_->HitBlock(ray_,-1);
 }
 
 void MapEditor::UpdatePreview()
@@ -255,4 +256,18 @@ void MapEditor::PlaceBlock()
 
 
 	//ブロックの切り替え
+}
+
+void MapEditor::Save()
+{
+	std::ofstream file("stage.json");
+	auto& blocks = stage_->SetBlock();
+
+	file << "{\n";
+	file << "\"blocks\": [\n";
+
+	//書き込み
+
+	file << "]\n";
+	file.close;
 }

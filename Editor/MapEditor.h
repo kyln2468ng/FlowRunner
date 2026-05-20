@@ -21,6 +21,8 @@ public:
 	void UpdatePreview();
 	void PlaceBlock();
 
+	void Save();
+
 
 private:
 	Stage* stage_;

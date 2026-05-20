@@ -286,7 +286,7 @@ void Stage::Draw()
 
 	for (auto& b : models_) {
 	
-		if (models_[b.type].isAlive) {
+		if (b.isAlive) {
 			Model::SetTransform(b.type, b.transform);
 			Model::Draw(b.type);
 		}
@@ -409,6 +409,44 @@ float Stage::PlayerMaxDist(const PlayerParamConfig& param)
 	airTime_ = (2.0f * pJumpV0_) / param.GRAVITY;
 
 	return param.MOVE_SPEED * airTime_;
+}
+
+bool Stage::HitBlock(RayCastData& data, int selfHandle)
+{
+	bool hit = false;
+	float closest = FLT_MAX;
+
+	for (int i = 0; i < models_.size(); i++)
+	{
+		// 死んでるブロック無視
+		if (!models_[i].isAlive)
+			continue;
+
+		// 自分自身無視
+		if (models_[i].type == selfHandle)
+			continue;
+
+		RayCastData ray = data;
+
+		Model::RayCast(models_[i].type, ray);
+
+		if (!ray.isHit)
+			continue;
+
+		if (ray.dist < closest)
+		{
+			closest = ray.dist;
+
+			data = ray;
+
+			// ← Block配列のindex
+			hitModelIndex_ = i;
+
+			hit = true;
+		}
+	}
+
+	return hit;
 }
 
 void Stage::CreateBlock(XMFLOAT3 pos)
