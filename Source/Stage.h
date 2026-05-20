@@ -82,6 +82,8 @@ public:
 	void CreateBlock(XMFLOAT3 pos);
 	void DeleteBlock(int index);
 
+	const std::vector<Block>& GetBlocks();
+
 private:
 	std::vector<Enemy*> enemy_;
 	int type_;

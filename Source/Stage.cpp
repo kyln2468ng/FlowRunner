@@ -471,6 +471,11 @@ void Stage::DeleteBlock(int index)
 	models_[index].isAlive = false;
 }
 
+const std::vector<Block>& Stage::GetBlocks()
+{
+	return models_;
+}
+
 //bool Stage::CollideLine(RayCastData& data)
 //{
 //	bool found = false;

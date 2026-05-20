@@ -256,18 +256,53 @@ void MapEditor::PlaceBlock()
 
 
 	//ブロックの切り替え
+
+
+	if (Input::IsKeyDown(DIK_L)) {
+		Save();
+	}
 }
 
 void MapEditor::Save()
 {
 	std::ofstream file("stage.json");
-	auto& blocks = stage_->SetBlock();
+	auto& blocks = stage_->GetBlocks();
 
 	file << "{\n";
 	file << "\"blocks\": [\n";
 
 	//書き込み
+	for (int i = 0; i < blocks.size(); i++) {
+		auto& b = blocks[i];
+
+		file << "{\n";
+
+		file << "\"type\": " << b.type << ",\n";
+		
+		file << "\"posX\": " << b.transform.position_.x << ",\n";
+		file << "\"posY\": " << b.transform.position_.y << ",\n";
+		file << "\"posZ\": " << b.transform.position_.z << ",\n";
+
+		XMFLOAT4 q;
+		XMStoreFloat4(&q, b.transform.rotate_.quaternion_);
+		file << "\"rotX\": " << q.x << ",\n";
+		file << "\"rotY\": " << q.y << ",\n";
+		file << "\"rotZ\": " << q.z << ",\n";
+		file << "\"rotW\": " << q.w << ",\n";
+
+		file << "\"sclX\": " << b.transform.scale_.x << ",\n";
+		file << "\"sclY\": " << b.transform.scale_.y << ",\n";
+		file << "\"sclZ\": " << b.transform.scale_.z << "\n";
+
+		file << "}\n";
+
+		if (i != blocks.size() - 1)
+		{
+			file << ",\n";
+		}
+	}
 
 	file << "]\n";
-	file.close;
+	file << "}\n";
+	file.close();
 }
