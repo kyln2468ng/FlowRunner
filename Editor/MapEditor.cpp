@@ -261,11 +261,56 @@ void MapEditor::PlaceBlock()
 	if (Input::IsKeyDown(DIK_L)) {
 		Save();
 	}
+	if (Input::IsKeyDown(DIK_O)) {
+		Load();
+	}
+}
+
+string MapEditor::OpenFileDialog(bool isSave)
+{
+	char fileName[255] = "";
+
+	OPENFILENAMEA ofn = { 0 };
+	ofn.lStructSize = sizeof(ofn);
+	ofn.hwndOwner = nullptr;
+	ofn.lpstrFile = fileName;
+	ofn.nMaxFile = 255;
+
+	ofn.lpstrFilter = "Json Files\0*.json\0" "All Files\0*.*\0";
+
+	ofn.nFilterIndex = 1;
+
+	ofn.lpstrDefExt = "json";
+
+	if (isSave) {
+		ofn.Flags =	OFN_PATHMUSTEXIST |	OFN_OVERWRITEPROMPT;
+
+		if (GetSaveFileNameA(&ofn))
+			return fileName;
+	}
+	else {
+		ofn.Flags =
+			OFN_PATHMUSTEXIST |	OFN_FILEMUSTEXIST;
+
+		if (GetOpenFileNameA(&ofn))
+			return fileName;
+	}
+
+	return "";
 }
 
 void MapEditor::Save()
 {
-	std::ofstream file("stage.json");
+	std::string path = OpenFileDialog(true);
+
+	if (path.empty())
+		return;
+
+	std::ofstream file(path);
+
+	if (!file.is_open())
+		return;
+
 	auto& blocks = stage_->GetBlocks();
 
 	file << "{\n";
@@ -305,4 +350,19 @@ void MapEditor::Save()
 	file << "]\n";
 	file << "}\n";
 	file.close();
+}
+
+
+void MapEditor::Load()
+{
+	string path = OpenFileDialog(false);
+	if (!path.empty()) {
+		std::ifstream file(path);
+		if (!file.is_open()) {
+			//ブロックの初期化
+			//json読む
+			//データ作る
+			//ステージ生成
+		}
+	}
 }

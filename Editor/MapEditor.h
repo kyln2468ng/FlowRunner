@@ -1,6 +1,8 @@
 #pragma once
 #include <DirectXMath.h>
 #include "../Engine/Fbx.h"
+#include <string>
+
 class Stage;
 
 struct DebugCube
@@ -21,8 +23,9 @@ public:
 	void UpdatePreview();
 	void PlaceBlock();
 
+	std::string OpenFileDialog(bool isSave);
 	void Save();
-
+	void Load();
 
 private:
 	Stage* stage_;
