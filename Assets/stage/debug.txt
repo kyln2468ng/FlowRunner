@@ -1,0 +1,1180 @@
+handle 9
+position 0 -5 0
+rotation 0 0 0 1
+scale 1 1 1
+---
+handle 10
+position 1 -5 0
+rotation 0 0 0 1
+scale 1 1 1
+---
+handle 11
+position 2 -5 0
+rotation 0 0 0 1
+scale 1 1 1
+---
+handle 12
+position 3 -5 0
+rotation 0 0 0 1
+scale 1 1 1
+---
+handle 13
+position 4 -5 0
+rotation 0 0 0 1
+scale 1 1 1
+---
+handle 14
+position 5 -5 0
+rotation 0 0 0 1
+scale 1 1 1
+---
+handle 15
+position 6 -5 0
+rotation 0 0 0 1
+scale 1 1 1
+---
+handle 16
+position 7 -5 0
+rotation 0 0 0 1
+scale 1 1 1
+---
+handle 17
+position 8 -5 0
+rotation 0 0 0 1
+scale 1 1 1
+---
+handle 18
+position 9 -5 0
+rotation 0 0 0 1
+scale 1 1 1
+---
+handle 19
+position 10 -5 0
+rotation 0 0 0 1
+scale 1 1 1
+---
+handle 20
+position 11 -5 0
+rotation 0 0 0 1
+scale 1 1 1
+---
+handle 21
+position 12 -5 0
+rotation 0 0 0 1
+scale 1 1 1
+---
+handle 22
+position 13 -5 0
+rotation 0 0 0 1
+scale 1 1 1
+---
+handle 23
+position 14 -5 0
+rotation 0 0 0 1
+scale 1 1 1
+---
+handle 24
+position 0 -5 1
+rotation 0 0 0 1
+scale 1 1 1
+---
+handle 25
+position 1 -5 1
+rotation 0 0 0 1
+scale 1 1 1
+---
+handle 26
+position 2 -5 1
+rotation 0 0 0 1
+scale 1 1 1
+---
+handle 27
+position 3 -5 1
+rotation 0 0 0 1
+scale 1 1 1
+---
+handle 28
+position 4 -5 1
+rotation 0 0 0 1
+scale 1 1 1
+---
+handle 29
+position 5 -5 1
+rotation 0 0 0 1
+scale 1 1 1
+---
+handle 30
+position 6 -5 1
+rotation 0 0 0 1
+scale 1 1 1
+---
+handle 31
+position 7 -5 1
+rotation 0 0 0 1
+scale 1 1 1
+---
+handle 32
+position 8 -5 1
+rotation 0 0 0 1
+scale 1 1 1
+---
+handle 33
+position 9 -5 1
+rotation 0 0 0 1
+scale 1 1 1
+---
+handle 34
+position 10 -5 1
+rotation 0 0 0 1
+scale 1 1 1
+---
+handle 35
+position 11 -5 1
+rotation 0 0 0 1
+scale 1 1 1
+---
+handle 36
+position 12 -5 1
+rotation 0 0 0 1
+scale 1 1 1
+---
+handle 37
+position 13 -5 1
+rotation 0 0 0 1
+scale 1 1 1
+---
+handle 38
+position 14 -5 1
+rotation 0 0 0 1
+scale 1 1 1
+---
+handle 39
+position 0 -5 2
+rotation 0 0 0 1
+scale 1 1 1
+---
+handle 40
+position 1 -5 2
+rotation 0 0 0 1
+scale 1 1 1
+---
+handle 41
+position 2 -5 2
+rotation 0 0 0 1
+scale 1 1 1
+---
+handle 42
+position 3 -5 2
+rotation 0 0 0 1
+scale 1 1 1
+---
+handle 43
+position 4 -5 2
+rotation 0 0 0 1
+scale 1 1 1
+---
+handle 44
+position 5 -5 2
+rotation 0 0 0 1
+scale 1 1 1
+---
+handle 45
+position 6 -5 2
+rotation 0 0 0 1
+scale 1 1 1
+---
+handle 46
+position 7 -5 2
+rotation 0 0 0 1
+scale 1 1 1
+---
+handle 47
+position 8 -5 2
+rotation 0 0 0 1
+scale 1 1 1
+---
+handle 48
+position 9 -5 2
+rotation 0 0 0 1
+scale 1 1 1
+---
+handle 49
+position 10 -5 2
+rotation 0 0 0 1
+scale 1 1 1
+---
+handle 50
+position 11 -5 2
+rotation 0 0 0 1
+scale 1 1 1
+---
+handle 51
+position 12 -5 2
+rotation 0 0 0 1
+scale 1 1 1
+---
+handle 52
+position 13 -5 2
+rotation 0 0 0 1
+scale 1 1 1
+---
+handle 53
+position 14 -5 2
+rotation 0 0 0 1
+scale 1 1 1
+---
+handle 54
+position 0 -5 3
+rotation 0 0 0 1
+scale 1 1 1
+---
+handle 55
+position 1 -5 3
+rotation 0 0 0 1
+scale 1 1 1
+---
+handle 56
+position 2 -5 3
+rotation 0 0 0 1
+scale 1 1 1
+---
+handle 57
+position 3 -5 3
+rotation 0 0 0 1
+scale 1 1 1
+---
+handle 58
+position 4 -5 3
+rotation 0 0 0 1
+scale 1 1 1
+---
+handle 59
+position 5 -5 3
+rotation 0 0 0 1
+scale 1 1 1
+---
+handle 60
+position 6 -5 3
+rotation 0 0 0 1
+scale 1 1 1
+---
+handle 61
+position 7 -5 3
+rotation 0 0 0 1
+scale 1 1 1
+---
+handle 62
+position 8 -5 3
+rotation 0 0 0 1
+scale 1 1 1
+---
+handle 63
+position 9 -5 3
+rotation 0 0 0 1
+scale 1 1 1
+---
+handle 64
+position 10 -5 3
+rotation 0 0 0 1
+scale 1 1 1
+---
+handle 65
+position 11 -5 3
+rotation 0 0 0 1
+scale 1 1 1
+---
+handle 66
+position 12 -5 3
+rotation 0 0 0 1
+scale 1 1 1
+---
+handle 67
+position 13 -5 3
+rotation 0 0 0 1
+scale 1 1 1
+---
+handle 68
+position 14 -5 3
+rotation 0 0 0 1
+scale 1 1 1
+---
+handle 69
+position 0 -5 4
+rotation 0 0 0 1
+scale 1 1 1
+---
+handle 70
+position 1 -5 4
+rotation 0 0 0 1
+scale 1 1 1
+---
+handle 71
+position 2 -5 4
+rotation 0 0 0 1
+scale 1 1 1
+---
+handle 72
+position 3 -5 4
+rotation 0 0 0 1
+scale 1 1 1
+---
+handle 73
+position 4 -5 4
+rotation 0 0 0 1
+scale 1 1 1
+---
+handle 74
+position 5 -5 4
+rotation 0 0 0 1
+scale 1 1 1
+---
+handle 75
+position 6 -5 4
+rotation 0 0 0 1
+scale 1 1 1
+---
+handle 76
+position 7 -5 4
+rotation 0 0 0 1
+scale 1 1 1
+---
+handle 77
+position 8 -5 4
+rotation 0 0 0 1
+scale 1 1 1
+---
+handle 78
+position 9 -5 4
+rotation 0 0 0 1
+scale 1 1 1
+---
+handle 79
+position 10 -5 4
+rotation 0 0 0 1
+scale 1 1 1
+---
+handle 80
+position 11 -5 4
+rotation 0 0 0 1
+scale 1 1 1
+---
+handle 81
+position 12 -5 4
+rotation 0 0 0 1
+scale 1 1 1
+---
+handle 82
+position 13 -5 4
+rotation 0 0 0 1
+scale 1 1 1
+---
+handle 83
+position 14 -5 4
+rotation 0 0 0 1
+scale 1 1 1
+---
+handle 84
+position 0 -5 5
+rotation 0 0 0 1
+scale 1 1 1
+---
+handle 85
+position 1 -5 5
+rotation 0 0 0 1
+scale 1 1 1
+---
+handle 86
+position 2 -5 5
+rotation 0 0 0 1
+scale 1 1 1
+---
+handle 87
+position 3 -5 5
+rotation 0 0 0 1
+scale 1 1 1
+---
+handle 88
+position 4 -5 5
+rotation 0 0 0 1
+scale 1 1 1
+---
+handle 89
+position 5 -5 5
+rotation 0 0 0 1
+scale 1 1 1
+---
+handle 90
+position 6 -5 5
+rotation 0 0 0 1
+scale 1 1 1
+---
+handle 91
+position 7 -5 5
+rotation 0 0 0 1
+scale 1 1 1
+---
+handle 92
+position 8 -5 5
+rotation 0 0 0 1
+scale 1 1 1
+---
+handle 93
+position 9 -5 5
+rotation 0 0 0 1
+scale 1 1 1
+---
+handle 94
+position 10 -5 5
+rotation 0 0 0 1
+scale 1 1 1
+---
+handle 95
+position 11 -5 5
+rotation 0 0 0 1
+scale 1 1 1
+---
+handle 96
+position 12 -5 5
+rotation 0 0 0 1
+scale 1 1 1
+---
+handle 97
+position 13 -5 5
+rotation 0 0 0 1
+scale 1 1 1
+---
+handle 98
+position 14 -5 5
+rotation 0 0 0 1
+scale 1 1 1
+---
+handle 99
+position 0 -5 6
+rotation 0 0 0 1
+scale 1 1 1
+---
+handle 100
+position 1 -5 6
+rotation 0 0 0 1
+scale 1 1 1
+---
+handle 101
+position 2 -5 6
+rotation 0 0 0 1
+scale 1 1 1
+---
+handle 102
+position 3 -5 6
+rotation 0 0 0 1
+scale 1 1 1
+---
+handle 103
+position 4 -5 6
+rotation 0 0 0 1
+scale 1 1 1
+---
+handle 104
+position 5 -5 6
+rotation 0 0 0 1
+scale 1 1 1
+---
+handle 105
+position 6 -5 6
+rotation 0 0 0 1
+scale 1 1 1
+---
+handle 106
+position 7 -5 6
+rotation 0 0 0 1
+scale 1 1 1
+---
+handle 107
+position 8 -5 6
+rotation 0 0 0 1
+scale 1 1 1
+---
+handle 108
+position 9 -5 6
+rotation 0 0 0 1
+scale 1 1 1
+---
+handle 109
+position 10 -5 6
+rotation 0 0 0 1
+scale 1 1 1
+---
+handle 110
+position 11 -5 6
+rotation 0 0 0 1
+scale 1 1 1
+---
+handle 111
+position 12 -5 6
+rotation 0 0 0 1
+scale 1 1 1
+---
+handle 112
+position 13 -5 6
+rotation 0 0 0 1
+scale 1 1 1
+---
+handle 113
+position 14 -5 6
+rotation 0 0 0 1
+scale 1 1 1
+---
+handle 114
+position 0 -5 7
+rotation 0 0 0 1
+scale 1 1 1
+---
+handle 115
+position 1 -5 7
+rotation 0 0 0 1
+scale 1 1 1
+---
+handle 116
+position 2 -5 7
+rotation 0 0 0 1
+scale 1 1 1
+---
+handle 117
+position 3 -5 7
+rotation 0 0 0 1
+scale 1 1 1
+---
+handle 118
+position 4 -5 7
+rotation 0 0 0 1
+scale 1 1 1
+---
+handle 119
+position 5 -5 7
+rotation 0 0 0 1
+scale 1 1 1
+---
+handle 120
+position 6 -5 7
+rotation 0 0 0 1
+scale 1 1 1
+---
+handle 121
+position 7 -5 7
+rotation 0 0 0 1
+scale 1 1 1
+---
+handle 122
+position 8 -5 7
+rotation 0 0 0 1
+scale 1 1 1
+---
+handle 123
+position 9 -5 7
+rotation 0 0 0 1
+scale 1 1 1
+---
+handle 124
+position 10 -5 7
+rotation 0 0 0 1
+scale 1 1 1
+---
+handle 125
+position 11 -5 7
+rotation 0 0 0 1
+scale 1 1 1
+---
+handle 126
+position 12 -5 7
+rotation 0 0 0 1
+scale 1 1 1
+---
+handle 127
+position 13 -5 7
+rotation 0 0 0 1
+scale 1 1 1
+---
+handle 128
+position 14 -5 7
+rotation 0 0 0 1
+scale 1 1 1
+---
+handle 129
+position 0 -5 8
+rotation 0 0 0 1
+scale 1 1 1
+---
+handle 130
+position 1 -5 8
+rotation 0 0 0 1
+scale 1 1 1
+---
+handle 131
+position 2 -5 8
+rotation 0 0 0 1
+scale 1 1 1
+---
+handle 132
+position 3 -5 8
+rotation 0 0 0 1
+scale 1 1 1
+---
+handle 133
+position 4 -5 8
+rotation 0 0 0 1
+scale 1 1 1
+---
+handle 134
+position 5 -5 8
+rotation 0 0 0 1
+scale 1 1 1
+---
+handle 135
+position 6 -5 8
+rotation 0 0 0 1
+scale 1 1 1
+---
+handle 136
+position 7 -5 8
+rotation 0 0 0 1
+scale 1 1 1
+---
+handle 137
+position 8 -5 8
+rotation 0 0 0 1
+scale 1 1 1
+---
+handle 138
+position 9 -5 8
+rotation 0 0 0 1
+scale 1 1 1
+---
+handle 139
+position 10 -5 8
+rotation 0 0 0 1
+scale 1 1 1
+---
+handle 140
+position 11 -5 8
+rotation 0 0 0 1
+scale 1 1 1
+---
+handle 141
+position 12 -5 8
+rotation 0 0 0 1
+scale 1 1 1
+---
+handle 142
+position 13 -5 8
+rotation 0 0 0 1
+scale 1 1 1
+---
+handle 143
+position 14 -5 8
+rotation 0 0 0 1
+scale 1 1 1
+---
+handle 144
+position 0 -5 9
+rotation 0 0 0 1
+scale 1 1 1
+---
+handle 145
+position 1 -5 9
+rotation 0 0 0 1
+scale 1 1 1
+---
+handle 146
+position 2 -5 9
+rotation 0 0 0 1
+scale 1 1 1
+---
+handle 147
+position 3 -5 9
+rotation 0 0 0 1
+scale 1 1 1
+---
+handle 148
+position 4 -5 9
+rotation 0 0 0 1
+scale 1 1 1
+---
+handle 149
+position 5 -5 9
+rotation 0 0 0 1
+scale 1 1 1
+---
+handle 150
+position 6 -5 9
+rotation 0 0 0 1
+scale 1 1 1
+---
+handle 151
+position 7 -5 9
+rotation 0 0 0 1
+scale 1 1 1
+---
+handle 152
+position 8 -5 9
+rotation 0 0 0 1
+scale 1 1 1
+---
+handle 153
+position 9 -5 9
+rotation 0 0 0 1
+scale 1 1 1
+---
+handle 154
+position 10 -5 9
+rotation 0 0 0 1
+scale 1 1 1
+---
+handle 155
+position 11 -5 9
+rotation 0 0 0 1
+scale 1 1 1
+---
+handle 156
+position 12 -5 9
+rotation 0 0 0 1
+scale 1 1 1
+---
+handle 157
+position 13 -5 9
+rotation 0 0 0 1
+scale 1 1 1
+---
+handle 158
+position 14 -5 9
+rotation 0 0 0 1
+scale 1 1 1
+---
+handle 159
+position 0 -5 10
+rotation 0 0 0 1
+scale 1 1 1
+---
+handle 160
+position 1 -5 10
+rotation 0 0 0 1
+scale 1 1 1
+---
+handle 161
+position 2 -5 10
+rotation 0 0 0 1
+scale 1 1 1
+---
+handle 162
+position 3 -5 10
+rotation 0 0 0 1
+scale 1 1 1
+---
+handle 163
+position 4 -5 10
+rotation 0 0 0 1
+scale 1 1 1
+---
+handle 164
+position 5 -5 10
+rotation 0 0 0 1
+scale 1 1 1
+---
+handle 165
+position 6 -5 10
+rotation 0 0 0 1
+scale 1 1 1
+---
+handle 166
+position 7 -5 10
+rotation 0 0 0 1
+scale 1 1 1
+---
+handle 167
+position 8 -5 10
+rotation 0 0 0 1
+scale 1 1 1
+---
+handle 168
+position 9 -5 10
+rotation 0 0 0 1
+scale 1 1 1
+---
+handle 169
+position 10 -5 10
+rotation 0 0 0 1
+scale 1 1 1
+---
+handle 170
+position 11 -5 10
+rotation 0 0 0 1
+scale 1 1 1
+---
+handle 171
+position 12 -5 10
+rotation 0 0 0 1
+scale 1 1 1
+---
+handle 172
+position 13 -5 10
+rotation 0 0 0 1
+scale 1 1 1
+---
+handle 173
+position 14 -5 10
+rotation 0 0 0 1
+scale 1 1 1
+---
+handle 174
+position 0 -5 11
+rotation 0 0 0 1
+scale 1 1 1
+---
+handle 175
+position 1 -5 11
+rotation 0 0 0 1
+scale 1 1 1
+---
+handle 176
+position 2 -5 11
+rotation 0 0 0 1
+scale 1 1 1
+---
+handle 177
+position 3 -5 11
+rotation 0 0 0 1
+scale 1 1 1
+---
+handle 178
+position 4 -5 11
+rotation 0 0 0 1
+scale 1 1 1
+---
+handle 179
+position 5 -5 11
+rotation 0 0 0 1
+scale 1 1 1
+---
+handle 180
+position 6 -5 11
+rotation 0 0 0 1
+scale 1 1 1
+---
+handle 181
+position 7 -5 11
+rotation 0 0 0 1
+scale 1 1 1
+---
+handle 182
+position 8 -5 11
+rotation 0 0 0 1
+scale 1 1 1
+---
+handle 183
+position 9 -5 11
+rotation 0 0 0 1
+scale 1 1 1
+---
+handle 184
+position 10 -5 11
+rotation 0 0 0 1
+scale 1 1 1
+---
+handle 185
+position 11 -5 11
+rotation 0 0 0 1
+scale 1 1 1
+---
+handle 186
+position 12 -5 11
+rotation 0 0 0 1
+scale 1 1 1
+---
+handle 187
+position 13 -5 11
+rotation 0 0 0 1
+scale 1 1 1
+---
+handle 188
+position 14 -5 11
+rotation 0 0 0 1
+scale 1 1 1
+---
+handle 189
+position 0 -5 12
+rotation 0 0 0 1
+scale 1 1 1
+---
+handle 190
+position 1 -5 12
+rotation 0 0 0 1
+scale 1 1 1
+---
+handle 191
+position 2 -5 12
+rotation 0 0 0 1
+scale 1 1 1
+---
+handle 192
+position 3 -5 12
+rotation 0 0 0 1
+scale 1 1 1
+---
+handle 193
+position 4 -5 12
+rotation 0 0 0 1
+scale 1 1 1
+---
+handle 194
+position 5 -5 12
+rotation 0 0 0 1
+scale 1 1 1
+---
+handle 195
+position 6 -5 12
+rotation 0 0 0 1
+scale 1 1 1
+---
+handle 196
+position 7 -5 12
+rotation 0 0 0 1
+scale 1 1 1
+---
+handle 197
+position 8 -5 12
+rotation 0 0 0 1
+scale 1 1 1
+---
+handle 198
+position 9 -5 12
+rotation 0 0 0 1
+scale 1 1 1
+---
+handle 199
+position 10 -5 12
+rotation 0 0 0 1
+scale 1 1 1
+---
+handle 200
+position 11 -5 12
+rotation 0 0 0 1
+scale 1 1 1
+---
+handle 201
+position 12 -5 12
+rotation 0 0 0 1
+scale 1 1 1
+---
+handle 202
+position 13 -5 12
+rotation 0 0 0 1
+scale 1 1 1
+---
+handle 203
+position 14 -5 12
+rotation 0 0 0 1
+scale 1 1 1
+---
+handle 204
+position 0 -5 13
+rotation 0 0 0 1
+scale 1 1 1
+---
+handle 205
+position 1 -5 13
+rotation 0 0 0 1
+scale 1 1 1
+---
+handle 206
+position 2 -5 13
+rotation 0 0 0 1
+scale 1 1 1
+---
+handle 207
+position 3 -5 13
+rotation 0 0 0 1
+scale 1 1 1
+---
+handle 208
+position 4 -5 13
+rotation 0 0 0 1
+scale 1 1 1
+---
+handle 209
+position 5 -5 13
+rotation 0 0 0 1
+scale 1 1 1
+---
+handle 210
+position 6 -5 13
+rotation 0 0 0 1
+scale 1 1 1
+---
+handle 211
+position 7 -5 13
+rotation 0 0 0 1
+scale 1 1 1
+---
+handle 212
+position 8 -5 13
+rotation 0 0 0 1
+scale 1 1 1
+---
+handle 213
+position 9 -5 13
+rotation 0 0 0 1
+scale 1 1 1
+---
+handle 214
+position 10 -5 13
+rotation 0 0 0 1
+scale 1 1 1
+---
+handle 215
+position 11 -5 13
+rotation 0 0 0 1
+scale 1 1 1
+---
+handle 216
+position 12 -5 13
+rotation 0 0 0 1
+scale 1 1 1
+---
+handle 217
+position 13 -5 13
+rotation 0 0 0 1
+scale 1 1 1
+---
+handle 218
+position 14 -5 13
+rotation 0 0 0 1
+scale 1 1 1
+---
+handle 219
+position 0 -5 14
+rotation 0 0 0 1
+scale 1 1 1
+---
+handle 220
+position 1 -5 14
+rotation 0 0 0 1
+scale 1 1 1
+---
+handle 221
+position 2 -5 14
+rotation 0 0 0 1
+scale 1 1 1
+---
+handle 222
+position 3 -5 14
+rotation 0 0 0 1
+scale 1 1 1
+---
+handle 223
+position 4 -5 14
+rotation 0 0 0 1
+scale 1 1 1
+---
+handle 224
+position 5 -5 14
+rotation 0 0 0 1
+scale 1 1 1
+---
+handle 225
+position 6 -5 14
+rotation 0 0 0 1
+scale 1 1 1
+---
+handle 226
+position 7 -5 14
+rotation 0 0 0 1
+scale 1 1 1
+---
+handle 227
+position 8 -5 14
+rotation 0 0 0 1
+scale 1 1 1
+---
+handle 228
+position 9 -5 14
+rotation 0 0 0 1
+scale 1 1 1
+---
+handle 229
+position 10 -5 14
+rotation 0 0 0 1
+scale 1 1 1
+---
+handle 230
+position 11 -5 14
+rotation 0 0 0 1
+scale 1 1 1
+---
+handle 231
+position 12 -5 14
+rotation 0 0 0 1
+scale 1 1 1
+---
+handle 232
+position 13 -5 14
+rotation 0 0 0 1
+scale 1 1 1
+---
+handle 233
+position 14 -5 14
+rotation 0 0 0 1
+scale 1 1 1
+---
+handle 234
+position 4 -4 5
+rotation 0 0 0 1
+scale 1 1 1
+---
+handle 235
+position 2 -4 2
+rotation 0 0 0 1
+scale 1 1 1
+---
+handle 236
+position 1 -4 2
+rotation 0 0 0 1
+scale 1 1 1
+---
+handle 237
+position 4 -5 -1
+rotation 0 0 0 1
+scale 1 1 1
+---
+handle 238
+position 5 -4 -0
+rotation 0 0 0 1
+scale 1 1 1
+---
+handle 239
+position 3 -4 1
+rotation 0 0 0 1
+scale 1 1 1
+---
+handle 240
+position 5 -4 3
+rotation 0 0 0 1
+scale 1 1 1
+---
+handle 241
+position 3 -3 1
+rotation 0 0 0 1
+scale 1 1 1
+---
+handle 242
+position 3 -3 0
+rotation 0 0 0 1
+scale 1 1 1
+---
+handle 243
+position 3 -3 -1
+rotation 0 0 0 1
+scale 1 1 1
+---
+handle 244
+position 3 -2 -0
+rotation 0 0 0 1
+scale 1 1 1
+---

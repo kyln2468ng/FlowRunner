@@ -81,16 +81,22 @@ void Stage::Initialize()
 	for (int j = 0; j < ZSIZE; j++) {
 		for (int i = 0; i < XSIZE; i++) {
 
+			Block block{};
+			block.type = DEFAULT;
+
 			int h = Model::Load("BoxDefault.fbx");
 			assert(h >= 0);
+			block.handle = h;
 
 			Transform t;
 			t.position_ = { (float)i, -5.0f, (float)j };
 			t.scale_ = { 1,1,1 };
 			t.Calculation();
 
-			Model::SetTransform(h, t);
-			models_.push_back({h, t});
+			block.transform = t;
+
+			Model::SetTransform(block.handle, block.transform);
+			models_.push_back(block);
 		}
 	}
 
@@ -287,8 +293,8 @@ void Stage::Draw()
 	for (auto& b : models_) {
 	
 		if (b.isAlive) {
-			Model::SetTransform(b.type, b.transform);
-			Model::Draw(b.type);
+			Model::SetTransform(b.handle, b.transform);
+			Model::Draw(b.handle);
 		}
 	}
 
@@ -423,12 +429,12 @@ bool Stage::HitBlock(RayCastData& data, int selfHandle)
 			continue;
 
 		// é©ï™é©êgñ≥éã
-		if (models_[i].type == selfHandle)
+		if (models_[i].handle == selfHandle)
 			continue;
 
 		RayCastData ray = data;
 
-		Model::RayCast(models_[i].type, ray);
+		Model::RayCast(models_[i].handle, ray);
 
 		if (!ray.isHit)
 			continue;
@@ -451,16 +457,24 @@ bool Stage::HitBlock(RayCastData& data, int selfHandle)
 
 void Stage::CreateBlock(XMFLOAT3 pos)
 {
+
+
+
+	Block block{};
+	block.type = DEFAULT;
+
 	int h = Model::Load("BoxDefault.fbx");
+	block.handle = h;
 
 	Transform t;
 	t.position_ = pos;
 	t.scale_ = { 1,1,1 };
 	t.Calculation();
 
-	Model::SetTransform(h, t);
+	block.transform = t;
 
-	models_.push_back({ h, t });
+	Model::SetTransform(block.handle, block.transform);
+	models_.push_back(block);
 }
 
 void Stage::DeleteBlock(int index)
@@ -474,6 +488,32 @@ void Stage::DeleteBlock(int index)
 const std::vector<Block>& Stage::GetBlocks()
 {
 	return models_;
+}
+
+void Stage::AddBlock(const Block& src)
+{
+	Block block = src;
+
+	std::vector<string> modelName
+	{
+		"BoxDefault.fbx",
+		"BoxBrick.fbx",
+		"BoxGrass.fbx",
+		"BoxSand.fbx",
+		"BoxWater.fbx"
+	};
+
+	block.handle = Model::Load(modelName[block.type]);
+
+	block.transform.Calculation();
+
+	Model::SetTransform(block.handle, block.transform);
+	models_.push_back(block);
+}
+
+void Stage::ClearBlocks()
+{
+	models_.clear();
 }
 
 //bool Stage::CollideLine(RayCastData& data)

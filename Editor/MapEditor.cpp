@@ -3,6 +3,7 @@
 #include "../Source/Stage.h"
 #include "../Engine/Camera.h"
 #include <fstream>
+#include <sstream>
 
 void MapEditor::Initialize(Stage* stage)
 {
@@ -276,11 +277,11 @@ string MapEditor::OpenFileDialog(bool isSave)
 	ofn.lpstrFile = fileName;
 	ofn.nMaxFile = 255;
 
-	ofn.lpstrFilter = "Json Files\0*.json\0" "All Files\0*.*\0";
+	ofn.lpstrFilter = "txt Files\0*.txt\0" "All Files\0*.*\0";
 
 	ofn.nFilterIndex = 1;
 
-	ofn.lpstrDefExt = "json";
+	ofn.lpstrDefExt = "txt";
 
 	if (isSave) {
 		ofn.Flags =	OFN_PATHMUSTEXIST |	OFN_OVERWRITEPROMPT;
@@ -313,42 +314,33 @@ void MapEditor::Save()
 
 	auto& blocks = stage_->GetBlocks();
 
-	file << "{\n";
-	file << "\"blocks\": [\n";
-
 	//書き込み
 	for (int i = 0; i < blocks.size(); i++) {
 		auto& b = blocks[i];
 
-		file << "{\n";
-
-		file << "\"type\": " << b.type << ",\n";
+		file << "type " << (int)b.type << "\n";
 		
-		file << "\"posX\": " << b.transform.position_.x << ",\n";
-		file << "\"posY\": " << b.transform.position_.y << ",\n";
-		file << "\"posZ\": " << b.transform.position_.z << ",\n";
-
+		file << "position " 
+			<< b.transform.position_.x << " " 
+			<< b.transform.position_.y << " " 
+			<< b.transform.position_.z << "\n";
+		
 		XMFLOAT4 q;
 		XMStoreFloat4(&q, b.transform.rotate_.quaternion_);
-		file << "\"rotX\": " << q.x << ",\n";
-		file << "\"rotY\": " << q.y << ",\n";
-		file << "\"rotZ\": " << q.z << ",\n";
-		file << "\"rotW\": " << q.w << ",\n";
+		file << "rotation "
+			<< q.x << " "
+			<< q.y << " "
+			<< q.z << " "
+			<< q.w << "\n";
 
-		file << "\"sclX\": " << b.transform.scale_.x << ",\n";
-		file << "\"sclY\": " << b.transform.scale_.y << ",\n";
-		file << "\"sclZ\": " << b.transform.scale_.z << "\n";
 
-		file << "}\n";
+		file << "scale "
+			<< b.transform.scale_.x << " "
+			<< b.transform.scale_.y << " "
+			<< b.transform.scale_.z << "\n";
 
-		if (i != blocks.size() - 1)
-		{
-			file << ",\n";
-		}
+		file << "---\n";
 	}
-
-	file << "]\n";
-	file << "}\n";
 	file.close();
 }
 
@@ -358,11 +350,53 @@ void MapEditor::Load()
 	string path = OpenFileDialog(false);
 	if (!path.empty()) {
 		std::ifstream file(path);
-		if (!file.is_open()) {
+		if (file.is_open()) {
 			//ブロックの初期化
-			//json読む
-			//データ作る
-			//ステージ生成
+			stage_->ClearBlocks();
+			
+			Block block{};
+			string line;
+
+			//データを読む
+			while (std::getline(file,line))
+			{
+				std::istringstream iss(line);
+
+				string key;
+
+				iss >> key;
+
+				if (key == "type") {
+					int t;
+					iss >> t;
+					block.type = (BLOCK_TYPE)t;
+				}
+				else if (key == "position")	{
+					iss >> block.transform.position_.x
+						>> block.transform.position_.y
+						>> block.transform.position_.z;
+				}
+				else if (key == "rotation") {
+					XMFLOAT4 q;
+					iss >> q.x >> q.y >> q.z >> q.w;
+
+					block.transform.rotate_.quaternion_ = XMVectorSet(q.x, q.y, q.z, q.w);
+				}
+				else if (key == "scale") {
+					iss >> block.transform.scale_.x
+						>> block.transform.scale_.y
+						>> block.transform.scale_.z;
+				}
+				else if (key == "---") {
+					//ステージ生成
+					/*block.type = Model::Load("BoxDefault.fbx");
+					Model::SetTransform(block.type, block.transform);*/
+
+					stage_->AddBlock(block);
+					block = Block{};
+				}
+			}
 		}
 	}
 }
+

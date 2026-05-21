@@ -1,0 +1,1165 @@
+type 9
+position 0 -5 0
+rotation 0 0 0 1
+scale 1 1 1
+---
+type 10
+position 1 -5 0
+rotation 0 0 0 1
+scale 1 1 1
+---
+type 11
+position 2 -5 0
+rotation 0 0 0 1
+scale 1 1 1
+---
+type 12
+position 3 -5 0
+rotation 0 0 0 1
+scale 1 1 1
+---
+type 13
+position 4 -5 0
+rotation 0 0 0 1
+scale 1 1 1
+---
+type 14
+position 5 -5 0
+rotation 0 0 0 1
+scale 1 1 1
+---
+type 15
+position 6 -5 0
+rotation 0 0 0 1
+scale 1 1 1
+---
+type 16
+position 7 -5 0
+rotation 0 0 0 1
+scale 1 1 1
+---
+type 17
+position 8 -5 0
+rotation 0 0 0 1
+scale 1 1 1
+---
+type 18
+position 9 -5 0
+rotation 0 0 0 1
+scale 1 1 1
+---
+type 19
+position 10 -5 0
+rotation 0 0 0 1
+scale 1 1 1
+---
+type 20
+position 11 -5 0
+rotation 0 0 0 1
+scale 1 1 1
+---
+type 21
+position 12 -5 0
+rotation 0 0 0 1
+scale 1 1 1
+---
+type 22
+position 13 -5 0
+rotation 0 0 0 1
+scale 1 1 1
+---
+type 23
+position 14 -5 0
+rotation 0 0 0 1
+scale 1 1 1
+---
+type 24
+position 0 -5 1
+rotation 0 0 0 1
+scale 1 1 1
+---
+type 25
+position 1 -5 1
+rotation 0 0 0 1
+scale 1 1 1
+---
+type 26
+position 2 -5 1
+rotation 0 0 0 1
+scale 1 1 1
+---
+type 27
+position 3 -5 1
+rotation 0 0 0 1
+scale 1 1 1
+---
+type 28
+position 4 -5 1
+rotation 0 0 0 1
+scale 1 1 1
+---
+type 29
+position 5 -5 1
+rotation 0 0 0 1
+scale 1 1 1
+---
+type 30
+position 6 -5 1
+rotation 0 0 0 1
+scale 1 1 1
+---
+type 31
+position 7 -5 1
+rotation 0 0 0 1
+scale 1 1 1
+---
+type 32
+position 8 -5 1
+rotation 0 0 0 1
+scale 1 1 1
+---
+type 33
+position 9 -5 1
+rotation 0 0 0 1
+scale 1 1 1
+---
+type 34
+position 10 -5 1
+rotation 0 0 0 1
+scale 1 1 1
+---
+type 35
+position 11 -5 1
+rotation 0 0 0 1
+scale 1 1 1
+---
+type 36
+position 12 -5 1
+rotation 0 0 0 1
+scale 1 1 1
+---
+type 37
+position 13 -5 1
+rotation 0 0 0 1
+scale 1 1 1
+---
+type 38
+position 14 -5 1
+rotation 0 0 0 1
+scale 1 1 1
+---
+type 39
+position 0 -5 2
+rotation 0 0 0 1
+scale 1 1 1
+---
+type 40
+position 1 -5 2
+rotation 0 0 0 1
+scale 1 1 1
+---
+type 41
+position 2 -5 2
+rotation 0 0 0 1
+scale 1 1 1
+---
+type 42
+position 3 -5 2
+rotation 0 0 0 1
+scale 1 1 1
+---
+type 43
+position 4 -5 2
+rotation 0 0 0 1
+scale 1 1 1
+---
+type 44
+position 5 -5 2
+rotation 0 0 0 1
+scale 1 1 1
+---
+type 45
+position 6 -5 2
+rotation 0 0 0 1
+scale 1 1 1
+---
+type 46
+position 7 -5 2
+rotation 0 0 0 1
+scale 1 1 1
+---
+type 47
+position 8 -5 2
+rotation 0 0 0 1
+scale 1 1 1
+---
+type 48
+position 9 -5 2
+rotation 0 0 0 1
+scale 1 1 1
+---
+type 49
+position 10 -5 2
+rotation 0 0 0 1
+scale 1 1 1
+---
+type 50
+position 11 -5 2
+rotation 0 0 0 1
+scale 1 1 1
+---
+type 51
+position 12 -5 2
+rotation 0 0 0 1
+scale 1 1 1
+---
+type 52
+position 13 -5 2
+rotation 0 0 0 1
+scale 1 1 1
+---
+type 53
+position 14 -5 2
+rotation 0 0 0 1
+scale 1 1 1
+---
+type 54
+position 0 -5 3
+rotation 0 0 0 1
+scale 1 1 1
+---
+type 55
+position 1 -5 3
+rotation 0 0 0 1
+scale 1 1 1
+---
+type 56
+position 2 -5 3
+rotation 0 0 0 1
+scale 1 1 1
+---
+type 57
+position 3 -5 3
+rotation 0 0 0 1
+scale 1 1 1
+---
+type 58
+position 4 -5 3
+rotation 0 0 0 1
+scale 1 1 1
+---
+type 59
+position 5 -5 3
+rotation 0 0 0 1
+scale 1 1 1
+---
+type 60
+position 6 -5 3
+rotation 0 0 0 1
+scale 1 1 1
+---
+type 61
+position 7 -5 3
+rotation 0 0 0 1
+scale 1 1 1
+---
+type 62
+position 8 -5 3
+rotation 0 0 0 1
+scale 1 1 1
+---
+type 63
+position 9 -5 3
+rotation 0 0 0 1
+scale 1 1 1
+---
+type 64
+position 10 -5 3
+rotation 0 0 0 1
+scale 1 1 1
+---
+type 65
+position 11 -5 3
+rotation 0 0 0 1
+scale 1 1 1
+---
+type 66
+position 12 -5 3
+rotation 0 0 0 1
+scale 1 1 1
+---
+type 67
+position 13 -5 3
+rotation 0 0 0 1
+scale 1 1 1
+---
+type 68
+position 14 -5 3
+rotation 0 0 0 1
+scale 1 1 1
+---
+type 69
+position 0 -5 4
+rotation 0 0 0 1
+scale 1 1 1
+---
+type 70
+position 1 -5 4
+rotation 0 0 0 1
+scale 1 1 1
+---
+type 71
+position 2 -5 4
+rotation 0 0 0 1
+scale 1 1 1
+---
+type 72
+position 3 -5 4
+rotation 0 0 0 1
+scale 1 1 1
+---
+type 73
+position 4 -5 4
+rotation 0 0 0 1
+scale 1 1 1
+---
+type 74
+position 5 -5 4
+rotation 0 0 0 1
+scale 1 1 1
+---
+type 75
+position 6 -5 4
+rotation 0 0 0 1
+scale 1 1 1
+---
+type 76
+position 7 -5 4
+rotation 0 0 0 1
+scale 1 1 1
+---
+type 77
+position 8 -5 4
+rotation 0 0 0 1
+scale 1 1 1
+---
+type 78
+position 9 -5 4
+rotation 0 0 0 1
+scale 1 1 1
+---
+type 79
+position 10 -5 4
+rotation 0 0 0 1
+scale 1 1 1
+---
+type 80
+position 11 -5 4
+rotation 0 0 0 1
+scale 1 1 1
+---
+type 81
+position 12 -5 4
+rotation 0 0 0 1
+scale 1 1 1
+---
+type 82
+position 13 -5 4
+rotation 0 0 0 1
+scale 1 1 1
+---
+type 83
+position 14 -5 4
+rotation 0 0 0 1
+scale 1 1 1
+---
+type 84
+position 0 -5 5
+rotation 0 0 0 1
+scale 1 1 1
+---
+type 85
+position 1 -5 5
+rotation 0 0 0 1
+scale 1 1 1
+---
+type 86
+position 2 -5 5
+rotation 0 0 0 1
+scale 1 1 1
+---
+type 87
+position 3 -5 5
+rotation 0 0 0 1
+scale 1 1 1
+---
+type 88
+position 4 -5 5
+rotation 0 0 0 1
+scale 1 1 1
+---
+type 89
+position 5 -5 5
+rotation 0 0 0 1
+scale 1 1 1
+---
+type 90
+position 6 -5 5
+rotation 0 0 0 1
+scale 1 1 1
+---
+type 91
+position 7 -5 5
+rotation 0 0 0 1
+scale 1 1 1
+---
+type 92
+position 8 -5 5
+rotation 0 0 0 1
+scale 1 1 1
+---
+type 93
+position 9 -5 5
+rotation 0 0 0 1
+scale 1 1 1
+---
+type 94
+position 10 -5 5
+rotation 0 0 0 1
+scale 1 1 1
+---
+type 95
+position 11 -5 5
+rotation 0 0 0 1
+scale 1 1 1
+---
+type 96
+position 12 -5 5
+rotation 0 0 0 1
+scale 1 1 1
+---
+type 97
+position 13 -5 5
+rotation 0 0 0 1
+scale 1 1 1
+---
+type 98
+position 14 -5 5
+rotation 0 0 0 1
+scale 1 1 1
+---
+type 99
+position 0 -5 6
+rotation 0 0 0 1
+scale 1 1 1
+---
+type 100
+position 1 -5 6
+rotation 0 0 0 1
+scale 1 1 1
+---
+type 101
+position 2 -5 6
+rotation 0 0 0 1
+scale 1 1 1
+---
+type 102
+position 3 -5 6
+rotation 0 0 0 1
+scale 1 1 1
+---
+type 103
+position 4 -5 6
+rotation 0 0 0 1
+scale 1 1 1
+---
+type 104
+position 5 -5 6
+rotation 0 0 0 1
+scale 1 1 1
+---
+type 105
+position 6 -5 6
+rotation 0 0 0 1
+scale 1 1 1
+---
+type 106
+position 7 -5 6
+rotation 0 0 0 1
+scale 1 1 1
+---
+type 107
+position 8 -5 6
+rotation 0 0 0 1
+scale 1 1 1
+---
+type 108
+position 9 -5 6
+rotation 0 0 0 1
+scale 1 1 1
+---
+type 109
+position 10 -5 6
+rotation 0 0 0 1
+scale 1 1 1
+---
+type 110
+position 11 -5 6
+rotation 0 0 0 1
+scale 1 1 1
+---
+type 111
+position 12 -5 6
+rotation 0 0 0 1
+scale 1 1 1
+---
+type 112
+position 13 -5 6
+rotation 0 0 0 1
+scale 1 1 1
+---
+type 113
+position 14 -5 6
+rotation 0 0 0 1
+scale 1 1 1
+---
+type 114
+position 0 -5 7
+rotation 0 0 0 1
+scale 1 1 1
+---
+type 115
+position 1 -5 7
+rotation 0 0 0 1
+scale 1 1 1
+---
+type 116
+position 2 -5 7
+rotation 0 0 0 1
+scale 1 1 1
+---
+type 117
+position 3 -5 7
+rotation 0 0 0 1
+scale 1 1 1
+---
+type 118
+position 4 -5 7
+rotation 0 0 0 1
+scale 1 1 1
+---
+type 119
+position 5 -5 7
+rotation 0 0 0 1
+scale 1 1 1
+---
+type 120
+position 6 -5 7
+rotation 0 0 0 1
+scale 1 1 1
+---
+type 121
+position 7 -5 7
+rotation 0 0 0 1
+scale 1 1 1
+---
+type 122
+position 8 -5 7
+rotation 0 0 0 1
+scale 1 1 1
+---
+type 123
+position 9 -5 7
+rotation 0 0 0 1
+scale 1 1 1
+---
+type 124
+position 10 -5 7
+rotation 0 0 0 1
+scale 1 1 1
+---
+type 125
+position 11 -5 7
+rotation 0 0 0 1
+scale 1 1 1
+---
+type 126
+position 12 -5 7
+rotation 0 0 0 1
+scale 1 1 1
+---
+type 127
+position 13 -5 7
+rotation 0 0 0 1
+scale 1 1 1
+---
+type 128
+position 14 -5 7
+rotation 0 0 0 1
+scale 1 1 1
+---
+type 129
+position 0 -5 8
+rotation 0 0 0 1
+scale 1 1 1
+---
+type 130
+position 1 -5 8
+rotation 0 0 0 1
+scale 1 1 1
+---
+type 131
+position 2 -5 8
+rotation 0 0 0 1
+scale 1 1 1
+---
+type 132
+position 3 -5 8
+rotation 0 0 0 1
+scale 1 1 1
+---
+type 133
+position 4 -5 8
+rotation 0 0 0 1
+scale 1 1 1
+---
+type 134
+position 5 -5 8
+rotation 0 0 0 1
+scale 1 1 1
+---
+type 135
+position 6 -5 8
+rotation 0 0 0 1
+scale 1 1 1
+---
+type 136
+position 7 -5 8
+rotation 0 0 0 1
+scale 1 1 1
+---
+type 137
+position 8 -5 8
+rotation 0 0 0 1
+scale 1 1 1
+---
+type 138
+position 9 -5 8
+rotation 0 0 0 1
+scale 1 1 1
+---
+type 139
+position 10 -5 8
+rotation 0 0 0 1
+scale 1 1 1
+---
+type 140
+position 11 -5 8
+rotation 0 0 0 1
+scale 1 1 1
+---
+type 141
+position 12 -5 8
+rotation 0 0 0 1
+scale 1 1 1
+---
+type 142
+position 13 -5 8
+rotation 0 0 0 1
+scale 1 1 1
+---
+type 143
+position 14 -5 8
+rotation 0 0 0 1
+scale 1 1 1
+---
+type 144
+position 0 -5 9
+rotation 0 0 0 1
+scale 1 1 1
+---
+type 145
+position 1 -5 9
+rotation 0 0 0 1
+scale 1 1 1
+---
+type 146
+position 2 -5 9
+rotation 0 0 0 1
+scale 1 1 1
+---
+type 147
+position 3 -5 9
+rotation 0 0 0 1
+scale 1 1 1
+---
+type 148
+position 4 -5 9
+rotation 0 0 0 1
+scale 1 1 1
+---
+type 149
+position 5 -5 9
+rotation 0 0 0 1
+scale 1 1 1
+---
+type 150
+position 6 -5 9
+rotation 0 0 0 1
+scale 1 1 1
+---
+type 151
+position 7 -5 9
+rotation 0 0 0 1
+scale 1 1 1
+---
+type 152
+position 8 -5 9
+rotation 0 0 0 1
+scale 1 1 1
+---
+type 153
+position 9 -5 9
+rotation 0 0 0 1
+scale 1 1 1
+---
+type 154
+position 10 -5 9
+rotation 0 0 0 1
+scale 1 1 1
+---
+type 155
+position 11 -5 9
+rotation 0 0 0 1
+scale 1 1 1
+---
+type 156
+position 12 -5 9
+rotation 0 0 0 1
+scale 1 1 1
+---
+type 157
+position 13 -5 9
+rotation 0 0 0 1
+scale 1 1 1
+---
+type 158
+position 14 -5 9
+rotation 0 0 0 1
+scale 1 1 1
+---
+type 159
+position 0 -5 10
+rotation 0 0 0 1
+scale 1 1 1
+---
+type 160
+position 1 -5 10
+rotation 0 0 0 1
+scale 1 1 1
+---
+type 161
+position 2 -5 10
+rotation 0 0 0 1
+scale 1 1 1
+---
+type 162
+position 3 -5 10
+rotation 0 0 0 1
+scale 1 1 1
+---
+type 163
+position 4 -5 10
+rotation 0 0 0 1
+scale 1 1 1
+---
+type 164
+position 5 -5 10
+rotation 0 0 0 1
+scale 1 1 1
+---
+type 165
+position 6 -5 10
+rotation 0 0 0 1
+scale 1 1 1
+---
+type 166
+position 7 -5 10
+rotation 0 0 0 1
+scale 1 1 1
+---
+type 167
+position 8 -5 10
+rotation 0 0 0 1
+scale 1 1 1
+---
+type 168
+position 9 -5 10
+rotation 0 0 0 1
+scale 1 1 1
+---
+type 169
+position 10 -5 10
+rotation 0 0 0 1
+scale 1 1 1
+---
+type 170
+position 11 -5 10
+rotation 0 0 0 1
+scale 1 1 1
+---
+type 171
+position 12 -5 10
+rotation 0 0 0 1
+scale 1 1 1
+---
+type 172
+position 13 -5 10
+rotation 0 0 0 1
+scale 1 1 1
+---
+type 173
+position 14 -5 10
+rotation 0 0 0 1
+scale 1 1 1
+---
+type 174
+position 0 -5 11
+rotation 0 0 0 1
+scale 1 1 1
+---
+type 175
+position 1 -5 11
+rotation 0 0 0 1
+scale 1 1 1
+---
+type 176
+position 2 -5 11
+rotation 0 0 0 1
+scale 1 1 1
+---
+type 177
+position 3 -5 11
+rotation 0 0 0 1
+scale 1 1 1
+---
+type 178
+position 4 -5 11
+rotation 0 0 0 1
+scale 1 1 1
+---
+type 179
+position 5 -5 11
+rotation 0 0 0 1
+scale 1 1 1
+---
+type 180
+position 6 -5 11
+rotation 0 0 0 1
+scale 1 1 1
+---
+type 181
+position 7 -5 11
+rotation 0 0 0 1
+scale 1 1 1
+---
+type 182
+position 8 -5 11
+rotation 0 0 0 1
+scale 1 1 1
+---
+type 183
+position 9 -5 11
+rotation 0 0 0 1
+scale 1 1 1
+---
+type 184
+position 10 -5 11
+rotation 0 0 0 1
+scale 1 1 1
+---
+type 185
+position 11 -5 11
+rotation 0 0 0 1
+scale 1 1 1
+---
+type 186
+position 12 -5 11
+rotation 0 0 0 1
+scale 1 1 1
+---
+type 187
+position 13 -5 11
+rotation 0 0 0 1
+scale 1 1 1
+---
+type 188
+position 14 -5 11
+rotation 0 0 0 1
+scale 1 1 1
+---
+type 189
+position 0 -5 12
+rotation 0 0 0 1
+scale 1 1 1
+---
+type 190
+position 1 -5 12
+rotation 0 0 0 1
+scale 1 1 1
+---
+type 191
+position 2 -5 12
+rotation 0 0 0 1
+scale 1 1 1
+---
+type 192
+position 3 -5 12
+rotation 0 0 0 1
+scale 1 1 1
+---
+type 193
+position 4 -5 12
+rotation 0 0 0 1
+scale 1 1 1
+---
+type 194
+position 5 -5 12
+rotation 0 0 0 1
+scale 1 1 1
+---
+type 195
+position 6 -5 12
+rotation 0 0 0 1
+scale 1 1 1
+---
+type 196
+position 7 -5 12
+rotation 0 0 0 1
+scale 1 1 1
+---
+type 197
+position 8 -5 12
+rotation 0 0 0 1
+scale 1 1 1
+---
+type 198
+position 9 -5 12
+rotation 0 0 0 1
+scale 1 1 1
+---
+type 199
+position 10 -5 12
+rotation 0 0 0 1
+scale 1 1 1
+---
+type 200
+position 11 -5 12
+rotation 0 0 0 1
+scale 1 1 1
+---
+type 201
+position 12 -5 12
+rotation 0 0 0 1
+scale 1 1 1
+---
+type 202
+position 13 -5 12
+rotation 0 0 0 1
+scale 1 1 1
+---
+type 203
+position 14 -5 12
+rotation 0 0 0 1
+scale 1 1 1
+---
+type 204
+position 0 -5 13
+rotation 0 0 0 1
+scale 1 1 1
+---
+type 205
+position 1 -5 13
+rotation 0 0 0 1
+scale 1 1 1
+---
+type 206
+position 2 -5 13
+rotation 0 0 0 1
+scale 1 1 1
+---
+type 207
+position 3 -5 13
+rotation 0 0 0 1
+scale 1 1 1
+---
+type 208
+position 4 -5 13
+rotation 0 0 0 1
+scale 1 1 1
+---
+type 209
+position 5 -5 13
+rotation 0 0 0 1
+scale 1 1 1
+---
+type 210
+position 6 -5 13
+rotation 0 0 0 1
+scale 1 1 1
+---
+type 211
+position 7 -5 13
+rotation 0 0 0 1
+scale 1 1 1
+---
+type 212
+position 8 -5 13
+rotation 0 0 0 1
+scale 1 1 1
+---
+type 213
+position 9 -5 13
+rotation 0 0 0 1
+scale 1 1 1
+---
+type 214
+position 10 -5 13
+rotation 0 0 0 1
+scale 1 1 1
+---
+type 215
+position 11 -5 13
+rotation 0 0 0 1
+scale 1 1 1
+---
+type 216
+position 12 -5 13
+rotation 0 0 0 1
+scale 1 1 1
+---
+type 217
+position 13 -5 13
+rotation 0 0 0 1
+scale 1 1 1
+---
+type 218
+position 14 -5 13
+rotation 0 0 0 1
+scale 1 1 1
+---
+type 219
+position 0 -5 14
+rotation 0 0 0 1
+scale 1 1 1
+---
+type 220
+position 1 -5 14
+rotation 0 0 0 1
+scale 1 1 1
+---
+type 221
+position 2 -5 14
+rotation 0 0 0 1
+scale 1 1 1
+---
+type 222
+position 3 -5 14
+rotation 0 0 0 1
+scale 1 1 1
+---
+type 223
+position 4 -5 14
+rotation 0 0 0 1
+scale 1 1 1
+---
+type 224
+position 5 -5 14
+rotation 0 0 0 1
+scale 1 1 1
+---
+type 225
+position 6 -5 14
+rotation 0 0 0 1
+scale 1 1 1
+---
+type 226
+position 7 -5 14
+rotation 0 0 0 1
+scale 1 1 1
+---
+type 227
+position 8 -5 14
+rotation 0 0 0 1
+scale 1 1 1
+---
+type 228
+position 9 -5 14
+rotation 0 0 0 1
+scale 1 1 1
+---
+type 229
+position 10 -5 14
+rotation 0 0 0 1
+scale 1 1 1
+---
+type 230
+position 11 -5 14
+rotation 0 0 0 1
+scale 1 1 1
+---
+type 231
+position 12 -5 14
+rotation 0 0 0 1
+scale 1 1 1
+---
+type 232
+position 13 -5 14
+rotation 0 0 0 1
+scale 1 1 1
+---
+type 233
+position 14 -5 14
+rotation 0 0 0 1
+scale 1 1 1
+---
+type 234
+position 6 -4 4
+rotation 0 0 0 1
+scale 1 1 1
+---
+type 235
+position 3 -4 3
+rotation 0 0 0 1
+scale 1 1 1
+---
+type 236
+position 3 -4 2
+rotation 0 0 0 1
+scale 1 1 1
+---
+type 237
+position 4 -4 2
+rotation 0 0 0 1
+scale 1 1 1
+---
+type 238
+position 6 -4 1
+rotation 0 0 0 1
+scale 1 1 1
+---
+type 239
+position 6 -4 0
+rotation 0 0 0 1
+scale 1 1 1
+---
+type 240
+position 5 -4 1
+rotation 0 0 0 1
+scale 1 1 1
+---
+type 241
+position 4 -4 1
+rotation 0 0 0 1
+scale 1 1 1
+---

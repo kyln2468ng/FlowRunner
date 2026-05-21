@@ -31,9 +31,10 @@ struct sData
 
 struct Block
 {
-	int type;
-	Transform transform;
+	int handle = -1;
+	BLOCK_TYPE type = BLOCK_TYPE::DEFAULT;
 
+	Transform transform;
 	bool isAlive = true;
 };
 
@@ -83,6 +84,8 @@ public:
 	void DeleteBlock(int index);
 
 	const std::vector<Block>& GetBlocks();
+	void AddBlock(const Block& src);
+	void ClearBlocks();
 
 private:
 	std::vector<Enemy*> enemy_;
