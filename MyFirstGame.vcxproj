@@ -139,6 +139,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="Editor\MapEditor.h" />
+    <ClInclude Include="Engine\Animation.h" />
     <ClInclude Include="Engine\Quaternion.h" />
     <ClInclude Include="Source\Bullet.h" />
     <ClInclude Include="Source\ChildOden.h" />
@@ -171,6 +172,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Editor\MapEditor.cpp" />
+    <ClCompile Include="Engine\Animation.cpp" />
     <ClCompile Include="Engine\Quaternion.cpp" />
     <ClCompile Include="Source\Bullet.cpp" />
     <ClCompile Include="Source\ChildOden.cpp" />

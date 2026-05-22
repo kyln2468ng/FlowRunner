@@ -457,9 +457,6 @@ bool Stage::HitBlock(RayCastData& data, int selfHandle)
 
 void Stage::CreateBlock(XMFLOAT3 pos)
 {
-
-
-
 	Block block{};
 	block.type = DEFAULT;
 
