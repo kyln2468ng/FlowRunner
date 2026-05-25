@@ -7,6 +7,7 @@
 #include "../Engine/SceneManager.h"
 #include "../Engine/Camera.h"
 #include "Stage.h"
+#include "../Engine/Animation.h"
 
 
 namespace
@@ -38,7 +39,8 @@ void Player::Initialize()
 	//pFbx_ = new Fbx;
 	//pFbx_がnullptrじゃなかった時のチェックあったほういい
 	//pFbx_->Load("OdenA.fbx");
-	hModel_ = Model::Load("BoxGrass.fbx");//おでんじゃなくしたら判定取れてた
+	//hModel_ = Model::Load("BoxGrass.fbx");//おでんじゃなくしたら判定取れてた
+	hModel_ = Model::Load("model/testAnim.fbx");
 	assert(hModel_ >= 0);
 	transform_.scale_.x = 1.0f;
 	transform_.scale_.y = 1.0f;
@@ -79,7 +81,6 @@ void Player::Update()
 
 	//coolTime_ -= deltatime_;
 	
-
 
 	//視点移動をする
 	if (Input::IsKey(DIK_RIGHT)) {

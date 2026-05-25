@@ -27,6 +27,14 @@ struct RayCastData
 	
 };
 
+struct Bone
+{
+	//std::string name;
+	FbxNode* node;
+	FbxAMatrix localMatrix;
+	
+};
+
 class Fbx
 {
 public:
@@ -40,6 +48,7 @@ public:
 	void InitConstantBuffer();
 	void InitMaterial(FbxNode* pNode);
 
+	void UpdateAnimation(float frame);
 	void RayCast(RayCastData& rayData);
 private:
 	struct MATERIAL
@@ -79,6 +88,9 @@ private:
 
 	XMFLOAT3 hitPos_;
 	XMFLOAT3 nolmal_;
+
+	float currentFrame_;
+	Bone bones_;
 
 	//auto& arr = ppIndex_[1];
 	//arr[0]Å`arr[index - 1];

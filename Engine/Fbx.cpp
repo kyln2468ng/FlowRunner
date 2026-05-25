@@ -474,6 +474,33 @@ void Fbx::InitMaterial(FbxNode* pNode)
 	}
 }
 
+void Fbx::UpdateAnimation(float frame)
+{
+	FbxTime time;
+
+	time.SetFrame(frame);
+
+	bones_.localMatrix = bones_.node->EvaluateLocalTransform(time);
+
+	//for (auto& bone : bones_)
+	//{
+	//	FbxAMatrix mat = bone.node->EvaluateLocalTransform(time);
+
+	//	bone.localMatrix = mat;
+	//}
+
+	currentFrame_ = frame;
+
+	auto rot = bones_.localMatrix.GetR();
+
+	char buf[128];
+
+	sprintf_s(buf,"rot: %.2f %.2f %.2f\n",
+				rot[0],	rot[1],	rot[2]);
+
+	OutputDebugStringA(buf);
+}
+
 void Fbx::RayCast(RayCastData& rayData)
 {
 	//XMVECTOR start = XMLoadFloat4(&rayData.start);
