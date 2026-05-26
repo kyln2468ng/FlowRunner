@@ -196,37 +196,66 @@ HRESULT Fbx::Load(std::string fileName)
 	fs::current_path(currPath);
 
 	//マネージャを生成
-	FbxManager* pFbxManager = FbxManager::Create();
+	pFbxManager_ = fbxsdk::FbxManager::Create();
 
 	//インポーターを生成
-	FbxImporter* fbxImporter = FbxImporter::Create(pFbxManager, "imp");
-	fbxImporter->Initialize(fileName.c_str(), -1, pFbxManager->GetIOSettings());
+	FbxImporter* fbxImporter = fbxsdk::FbxImporter::Create(pFbxManager_, "imp");
+	fbxImporter->Initialize(fileName.c_str(), -1, pFbxManager_->GetIOSettings());
 
 	//シーンオブジェクトにFBXファイルの情報を流し込む
-	FbxScene* pFbxScene = FbxScene::Create(pFbxManager, "fbxscene");
-	fbxImporter->Import(pFbxScene);
+	pFbxScene_ = fbxsdk::FbxScene::Create(pFbxManager_, "fbxscene");
+	fbxImporter->Import(pFbxScene_);
 	fbxImporter->Destroy();
 
 	//メッシュ情報を取得
-	FbxNode* rootNode = pFbxScene->GetRootNode();
-	FbxNode* pNode = rootNode->GetChild(0);
-	FbxMesh* mesh = pNode->GetMesh();
+	pRootNode_ = pFbxScene_->GetRootNode();
+	/*FbxNode* pNode = pRootNode_->GetChild(0);
+	bones_.node = pNode;*/
+
+	FbxNode* meshNode = nullptr;
+
+	// Root直下探索
+	for (int i = 0; i < pRootNode_->GetChildCount(); i++) {
+		FbxNode* node =	pRootNode_->GetChild(i);
+
+		auto* attr = node->GetNodeAttribute();
+
+		if (attr) {
+			// Bone
+			if (attr->GetAttributeType() == FbxNodeAttribute::eSkeleton) {
+				bones_.node = node;
+			}
+
+			// Mesh
+			if (attr->GetAttributeType() == FbxNodeAttribute::eMesh) {
+				meshNode = node;
+			}
+		}
+
+	}
+
+	// mesh node取得失敗
+	if (!meshNode) {
+		return E_FAIL;
+	}
+
+	FbxMesh* mesh = meshNode->GetMesh();
 
 	//各情報の個数を取得
 
 	vertexCount_ = mesh->GetControlPointsCount();	//頂点の数
 	polygonCount_ = mesh->GetPolygonCount();	//ポリゴンの数
-	materialCount_ = pNode->GetMaterialCount();
+	materialCount_ = meshNode->GetMaterialCount();
 
 	InitVertex(mesh);		//頂点バッファ準備
 	InitIndex(mesh);		//インデックスバッファ準備
 	InitConstantBuffer();	//コンスタントバッファ準備
-	InitMaterial(pNode);
+	InitMaterial(meshNode);
 
 	fs::current_path(basePath);
 
 	//マネージャ解放
-	pFbxManager->Destroy();
+	//pFbxManager_->Destroy();
 
 	return S_OK;
 }
@@ -292,6 +321,7 @@ void Fbx::Draw(Transform& transform)
 
 void Fbx::Release()
 {
+	pFbxManager_->Destroy();
 }
 
 void Fbx::InitVertex(FbxMesh* mesh)
@@ -476,10 +506,9 @@ void Fbx::InitMaterial(FbxNode* pNode)
 
 void Fbx::UpdateAnimation(float frame)
 {
-	FbxTime time;
+	fbxsdk::FbxTime time;
 
 	time.SetFrame(frame);
-
 	bones_.localMatrix = bones_.node->EvaluateLocalTransform(time);
 
 	//for (auto& bone : bones_)
@@ -490,15 +519,20 @@ void Fbx::UpdateAnimation(float frame)
 	//}
 
 	currentFrame_ = frame;
-
-	auto rot = bones_.localMatrix.GetR();
+	
+	auto rot = bones_.localMatrix.GetT();
 
 	char buf[128];
+	char name[256];
 
 	sprintf_s(buf,"rot: %.2f %.2f %.2f\n",
 				rot[0],	rot[1],	rot[2]);
 
+	sprintf_s(name, "node: %s\n",
+		bones_.node->GetName());
+
 	OutputDebugStringA(buf);
+	OutputDebugStringA(name);
 }
 
 void Fbx::RayCast(RayCastData& rayData)

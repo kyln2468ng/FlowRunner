@@ -29,9 +29,14 @@ struct RayCastData
 
 struct Bone
 {
-	//std::string name;
+	std::string name;
+
 	FbxNode* node;
+
 	FbxAMatrix localMatrix;
+	FbxAMatrix globalMatrix;
+
+	int parentIndex;
 	
 };
 
@@ -88,6 +93,10 @@ private:
 
 	XMFLOAT3 hitPos_;
 	XMFLOAT3 nolmal_;
+
+	FbxManager* pFbxManager_;
+	FbxScene* pFbxScene_;
+	FbxNode* pRootNode_;
 
 	float currentFrame_;
 	Bone bones_;

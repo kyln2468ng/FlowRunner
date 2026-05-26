@@ -7,7 +7,6 @@
 #include "../Engine/SceneManager.h"
 #include "../Engine/Camera.h"
 #include "Stage.h"
-#include "../Engine/Animation.h"
 
 
 namespace
@@ -62,6 +61,10 @@ void Player::Initialize()
 	onGround_ = false;
 	isWall_ = false;
 	velocity_ = { 0.0f, 0.0f, 0.0f };
+	anim_.Initialize();
+	anim_.SetMaxFrame(60.0f);
+	model_ = new Fbx();
+	model_->Load("model/testAnim.fbx");
 }
 
 void Player::Update()
@@ -81,6 +84,10 @@ void Player::Update()
 
 	//coolTime_ -= deltatime_;
 	
+	
+	anim_.Update(1.0f);
+
+	model_->UpdateAnimation(anim_.GetTime());
 
 	//Ž‹“_ˆÚ“®‚ð‚·‚é
 	if (Input::IsKey(DIK_RIGHT)) {

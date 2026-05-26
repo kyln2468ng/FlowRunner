@@ -1,6 +1,8 @@
 #pragma once
 #include "../Engine/GameObject.h"
 #include "PlayerParamConfig.h"
+#include "../Engine/Animation.h"
+#include "../Engine/Fbx.h"
 
 class ChildOden;
 class Bullet;
@@ -48,5 +50,7 @@ private:
 
 	bool isWall_;
 	XMFLOAT3 wallNormal_;
+	Animation anim_;
+	Fbx* model_;
 };
 
