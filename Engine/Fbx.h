@@ -42,10 +42,14 @@ public:
 
 	void UpdateAnimation(float frame);
 	void BoneHierarchy();
+	void UpdateBoneMatrices();
+	void OutputBoneMatrices();
+
 	void CollectBone(FbxNode* node);
 	int FindBoneIndex(FbxNode* node);
 	FbxNode* FindMeshNode(FbxNode* node);
 
+	XMMATRIX ToMatrix(const FbxMatrix& mat);
 	void RayCast(RayCastData& rayData);
 private:
 	struct MATERIAL
@@ -78,6 +82,8 @@ private:
 		FbxAMatrix localMatrix;
 		FbxAMatrix globalMatrix;
 
+		FbxAMatrix offsetMatrix;
+
 		int parentIndex;
 	};
 
@@ -88,6 +94,7 @@ private:
 	ID3D11Buffer* pVertexBuffer_;
 	ID3D11Buffer** pIndexBuffer_;
 	ID3D11Buffer* pConstantBuffer_;
+	ID3D11Buffer* pBoneConstantBuffer_;
 
 	std::vector<MATERIAL> pMaterialList_;
 	std::vector<int> indexCount_; // マテリアルごとのインデックス数

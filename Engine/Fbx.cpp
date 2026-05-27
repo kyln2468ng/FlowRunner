@@ -220,6 +220,13 @@ HRESULT Fbx::Load(std::string fileName)
 		bone.parentIndex = FindBoneIndex(bone.node->GetParent());
 	}
 
+	FbxTime bindTime;
+	bindTime.SetFrame(0);
+	for (auto& bone : bones_) {
+		bone.offsetMatrix = bone.node->EvaluateGlobalTransform(bindTime).Inverse();
+	}
+	
+
 	// Mesh‚Í•Ê‚ÅŽæ“¾
 	meshNode = FindMeshNode(pRootNode_);
 
@@ -534,6 +541,30 @@ void Fbx::BoneHierarchy()
 	}
 }
 
+void Fbx::UpdateBoneMatrices()
+{
+	boneMatrix_.resize(bones_.size());
+
+	for (int i = 0; i < bones_.size(); i++) {
+		boneMatrix_[i] = ToMatrix(bones_[i].offsetMatrix * bones_[i].globalMatrix);
+	}
+}
+
+void Fbx::OutputBoneMatrices()
+{
+	// GPU“]‘—
+	D3D11_MAPPED_SUBRESOURCE mapped;
+
+	Direct3D::pContext->Map(pBoneConstantBuffer_, 0, D3D11_MAP_WRITE_DISCARD, 0, &mapped);
+
+	memcpy(mapped.pData, boneMatrix_.data(), sizeof(XMMATRIX) * boneMatrix_.size());
+
+	Direct3D::pContext->Unmap(pBoneConstantBuffer_, 0);
+
+	Direct3D::pContext->VSSetConstantBuffers(1, 1, &pBoneConstantBuffer_);
+}
+
+
 void Fbx::CollectBone(FbxNode* node)
 {
 	
@@ -571,6 +602,16 @@ FbxNode* Fbx::FindMeshNode(FbxNode* node)
 		}
 	}
 	return nullptr;
+}
+
+XMMATRIX Fbx::ToMatrix(const FbxMatrix& mat)
+{
+	return XMMATRIX(
+		(float)mat[0][0], (float)mat[0][1], (float)mat[0][2], (float)mat[0][3],
+		(float)mat[1][0], (float)mat[1][1], (float)mat[1][2], (float)mat[1][3],
+		(float)mat[2][0], (float)mat[2][1], (float)mat[2][2], (float)mat[2][3],
+		(float)mat[3][0], (float)mat[3][1], (float)mat[3][2], (float)mat[3][3]
+	);
 }
 
 void Fbx::RayCast(RayCastData& rayData)
