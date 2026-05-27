@@ -208,31 +208,20 @@ HRESULT Fbx::Load(std::string fileName)
 	fbxImporter->Destroy();
 
 	//メッシュ情報を取得
-	pRootNode_ = pFbxScene_->GetRootNode();
-	/*FbxNode* pNode = pRootNode_->GetChild(0);
-	bones_.node = pNode;*/
-
 	FbxNode* meshNode = nullptr;
 
-	// Root直下探索
-	for (int i = 0; i < pRootNode_->GetChildCount(); i++) {
-		FbxNode* node =	pRootNode_->GetChild(i);
+	// Root取得
+	pRootNode_ = pFbxScene_->GetRootNode();
 
-		auto* attr = node->GetNodeAttribute();
+	// ボーン全部取得
+	CollectBone(pRootNode_);
 
-		if (attr) {
-			// Bone
-			if (attr->GetAttributeType() == FbxNodeAttribute::eSkeleton) {
-				bones_.node = node;
-			}
-
-			// Mesh
-			if (attr->GetAttributeType() == FbxNodeAttribute::eMesh) {
-				meshNode = node;
-			}
-		}
-
+	for (auto& bone : bones_) {
+		bone.parentIndex = FindBoneIndex(bone.node->GetParent());
 	}
+
+	// Meshは別で取得
+	meshNode = FindMeshNode(pRootNode_);
 
 	// mesh node取得失敗
 	if (!meshNode) {
@@ -509,30 +498,79 @@ void Fbx::UpdateAnimation(float frame)
 	fbxsdk::FbxTime time;
 
 	time.SetFrame(frame);
-	bones_.localMatrix = bones_.node->EvaluateLocalTransform(time);
 
-	//for (auto& bone : bones_)
-	//{
-	//	FbxAMatrix mat = bone.node->EvaluateLocalTransform(time);
-
-	//	bone.localMatrix = mat;
-	//}
+	for (auto& bone : bones_) {
+		bone.localMatrix = bone.node->EvaluateLocalTransform(time);
+	}
 
 	currentFrame_ = frame;
 	
-	auto rot = bones_.localMatrix.GetT();
+	//auto rot = bones_.localMatrix.GetT();
 
-	char buf[128];
-	char name[256];
+	//char buf[128];
+	//char name[256];
 
-	sprintf_s(buf,"rot: %.2f %.2f %.2f\n",
-				rot[0],	rot[1],	rot[2]);
+	//sprintf_s(buf,"rot: %.2f %.2f %.2f\n",
+	//			rot[0],	rot[1],	rot[2]);
 
-	sprintf_s(name, "node: %s\n",
-		bones_.node->GetName());
+	//sprintf_s(name, "node: %s\n",
+	//	bones_.node->GetName());
 
-	OutputDebugStringA(buf);
-	OutputDebugStringA(name);
+	//OutputDebugStringA(buf);
+	//OutputDebugStringA(name);
+}
+
+void Fbx::BoneHierarchy()
+{
+	for (int i = 0; i < bones_.size(); i++) {
+		auto& bone = bones_[i];
+
+		if (bone.parentIndex == -1)	{
+			bone.globalMatrix = bone.localMatrix;
+		}
+		else {
+			bone.globalMatrix =	bones_[bone.parentIndex].globalMatrix * bone.localMatrix;
+		}
+	}
+}
+
+void Fbx::CollectBone(FbxNode* node)
+{
+	
+	if (node->GetNodeAttribute() &&	node->GetNodeAttribute()->GetAttributeType() == FbxNodeAttribute::eSkeleton) {
+		Bone b;
+		b.node = node;
+		bones_.push_back(b);
+	}
+	for (int i = 0; i < node->GetChildCount(); i++)
+	{
+		CollectBone(node->GetChild(i));
+	}
+}
+
+int Fbx::FindBoneIndex(FbxNode* node)
+{
+	for (int i = 0;i < bones_.size();i++) {
+		if (bones_[i].node == node)
+			return i;
+	}
+}
+
+FbxNode* Fbx::FindMeshNode(FbxNode* node)
+{
+	if (node) {
+		auto* attr = node->GetNodeAttribute();
+
+		if (attr && attr->GetAttributeType() == FbxNodeAttribute::eMesh)
+			return node;
+
+		for (int i = 0; i < node->GetChildCount(); i++) {
+			FbxNode* res = FindMeshNode(node->GetChild(i));
+			if (res) 
+				return res;
+		}
+	}
+	return nullptr;
 }
 
 void Fbx::RayCast(RayCastData& rayData)

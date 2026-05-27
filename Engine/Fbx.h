@@ -24,20 +24,7 @@ struct RayCastData
 	XMFLOAT3 localHit;
 	XMFLOAT3 hitNormal; // ヒットした面の法線
 
-	
-};
 
-struct Bone
-{
-	std::string name;
-
-	FbxNode* node;
-
-	FbxAMatrix localMatrix;
-	FbxAMatrix globalMatrix;
-
-	int parentIndex;
-	
 };
 
 class Fbx
@@ -54,6 +41,11 @@ public:
 	void InitMaterial(FbxNode* pNode);
 
 	void UpdateAnimation(float frame);
+	void BoneHierarchy();
+	void CollectBone(FbxNode* node);
+	int FindBoneIndex(FbxNode* node);
+	FbxNode* FindMeshNode(FbxNode* node);
+
 	void RayCast(RayCastData& rayData);
 private:
 	struct MATERIAL
@@ -75,6 +67,18 @@ private:
 		XMVECTOR position;
 		XMVECTOR uv;
 		XMVECTOR normal;
+	};
+
+	struct Bone
+	{
+		std::string name;
+
+		FbxNode* node;
+
+		FbxAMatrix localMatrix;
+		FbxAMatrix globalMatrix;
+
+		int parentIndex;
 	};
 
 	int vertexCount_;	//頂点数
@@ -99,7 +103,8 @@ private:
 	FbxNode* pRootNode_;
 
 	float currentFrame_;
-	Bone bones_;
+	std::vector<Bone> bones_;
+	std::vector<XMMATRIX> boneMatrix_;
 
 	//auto& arr = ppIndex_[1];
 	//arr[0]～arr[index - 1];
