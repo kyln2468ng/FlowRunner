@@ -49,6 +49,8 @@ public:
 	int FindBoneIndex(FbxNode* node);
 	FbxNode* FindMeshNode(FbxNode* node);
 
+	void LoadBoneWeight(FbxMesh* mesh);
+
 	XMMATRIX ToMatrix(const FbxMatrix& mat);
 	void RayCast(RayCastData& rayData);
 private:
@@ -71,6 +73,9 @@ private:
 		XMVECTOR position;
 		XMVECTOR uv;
 		XMVECTOR normal;
+
+		UINT boneIndex[4];
+		float weight[4];
 	};
 
 	struct Bone

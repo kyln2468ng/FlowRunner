@@ -237,9 +237,34 @@ HRESULT Fbx::Load(std::string fileName)
 
 	FbxMesh* mesh = meshNode->GetMesh();
 
-	//各情報の個数を取得
+	// 頂点数確保
+	vertexCount_ = mesh->GetControlPointsCount();//頂点の数
+	pVertices_.resize(vertexCount_);
 
-	vertexCount_ = mesh->GetControlPointsCount();	//頂点の数
+	// ウェイト読み込み
+	LoadBoneWeight(mesh);
+	for (int i = 0; i < 10; i++)
+	{
+		char buf[256];
+
+		sprintf_s(
+			buf,
+			"V%d : B[%d,%d,%d,%d] W[%.2f,%.2f,%.2f,%.2f]\n",
+			i,
+			pVertices_[i].boneIndex[0],
+			pVertices_[i].boneIndex[1],
+			pVertices_[i].boneIndex[2],
+			pVertices_[i].boneIndex[3],
+			pVertices_[i].weight[0],
+			pVertices_[i].weight[1],
+			pVertices_[i].weight[2],
+			pVertices_[i].weight[3]
+		);
+
+		OutputDebugStringA(buf);
+	}
+
+	//各情報の個数を取得
 	polygonCount_ = mesh->GetPolygonCount();	//ポリゴンの数
 	materialCount_ = meshNode->GetMaterialCount();
 
@@ -602,6 +627,43 @@ FbxNode* Fbx::FindMeshNode(FbxNode* node)
 		}
 	}
 	return nullptr;
+}
+
+void Fbx::LoadBoneWeight(FbxMesh* mesh)
+{
+	int skinCount = mesh->GetDeformerCount(FbxDeformer::eSkin);
+
+	for (int skinIndex = 0; skinIndex < skinCount; skinIndex++)	{
+		FbxSkin* skin =	(FbxSkin*)mesh->GetDeformer(skinIndex, FbxDeformer::eSkin);
+
+		int clusterCount = skin->GetClusterCount();
+
+		for (int clusterIndex = 0; clusterIndex < clusterCount; clusterIndex++)	{
+			FbxCluster* cluster = skin->GetCluster(clusterIndex);
+
+			FbxNode* boneNode = cluster->GetLink();
+
+			int boneIndex = FindBoneIndex(boneNode);
+
+			int* indices = cluster->GetControlPointIndices();
+			double* weights = cluster->GetControlPointWeights();
+
+			int count = cluster->GetControlPointIndicesCount();
+
+			for (int i = 0; i < count; i++)	{
+				int vertexId = indices[i];
+				float weight = (float)weights[i];
+
+				for (int slot = 0; slot < 4; slot++) {
+					if (pVertices_[vertexId].weight[slot] == 0.0f) {
+						pVertices_[vertexId].boneIndex[slot] = boneIndex;
+						pVertices_[vertexId].weight[slot] = weight;
+						break;
+					}
+				}
+			}
+		}
+	}
 }
 
 XMMATRIX Fbx::ToMatrix(const FbxMatrix& mat)

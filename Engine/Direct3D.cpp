@@ -19,6 +19,8 @@ namespace Direct3D
         ID3D11RasterizerState* pRasterizerState;	//ラスタライザー
     };
 
+    ID3D11Buffer* pBoneConstantBuffer = nullptr; //骨のコンスタントバッファ
+
     ID3D11VertexShader* pVertexShader = nullptr;	//頂点シェーダー
     ID3D11PixelShader* pPixelShader = nullptr;		//ピクセルシェーダー
 
@@ -30,6 +32,7 @@ namespace Direct3D
 
 HRESULT Direct3D::InitShader()
 {
+    InitBoneConstantBuffer();
     if (FAILED(InitShader3D()))
     {
         return E_FAIL;
@@ -121,8 +124,10 @@ HRESULT Direct3D::InitShader3D()
         { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0,  D3D11_INPUT_PER_VERTEX_DATA, 0 },	//位置
         { "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, sizeof(XMVECTOR)  , D3D11_INPUT_PER_VERTEX_DATA, 0 },//UV座標
         { "NORMAL",	0, DXGI_FORMAT_R32G32B32_FLOAT, 0, sizeof(XMVECTOR) * 2 ,	D3D11_INPUT_PER_VERTEX_DATA, 0 },//法線
+        { "BLENDINDICES",  0, DXGI_FORMAT_R32G32B32A32_UINT,    0, 48, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+        { "BLENDWEIGHT",   0, DXGI_FORMAT_R32G32B32A32_FLOAT,   0, 64, D3D11_INPUT_PER_VERTEX_DATA, 0 }
     };
-    hr = pDevice->CreateInputLayout(layout, 3, pCompileVS->GetBufferPointer(), pCompileVS->GetBufferSize(), &(shaderBundle[SHADER_3D].pVertexLayout));
+    hr = pDevice->CreateInputLayout(layout, 5, pCompileVS->GetBufferPointer(), pCompileVS->GetBufferSize(), &(shaderBundle[SHADER_3D].pVertexLayout));
 
     if (FAILED(hr))
     {
@@ -181,9 +186,11 @@ HRESULT Direct3D::InitShader2D()
     D3D11_INPUT_ELEMENT_DESC layout[] = {
         { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0,  D3D11_INPUT_PER_VERTEX_DATA, 0 },	//位置
         { "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, sizeof(XMVECTOR)  , D3D11_INPUT_PER_VERTEX_DATA, 0 },//UV座標
-        { "NORMAL", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, sizeof(XMVECTOR) * 2, D3D11_INPUT_PER_VERTEX_DATA, 0}
+        { "NORMAL", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, sizeof(XMVECTOR) * 2, D3D11_INPUT_PER_VERTEX_DATA, 0},
+        { "BLENDINDICES",  0, DXGI_FORMAT_R32G32B32A32_UINT,    0, 48, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+        { "BLENDWEIGHT",   0, DXGI_FORMAT_R32G32B32A32_FLOAT,   0, 64, D3D11_INPUT_PER_VERTEX_DATA, 0 }
     };
-    hr = pDevice->CreateInputLayout(layout, 3, pCompileVS->GetBufferPointer(), pCompileVS->GetBufferSize(), &(shaderBundle[SHADER_2D].pVertexLayout));
+    hr = pDevice->CreateInputLayout(layout, 5, pCompileVS->GetBufferPointer(), pCompileVS->GetBufferSize(), &(shaderBundle[SHADER_2D].pVertexLayout));
 
     if (FAILED(hr))
     {
@@ -219,6 +226,28 @@ HRESULT Direct3D::InitShader2D()
     //pContext->RSSetState(pRasterizerState);		//ラスタライザー
 
     return S_OK; // サクセスおｋ　※問題なしって返す
+}
+
+HRESULT Direct3D::InitBoneConstantBuffer()
+{
+    D3D11_BUFFER_DESC bd = {};
+
+    bd.ByteWidth = sizeof(XMMATRIX) * 128;
+    bd.Usage = D3D11_USAGE_DYNAMIC;
+    bd.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+    bd.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+
+    HRESULT hr;
+
+    hr = pDevice->CreateBuffer(&bd, nullptr, &pBoneConstantBuffer);
+
+    if (FAILED(hr))
+    {
+        MessageBox(nullptr, L"ボーンコンスタントバッファの作成に失敗しました", L"エラー", MB_OK);
+        return hr;
+    }
+
+    return S_OK;
 }
 
 void Direct3D::SetShader(SHADER_TYPE type)

@@ -21,10 +21,14 @@ namespace Direct3D // namespace==グローバル関数
 {
 	extern ID3D11Device* pDevice;
 	extern ID3D11DeviceContext* pContext;
+	extern ID3D11Buffer* pBoneConstantBuffer;
+
 	// シェーダー準備
 	HRESULT InitShader();
 	HRESULT InitShader3D(); // 2D用シェーダー初期化
 	HRESULT InitShader2D();	// 3D用シェーダー初期化
+
+	HRESULT InitBoneConstantBuffer();
 
 	void SetShader(SHADER_TYPE type); // シェーダーのセット
 
