@@ -14,6 +14,7 @@ enum SHADER_TYPE
 {
 	SHADER_3D,//3D用シェーダー
 	SHADER_2D,//2D用シェーダー
+	SHADER_SKINNING_ANIM,
 	SHADER_MAX//シェーダーの最大数
 };
 
@@ -21,12 +22,13 @@ namespace Direct3D // namespace==グローバル関数
 {
 	extern ID3D11Device* pDevice;
 	extern ID3D11DeviceContext* pContext;
-	extern ID3D11Buffer* pBoneConstantBuffer;
+	extern ID3D11Buffer* pBoneConstantBuffer_;
 
 	// シェーダー準備
 	HRESULT InitShader();
 	HRESULT InitShader3D(); // 2D用シェーダー初期化
 	HRESULT InitShader2D();	// 3D用シェーダー初期化
+	HRESULT InitShaderSkinning(); //スキニングのアニメーションのシェーダ初期化
 
 	HRESULT InitBoneConstantBuffer();
 
@@ -34,9 +36,6 @@ namespace Direct3D // namespace==グローバル関数
 
 	//初期化
 	HRESULT Initialize(int winW, int winH, HWND hWnd);
-
-	////シェーダー準備
-	//HRESULT InitShader();
 
 	//描画開始
 	void BeginDraw();

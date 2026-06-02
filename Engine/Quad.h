@@ -17,7 +17,7 @@ struct CONSTANT_BUFFER
 };
 
 //í∏ì_èÓïÒ
-struct VERTEX
+struct QUAD_VERTEX
 {
 	XMVECTOR position;
 	XMVECTOR uv;

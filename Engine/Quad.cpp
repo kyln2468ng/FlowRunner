@@ -30,7 +30,7 @@ HRESULT Quad::Initialize()
 	//};
 
 	// 縦横2の乗数
-	VERTEX vertices[] =
+	QUAD_VERTEX vertices[] =
 	{
 		// 面1 正面
 		{ XMVectorSet(-1.0f,  1.0f, -1.0f, 1.0f), XMVectorSet(0.0f,  0.0f, 0.0f, 0.0f),XMVectorSet(0.0f, 0.0f, -1.0f, 0.0f) },   // 四角形の頂点（左上）
@@ -170,7 +170,7 @@ void Quad::Draw(XMMATRIX& worldMatrix)
 	Direct3D::pContext->Unmap(pConstantBuffer_, 0);	//再開
 
 	//頂点バッファ
-	UINT stride = sizeof(VERTEX);
+	UINT stride = sizeof(QUAD_VERTEX);
 	UINT offset = 0;
 	Direct3D::pContext->IASetVertexBuffers(0, 1, &pVertexBuffer_, &stride, &offset);
 

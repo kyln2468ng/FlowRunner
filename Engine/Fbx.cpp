@@ -242,7 +242,7 @@ HRESULT Fbx::Load(std::string fileName)
 	pVertices_.resize(vertexCount_);
 
 	// ウェイト読み込み
-	LoadBoneWeight(mesh);
+	/*LoadBoneWeight(mesh);
 	for (int i = 0; i < 10; i++)
 	{
 		char buf[256];
@@ -262,7 +262,7 @@ HRESULT Fbx::Load(std::string fileName)
 		);
 
 		OutputDebugStringA(buf);
-	}
+	}*/
 
 	//各情報の個数を取得
 	polygonCount_ = mesh->GetPolygonCount();	//ポリゴンの数
@@ -283,7 +283,13 @@ HRESULT Fbx::Load(std::string fileName)
 
 void Fbx::Draw(Transform& transform)
 {
-	Direct3D::SetShader(SHADER_3D); // シェーダーの設定
+	
+	UpdateAnimation(currentFrame_);
+	BoneHierarchy();
+	UpdateBoneMatrices();
+	OutputBoneMatrices();
+
+	Direct3D::SetShader(SHADER_SKINNING_ANIM); // シェーダーの設定
 	transform.Calculation();
 
 	CONSTANT_BUFFER cb;
@@ -292,7 +298,7 @@ void Fbx::Draw(Transform& transform)
 
 
 	//頂点バッファ
-	UINT stride = sizeof(VERTEX);
+	UINT stride = sizeof(FBX_VERTEX);
 	UINT offset = 0;
 	Direct3D::pContext->IASetVertexBuffers(0, 1, &pVertexBuffer_, &stride, &offset);
 
@@ -381,7 +387,7 @@ void Fbx::InitVertex(FbxMesh* mesh)
 
 	// 頂点データ用バッファの設定
 	D3D11_BUFFER_DESC bd_vertex;
-	bd_vertex.ByteWidth = sizeof(VERTEX) * vertexCount_;
+	bd_vertex.ByteWidth = sizeof(FBX_VERTEX) * vertexCount_;
 	bd_vertex.Usage = D3D11_USAGE_DEFAULT;
 	bd_vertex.BindFlags = D3D11_BIND_VERTEX_BUFFER;
 	bd_vertex.CPUAccessFlags = 0;
@@ -570,9 +576,23 @@ void Fbx::UpdateBoneMatrices()
 {
 	boneMatrix_.resize(bones_.size());
 
-	for (int i = 0; i < bones_.size(); i++) {
-		boneMatrix_[i] = ToMatrix(bones_[i].offsetMatrix * bones_[i].globalMatrix);
+	if (boneMatrix_.empty()) {
+		return;
 	}
+
+	for (int i = 0; i < bones_.size(); i++) {
+		boneMatrix_[i] = XMMatrixTranspose(ToMatrix(bones_[i].offsetMatrix * bones_[i].globalMatrix));
+	}
+
+	XMFLOAT4X4 m;
+	XMStoreFloat4x4(&m, boneMatrix_[0]);
+
+	char buf[256];
+	sprintf_s(buf,
+		"m00=%f m11=%f m22=%f m33=%f\n",
+		m._11, m._22, m._33, m._44);
+
+	OutputDebugStringA(buf);
 }
 
 void Fbx::OutputBoneMatrices()
@@ -580,13 +600,19 @@ void Fbx::OutputBoneMatrices()
 	// GPU転送
 	D3D11_MAPPED_SUBRESOURCE mapped;
 
-	Direct3D::pContext->Map(pBoneConstantBuffer_, 0, D3D11_MAP_WRITE_DISCARD, 0, &mapped);
+	if (!Direct3D::pDevice || !Direct3D::pContext || !Direct3D::pBoneConstantBuffer_)
+	{
+		return;
+	}
+
+	Direct3D::pContext->Map(Direct3D::pBoneConstantBuffer_,	0, D3D11_MAP_WRITE_DISCARD,	0, &mapped);
 
 	memcpy(mapped.pData, boneMatrix_.data(), sizeof(XMMATRIX) * boneMatrix_.size());
 
-	Direct3D::pContext->Unmap(pBoneConstantBuffer_, 0);
+	Direct3D::pContext->Unmap(Direct3D::pBoneConstantBuffer_, 0);
 
-	Direct3D::pContext->VSSetConstantBuffers(1, 1, &pBoneConstantBuffer_);
+	Direct3D::pContext->VSSetConstantBuffers(1, 1, &Direct3D::pBoneConstantBuffer_);
+
 }
 
 
@@ -610,6 +636,7 @@ int Fbx::FindBoneIndex(FbxNode* node)
 		if (bones_[i].node == node)
 			return i;
 	}
+	return -1;
 }
 
 FbxNode* Fbx::FindMeshNode(FbxNode* node)
@@ -792,9 +819,9 @@ void Fbx::RayCast(RayCastData& rayData)
 		//全ポリゴンに対して
 		for (int i = 0; i < (int)indices.size(); i += 3)
 		{
-			VERTEX& V0 = pVertices_[indices[i + 0]];
-			VERTEX& V1 = pVertices_[indices[i + 1]];
-			VERTEX& V2 = pVertices_[indices[i + 2]];
+			FBX_VERTEX& V0 = pVertices_[indices[i + 0]];
+			FBX_VERTEX& V1 = pVertices_[indices[i + 1]];
+			FBX_VERTEX& V2 = pVertices_[indices[i + 2]];
 	
 			float t;
 			bool result = TriangleTests::Intersects(

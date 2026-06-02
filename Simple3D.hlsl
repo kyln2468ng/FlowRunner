@@ -26,9 +26,6 @@ struct VS_OUT
     float4 pos : SV_POSITION; //位置
     float2 uv : TEXCOORD; //UV座標
     float4 color : COLOR; //色（明るさ）
-    
-    uint4 boneIndex : BLENDINDICES;
-    float4 weight : BLENDWEIGHT;
 };
 
 //───────────────────────────────────────
@@ -38,7 +35,7 @@ VS_OUT VS(float4 pos : POSITION, float4 uv : TEXCOORD, float4 normal : NORMAL)
 {
 	//ピクセルシェーダーへ渡す情報
     VS_OUT outData;
-
+    
 	//ローカル座標に、ワールド・ビュー・プロジェクション行列をかけて
 	//スクリーン座標に変換し、ピクセルシェーダーへ
     outData.pos = mul(pos, matWVP);
@@ -52,7 +49,7 @@ VS_OUT VS(float4 pos : POSITION, float4 uv : TEXCOORD, float4 normal : NORMAL)
     float4 light = float4(-1, 0.5, -0.7, 0);
     light = normalize(light);
     outData.color = dot(normal, light);
-
+    
 	//まとめて出力
     return outData;
 }

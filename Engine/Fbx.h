@@ -27,6 +27,16 @@ struct RayCastData
 
 };
 
+struct FBX_VERTEX
+{
+	XMVECTOR position;
+	XMVECTOR uv;
+	XMVECTOR normal;
+
+	UINT boneIndex[4];
+	float weight[4];
+};
+
 class Fbx
 {
 public:
@@ -68,16 +78,6 @@ private:
 		BOOL		materialFlag; // マテリアルがあるかないか
 	};
 
-	struct VERTEX
-	{
-		XMVECTOR position;
-		XMVECTOR uv;
-		XMVECTOR normal;
-
-		UINT boneIndex[4];
-		float weight[4];
-	};
-
 	struct Bone
 	{
 		std::string name;
@@ -99,12 +99,12 @@ private:
 	ID3D11Buffer* pVertexBuffer_;
 	ID3D11Buffer** pIndexBuffer_;
 	ID3D11Buffer* pConstantBuffer_;
-	ID3D11Buffer* pBoneConstantBuffer_;
+	//ID3D11Buffer* pBoneConstantBuffer_;
 
 	std::vector<MATERIAL> pMaterialList_;
 	std::vector<int> indexCount_; // マテリアルごとのインデックス数
 
-	std::vector<VERTEX>                 pVertices_;        // 頂点データ全部
+	std::vector<FBX_VERTEX>             pVertices_;        // 頂点データ全部
 	std::vector<std::vector<int>>       ppIndex_;   // マテリアルごとのインデックスデータ[material][index]
 
 	XMFLOAT3 hitPos_;

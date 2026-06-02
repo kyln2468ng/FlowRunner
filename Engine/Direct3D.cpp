@@ -1,6 +1,7 @@
 #include <d3dcompiler.h>
 #include "Direct3D.h"
 #include "Quad.h"
+#include "Fbx.h"
 
 namespace Direct3D
 {
@@ -19,7 +20,7 @@ namespace Direct3D
         ID3D11RasterizerState* pRasterizerState;	//ラスタライザー
     };
 
-    ID3D11Buffer* pBoneConstantBuffer = nullptr; //骨のコンスタントバッファ
+    ID3D11Buffer* pBoneConstantBuffer_ = nullptr; //骨のコンスタントバッファ
 
     ID3D11VertexShader* pVertexShader = nullptr;	//頂点シェーダー
     ID3D11PixelShader* pPixelShader = nullptr;		//ピクセルシェーダー
@@ -32,12 +33,19 @@ namespace Direct3D
 
 HRESULT Direct3D::InitShader()
 {
-    InitBoneConstantBuffer();
     if (FAILED(InitShader3D()))
     {
         return E_FAIL;
     }
     if (FAILED(InitShader2D()))
+    {
+        return E_FAIL;
+    }
+    if (FAILED(InitBoneConstantBuffer()))
+    {
+        return E_FAIL;
+    }
+    if (FAILED(InitShaderSkinning()))
     {
         return E_FAIL;
     }
@@ -124,10 +132,8 @@ HRESULT Direct3D::InitShader3D()
         { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0,  D3D11_INPUT_PER_VERTEX_DATA, 0 },	//位置
         { "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, sizeof(XMVECTOR)  , D3D11_INPUT_PER_VERTEX_DATA, 0 },//UV座標
         { "NORMAL",	0, DXGI_FORMAT_R32G32B32_FLOAT, 0, sizeof(XMVECTOR) * 2 ,	D3D11_INPUT_PER_VERTEX_DATA, 0 },//法線
-        { "BLENDINDICES",  0, DXGI_FORMAT_R32G32B32A32_UINT,    0, 48, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-        { "BLENDWEIGHT",   0, DXGI_FORMAT_R32G32B32A32_FLOAT,   0, 64, D3D11_INPUT_PER_VERTEX_DATA, 0 }
     };
-    hr = pDevice->CreateInputLayout(layout, 5, pCompileVS->GetBufferPointer(), pCompileVS->GetBufferSize(), &(shaderBundle[SHADER_3D].pVertexLayout));
+    hr = pDevice->CreateInputLayout(layout, 3, pCompileVS->GetBufferPointer(), pCompileVS->GetBufferSize(), &(shaderBundle[SHADER_3D].pVertexLayout));
 
     if (FAILED(hr))
     {
@@ -186,11 +192,9 @@ HRESULT Direct3D::InitShader2D()
     D3D11_INPUT_ELEMENT_DESC layout[] = {
         { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0,  D3D11_INPUT_PER_VERTEX_DATA, 0 },	//位置
         { "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, sizeof(XMVECTOR)  , D3D11_INPUT_PER_VERTEX_DATA, 0 },//UV座標
-        { "NORMAL", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, sizeof(XMVECTOR) * 2, D3D11_INPUT_PER_VERTEX_DATA, 0},
-        { "BLENDINDICES",  0, DXGI_FORMAT_R32G32B32A32_UINT,    0, 48, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-        { "BLENDWEIGHT",   0, DXGI_FORMAT_R32G32B32A32_FLOAT,   0, 64, D3D11_INPUT_PER_VERTEX_DATA, 0 }
+        //{ "NORMAL", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, sizeof(XMVECTOR) * 2, D3D11_INPUT_PER_VERTEX_DATA, 0}
     };
-    hr = pDevice->CreateInputLayout(layout, 5, pCompileVS->GetBufferPointer(), pCompileVS->GetBufferSize(), &(shaderBundle[SHADER_2D].pVertexLayout));
+    hr = pDevice->CreateInputLayout(layout, 2, pCompileVS->GetBufferPointer(), pCompileVS->GetBufferSize(), &(shaderBundle[SHADER_2D].pVertexLayout));
 
     if (FAILED(hr))
     {
@@ -228,6 +232,69 @@ HRESULT Direct3D::InitShader2D()
     return S_OK; // サクセスおｋ　※問題なしって返す
 }
 
+HRESULT Direct3D::InitShaderSkinning()
+{
+    HRESULT hr;
+
+    // 頂点シェーダの作成（コンパイル）
+    ID3DBlob* pCompileVS = nullptr;
+    D3DCompileFromFile(L"Skinning3D.hlsl", nullptr, nullptr, "VS", "vs_5_0", NULL, 0, &pCompileVS, NULL);
+    assert(pCompileVS != nullptr);
+
+    hr = pDevice->CreateVertexShader(pCompileVS->GetBufferPointer(), pCompileVS->GetBufferSize(), NULL, &(shaderBundle[SHADER_SKINNING_ANIM].pVertexShader));
+
+    if (FAILED(hr))
+    {
+        MessageBox(nullptr, L"頂点シェーダーの作成に失敗しました", L"エラー", MB_OK);
+        return hr;
+    }
+
+    //頂点インプットレイアウト
+    D3D11_INPUT_ELEMENT_DESC layout[] = {
+        { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0,  D3D11_INPUT_PER_VERTEX_DATA, 0 },	//位置
+        { "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 16  , D3D11_INPUT_PER_VERTEX_DATA, 0 },//UV座標
+        { "NORMAL",	0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 32,	D3D11_INPUT_PER_VERTEX_DATA, 0 },//法線
+        { "BLENDINDICES",  0, DXGI_FORMAT_R32G32B32A32_UINT,    0, 48, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+        { "BLENDWEIGHT",   0, DXGI_FORMAT_R32G32B32A32_FLOAT,   0, 64, D3D11_INPUT_PER_VERTEX_DATA, 0 }
+    };
+    hr = pDevice->CreateInputLayout(layout, 5, pCompileVS->GetBufferPointer(), pCompileVS->GetBufferSize(), &(shaderBundle[SHADER_SKINNING_ANIM].pVertexLayout));
+
+    if (FAILED(hr))
+    {
+        MessageBox(nullptr, L"頂点インプットレイアウトの作成に失敗しました", L"エラー", MB_OK);
+        return hr;
+    }
+
+    // ピクセルシェーダの作成（コンパイル）
+    ID3DBlob* pCompilePS = nullptr;
+    D3DCompileFromFile(L"Skinning3D.hlsl", nullptr, nullptr, "PS", "ps_5_0", NULL, 0, &pCompilePS, NULL);
+    assert(pCompilePS != nullptr);
+    hr = pDevice->CreatePixelShader(pCompilePS->GetBufferPointer(), pCompilePS->GetBufferSize(), NULL, &(shaderBundle[SHADER_SKINNING_ANIM].pPixelShader));
+    if (FAILED(hr))
+    {
+        MessageBox(nullptr, L"ピクセルシェーダーの作成に失敗しました", L"エラー", MB_OK);
+        return hr;
+    }
+
+    pCompileVS->Release();
+    pCompilePS->Release();
+
+    //ラスタライザ作成
+    D3D11_RASTERIZER_DESC rdc = {};
+    rdc.CullMode = D3D11_CULL_BACK;
+    rdc.FillMode = D3D11_FILL_SOLID;
+    rdc.FrontCounterClockwise = FALSE;
+    pDevice->CreateRasterizerState(&rdc, &(shaderBundle[SHADER_SKINNING_ANIM].pRasterizerState));
+
+    //それぞれをデバイスコンテキストにセット
+    //pContext->VSSetShader(pVertexShader, NULL, 0);	//頂点シェーダー
+    //pContext->PSSetShader(pPixelShader, NULL, 0);	//ピクセルシェーダー
+    //pContext->IASetInputLayout(pVertexLayout);	//頂点インプットレイアウト
+    //pContext->RSSetState(pRasterizerState);		//ラスタライザー
+
+    return S_OK; // サクセスおｋ　※問題なしって返す
+}
+
 HRESULT Direct3D::InitBoneConstantBuffer()
 {
     D3D11_BUFFER_DESC bd = {};
@@ -239,7 +306,7 @@ HRESULT Direct3D::InitBoneConstantBuffer()
 
     HRESULT hr;
 
-    hr = pDevice->CreateBuffer(&bd, nullptr, &pBoneConstantBuffer);
+    hr = pDevice->CreateBuffer(&bd, nullptr, &pBoneConstantBuffer_);
 
     if (FAILED(hr))
     {
