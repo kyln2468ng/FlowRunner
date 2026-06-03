@@ -287,7 +287,7 @@ void Fbx::Draw(Transform& transform)
 	UpdateAnimation(currentFrame_);
 	BoneHierarchy();
 	UpdateBoneMatrices();
-	OutputBoneMatrices();
+	Direct3D::UpdateBoneBuffer(boneMatrix_);
 
 	Direct3D::SetShader(SHADER_SKINNING_ANIM); // シェーダーの設定
 	transform.Calculation();
@@ -295,8 +295,7 @@ void Fbx::Draw(Transform& transform)
 	CONSTANT_BUFFER cb;
 	cb.matWVP = XMMatrixTranspose(transform.GetWorldMatrix() * Camera::GetViewMatrix() * Camera::GetProjectionMatrix());
 	cb.matNormal = transform.GetNormalMatrix();
-
-
+	
 	//頂点バッファ
 	UINT stride = sizeof(FBX_VERTEX);
 	UINT offset = 0;
@@ -356,7 +355,7 @@ void Fbx::InitVertex(FbxMesh* mesh)
 	//頂点情報を入れる配列
 	//VERTEX* vertices = new VERTEX[vertexCount_];
 	pVertices_.resize(vertexCount_);
-	
+
 	//全ポリゴン
 	for (long poly = 0; poly < polygonCount_; poly++)
 	{
@@ -594,27 +593,6 @@ void Fbx::UpdateBoneMatrices()
 
 	OutputDebugStringA(buf);
 }
-
-void Fbx::OutputBoneMatrices()
-{
-	// GPU転送
-	D3D11_MAPPED_SUBRESOURCE mapped;
-
-	if (!Direct3D::pDevice || !Direct3D::pContext || !Direct3D::pBoneConstantBuffer_)
-	{
-		return;
-	}
-
-	Direct3D::pContext->Map(Direct3D::pBoneConstantBuffer_,	0, D3D11_MAP_WRITE_DISCARD,	0, &mapped);
-
-	memcpy(mapped.pData, boneMatrix_.data(), sizeof(XMMATRIX) * boneMatrix_.size());
-
-	Direct3D::pContext->Unmap(Direct3D::pBoneConstantBuffer_, 0);
-
-	Direct3D::pContext->VSSetConstantBuffers(1, 1, &Direct3D::pBoneConstantBuffer_);
-
-}
-
 
 void Fbx::CollectBone(FbxNode* node)
 {

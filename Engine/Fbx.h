@@ -53,7 +53,6 @@ public:
 	void UpdateAnimation(float frame);
 	void BoneHierarchy();
 	void UpdateBoneMatrices();
-	void OutputBoneMatrices();
 
 	void CollectBone(FbxNode* node);
 	int FindBoneIndex(FbxNode* node);

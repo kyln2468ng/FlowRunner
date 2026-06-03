@@ -2,6 +2,8 @@
 //#include <winddi.h>
 #include <d3d11.h>
 #include <assert.h>
+#include <vector>
+#include <DirectXMath.h>
 
 //リンカ
 #pragma comment(lib, "d3d11.lib")
@@ -33,6 +35,7 @@ namespace Direct3D // namespace==グローバル関数
 	HRESULT InitBoneConstantBuffer();
 
 	void SetShader(SHADER_TYPE type); // シェーダーのセット
+	void UpdateBoneBuffer(const std::vector<DirectX::XMMATRIX>& bones);
 
 	//初期化
 	HRESULT Initialize(int winW, int winH, HWND hWnd);

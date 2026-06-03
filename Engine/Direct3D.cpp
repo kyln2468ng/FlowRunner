@@ -313,7 +313,7 @@ HRESULT Direct3D::InitBoneConstantBuffer()
         MessageBox(nullptr, L"ボーンコンスタントバッファの作成に失敗しました", L"エラー", MB_OK);
         return hr;
     }
-
+    rdc
     return S_OK;
 }
 
@@ -323,6 +323,25 @@ void Direct3D::SetShader(SHADER_TYPE type)
     pContext->PSSetShader(shaderBundle[type].pPixelShader, NULL, 0);	//ピクセルシェーダー
     pContext->IASetInputLayout(shaderBundle[type].pVertexLayout);	//頂点インプットレイアウト
     pContext->RSSetState(shaderBundle[type].pRasterizerState);		//ラスタライザー
+}
+
+void Direct3D::UpdateBoneBuffer(const std::vector<XMMATRIX>& bones)
+{
+    // GPU転送
+    D3D11_MAPPED_SUBRESOURCE mapped;
+
+    if (!pDevice || !pContext || !pBoneConstantBuffer_)
+    {
+        return;
+    }
+
+    Direct3D::pContext->Map(pBoneConstantBuffer_, 0, D3D11_MAP_WRITE_DISCARD, 0, &mapped);
+
+    memcpy(mapped.pData, bones.data(), sizeof(XMMATRIX) * bones.size());
+
+    Direct3D::pContext->Unmap(pBoneConstantBuffer_, 0);
+
+    Direct3D::pContext->VSSetConstantBuffers(1, 1, &pBoneConstantBuffer_);
 }
 
 HRESULT Direct3D::Initialize(int winW, int winH, HWND hWnd)
