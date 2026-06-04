@@ -242,27 +242,7 @@ HRESULT Fbx::Load(std::string fileName)
 	pVertices_.resize(vertexCount_);
 
 	// ウェイト読み込み
-	/*LoadBoneWeight(mesh);
-	for (int i = 0; i < 10; i++)
-	{
-		char buf[256];
-
-		sprintf_s(
-			buf,
-			"V%d : B[%d,%d,%d,%d] W[%.2f,%.2f,%.2f,%.2f]\n",
-			i,
-			pVertices_[i].boneIndex[0],
-			pVertices_[i].boneIndex[1],
-			pVertices_[i].boneIndex[2],
-			pVertices_[i].boneIndex[3],
-			pVertices_[i].weight[0],
-			pVertices_[i].weight[1],
-			pVertices_[i].weight[2],
-			pVertices_[i].weight[3]
-		);
-
-		OutputDebugStringA(buf);
-	}*/
+	LoadBoneWeight(mesh);
 
 	//各情報の個数を取得
 	polygonCount_ = mesh->GetPolygonCount();	//ポリゴンの数
@@ -283,13 +263,41 @@ HRESULT Fbx::Load(std::string fileName)
 
 void Fbx::Draw(Transform& transform)
 {
-	
-	UpdateAnimation(currentFrame_);
 	BoneHierarchy();
 	UpdateBoneMatrices();
 	Direct3D::UpdateBoneBuffer(boneMatrix_);
+	
+	
+	/*if (!boneMatrix_.empty())
+	{
+		XMFLOAT4X4 m;
+		XMStoreFloat4x4(&m, boneMatrix_[0]);
 
-	Direct3D::SetShader(SHADER_SKINNING_ANIM); // シェーダーの設定
+		char buf[512];
+		sprintf_s(buf,
+			"%f %f %f %f\n"
+			"%f %f %f %f\n"
+			"%f %f %f %f\n"
+			"%f %f %f %f\n",
+			m._11, m._12, m._13, m._14,
+			m._21, m._22, m._23, m._24,
+			m._31, m._32, m._33, m._34,
+			m._41, m._42, m._43, m._44);
+
+		OutputDebugStringA(buf);
+	}*/
+
+	
+
+	if (!bones_.empty())
+	{
+		Direct3D::SetShader(SHADER_SKINNING_ANIM);
+		Direct3D::UpdateBoneBuffer(boneMatrix_);
+	}
+	else
+	{
+		Direct3D::SetShader(SHADER_3D);
+	}
 	transform.Calculation();
 
 	CONSTANT_BUFFER cb;
@@ -299,6 +307,7 @@ void Fbx::Draw(Transform& transform)
 	//頂点バッファ
 	UINT stride = sizeof(FBX_VERTEX);
 	UINT offset = 0;
+
 	Direct3D::pContext->IASetVertexBuffers(0, 1, &pVertexBuffer_, &stride, &offset);
 
 	for (int i = 0; i < materialCount_;i++)
@@ -542,19 +551,16 @@ void Fbx::UpdateAnimation(float frame)
 
 	currentFrame_ = frame;
 	
-	//auto rot = bones_.localMatrix.GetT();
+	char buf[128];
+	sprintf_s(buf,
+		"this=%p frame=%f\n",
+		this,
+		frame);
+	OutputDebugStringA(buf);
 
-	//char buf[128];
-	//char name[256];
-
-	//sprintf_s(buf,"rot: %.2f %.2f %.2f\n",
-	//			rot[0],	rot[1],	rot[2]);
-
-	//sprintf_s(name, "node: %s\n",
-	//	bones_.node->GetName());
-
+	//char buf[256];
+	//sprintf_s(buf, "bone count = %d\n", (int)bones_.size());
 	//OutputDebugStringA(buf);
-	//OutputDebugStringA(name);
 }
 
 void Fbx::BoneHierarchy()
@@ -583,13 +589,23 @@ void Fbx::UpdateBoneMatrices()
 		boneMatrix_[i] = XMMatrixTranspose(ToMatrix(bones_[i].offsetMatrix * bones_[i].globalMatrix));
 	}
 
-	XMFLOAT4X4 m;
-	XMStoreFloat4x4(&m, boneMatrix_[0]);
+	auto m = ToMatrix(
+		bones_[0].offsetMatrix *
+		bones_[0].globalMatrix);
 
-	char buf[256];
+	XMFLOAT4X4 f;
+	XMStoreFloat4x4(&f, m);
+
+	char buf[512];
 	sprintf_s(buf,
-		"m00=%f m11=%f m22=%f m33=%f\n",
-		m._11, m._22, m._33, m._44);
+		"%f %f %f %f\n"
+		"%f %f %f %f\n"
+		"%f %f %f %f\n"
+		"%f %f %f %f\n",
+		f._11, f._12, f._13, f._14,
+		f._21, f._22, f._23, f._24,
+		f._31, f._32, f._33, f._34,
+		f._41, f._42, f._43, f._44);
 
 	OutputDebugStringA(buf);
 }
@@ -649,7 +665,7 @@ void Fbx::LoadBoneWeight(FbxMesh* mesh)
 			FbxNode* boneNode = cluster->GetLink();
 
 			int boneIndex = FindBoneIndex(boneNode);
-
+						
 			int* indices = cluster->GetControlPointIndices();
 			double* weights = cluster->GetControlPointWeights();
 

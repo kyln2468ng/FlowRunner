@@ -213,7 +213,7 @@
       <Filter>ソース ファイル\Editor</Filter>
     </ClCompile>
     <ClCompile Include="Engine\Animation.cpp">
-      <Filter>ソース ファイル</Filter>
+      <Filter>ソース ファイル\Engine</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
