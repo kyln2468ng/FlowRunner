@@ -556,7 +556,7 @@ void Fbx::UpdateAnimation(float frame)
 		"this=%p frame=%f\n",
 		this,
 		frame);
-	OutputDebugStringA(buf);
+	//OutputDebugStringA(buf);
 
 	//char buf[256];
 	//sprintf_s(buf, "bone count = %d\n", (int)bones_.size());
@@ -580,44 +580,89 @@ void Fbx::BoneHierarchy()
 void Fbx::UpdateBoneMatrices()
 {
 	boneMatrix_.resize(bones_.size());
+	//if (bones_.size() > 0)
+	//	OutputDebugStringA(("BoneCount = " + std::to_string(bones_.size()) + "\n").c_str());
+	//
 
 	if (boneMatrix_.empty()) {
+		
 		return;
 	}
+	/*FbxTime t;
+		t.SetFrame(0);
+
+		auto fbxGlobal = bones_[0].node->EvaluateGlobalTransform(t);
+
+		auto myGlobal = bones_[0].globalMatrix;
+
+		char buf[512];
+
+		sprintf_s(buf,
+			"FBX Global : %f %f %f\n"
+			"My  Global : %f %f %f\n",
+			fbxGlobal[3][0],
+			fbxGlobal[3][1],
+			fbxGlobal[3][2],
+			myGlobal[3][0],
+			myGlobal[3][1],
+			myGlobal[3][2]);
+
+		OutputDebugStringA(buf);*/
 
 	for (int i = 0; i < bones_.size(); i++) {
 		boneMatrix_[i] = XMMatrixTranspose(ToMatrix(bones_[i].offsetMatrix * bones_[i].globalMatrix));
 	}
 
-	auto m = ToMatrix(
-		bones_[0].offsetMatrix *
-		bones_[0].globalMatrix);
+	//offsetマトリックスのデバッグ用
+	//auto& m = bones_[0].offsetMatrix;
 
-	XMFLOAT4X4 f;
-	XMStoreFloat4x4(&f, m);
+	//char buf[512];
 
-	char buf[512];
-	sprintf_s(buf,
-		"%f %f %f %f\n"
-		"%f %f %f %f\n"
-		"%f %f %f %f\n"
-		"%f %f %f %f\n",
-		f._11, f._12, f._13, f._14,
-		f._21, f._22, f._23, f._24,
-		f._31, f._32, f._33, f._34,
-		f._41, f._42, f._43, f._44);
+	//sprintf_s(buf,
+	//	"FBX OFFSET\n"
+	//	"%f %f %f %f\n"
+	//	"%f %f %f %f\n"
+	//	"%f %f %f %f\n"
+	//	"%f %f %f %f\n",
+	//	m[0][0], m[0][1], m[0][2], m[0][3],
+	//	m[1][0], m[1][1], m[1][2], m[1][3],
+	//	m[2][0], m[2][1], m[2][2], m[2][3],
+	//	m[3][0], m[3][1], m[3][2], m[3][3]);
 
-	OutputDebugStringA(buf);
+	//OutputDebugStringA(buf);
+
+
+	//auto m = ToMatrix(
+	//	bones_[0].offsetMatrix *
+	//	bones_[0].globalMatrix);
+
+
+	//XMFLOAT4X4 f;
+	//XMStoreFloat4x4(&f, m);
+
+	//char buf[512];
+	//sprintf_s(buf,
+	//	"%f %f %f %f\n"
+	//	"%f %f %f %f\n"
+	//	"%f %f %f %f\n"
+	//	"%f %f %f %f\n",
+	//	f._11, f._12, f._13, f._14,
+	//	f._21, f._22, f._23, f._24,
+	//	f._31, f._32, f._33, f._34,
+	//	f._41, f._42, f._43, f._44);
+
+	//OutputDebugStringA(buf);
 }
 
 void Fbx::CollectBone(FbxNode* node)
 {
-	
 	if (node->GetNodeAttribute() &&	node->GetNodeAttribute()->GetAttributeType() == FbxNodeAttribute::eSkeleton) {
 		Bone b;
 		b.node = node;
 		bones_.push_back(b);
 	}
+	
+
 	for (int i = 0; i < node->GetChildCount(); i++)
 	{
 		CollectBone(node->GetChild(i));
@@ -687,7 +732,7 @@ void Fbx::LoadBoneWeight(FbxMesh* mesh)
 	}
 }
 
-XMMATRIX Fbx::ToMatrix(const FbxMatrix& mat)
+XMMATRIX Fbx::ToMatrix(const FbxMatrix& mat)//
 {
 	return XMMATRIX(
 		(float)mat[0][0], (float)mat[0][1], (float)mat[0][2], (float)mat[0][3],

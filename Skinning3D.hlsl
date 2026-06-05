@@ -47,7 +47,12 @@ VS_OUT VS(float4 pos : POSITION, float4 uv : TEXCOORD, float4 normal : NORMAL, u
     //                   bones[boneIndex.z] * weight.z + bones[boneIndex.w] * weight.w;
         
     float4x4 skinMat = bones[0];
-
+    
+    //float4x4 skinMat = float4x4(
+    //1, 0, 0, 0,
+    //0, 1, 0, 0,
+    //0, 0, 1, 0,
+    //0, 0, 0, 1);
     pos = mul(pos, skinMat);
     
     //pos = mul(pos, skinMat);
