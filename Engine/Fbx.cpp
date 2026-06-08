@@ -220,11 +220,11 @@ HRESULT Fbx::Load(std::string fileName)
 		bone.parentIndex = FindBoneIndex(bone.node->GetParent());
 	}
 
-	FbxTime bindTime;
+	/*FbxTime bindTime;
 	bindTime.SetFrame(0);
 	for (auto& bone : bones_) {
 		bone.offsetMatrix = bone.node->EvaluateGlobalTransform(bindTime).Inverse();
-	}
+	}*/
 	
 
 	// Meshは別で取得
@@ -263,36 +263,15 @@ HRESULT Fbx::Load(std::string fileName)
 
 void Fbx::Draw(Transform& transform)
 {
-	BoneHierarchy();
+	//BoneHierarchy();
 	UpdateBoneMatrices();
-	Direct3D::UpdateBoneBuffer(boneMatrix_);
-	
-	
-	/*if (!boneMatrix_.empty())
-	{
-		XMFLOAT4X4 m;
-		XMStoreFloat4x4(&m, boneMatrix_[0]);
-
-		char buf[512];
-		sprintf_s(buf,
-			"%f %f %f %f\n"
-			"%f %f %f %f\n"
-			"%f %f %f %f\n"
-			"%f %f %f %f\n",
-			m._11, m._12, m._13, m._14,
-			m._21, m._22, m._23, m._24,
-			m._31, m._32, m._33, m._34,
-			m._41, m._42, m._43, m._44);
-
-		OutputDebugStringA(buf);
-	}*/
-
-	
 
 	if (!bones_.empty())
-	{
+	{		
+
 		Direct3D::SetShader(SHADER_SKINNING_ANIM);
 		Direct3D::UpdateBoneBuffer(boneMatrix_);
+
 	}
 	else
 	{
@@ -546,21 +525,28 @@ void Fbx::UpdateAnimation(float frame)
 	time.SetFrame(frame);
 
 	for (auto& bone : bones_) {
-		bone.localMatrix = bone.node->EvaluateLocalTransform(time);
+		bone.globalMatrix = bone.node->EvaluateGlobalTransform(time);
 	}
 
 	currentFrame_ = frame;
 	
-	char buf[128];
+	/*char buf[128];
 	sprintf_s(buf,
 		"this=%p frame=%f\n",
 		this,
-		frame);
+		frame);*/
 	//OutputDebugStringA(buf);
 
-	//char buf[256];
-	//sprintf_s(buf, "bone count = %d\n", (int)bones_.size());
-	//OutputDebugStringA(buf);
+	auto& g = bones_[0].globalMatrix;
+
+	char buf[256];
+	sprintf_s(buf,
+		"GLOBAL POS = %f %f %f\n",
+		g[3][0],
+		g[3][1],
+		g[3][2]);
+
+	OutputDebugStringA(buf);
 }
 
 void Fbx::BoneHierarchy()
@@ -609,9 +595,48 @@ void Fbx::UpdateBoneMatrices()
 
 		OutputDebugStringA(buf);*/
 
+
+
 	for (int i = 0; i < bones_.size(); i++) {
 		boneMatrix_[i] = XMMatrixTranspose(ToMatrix(bones_[i].offsetMatrix * bones_[i].globalMatrix));
 	}
+
+	if (!boneMatrix_.empty())
+	{
+		XMFLOAT4X4 m;
+		XMStoreFloat4x4(&m, boneMatrix_[0]);
+
+		char buf[512];
+
+		sprintf_s(buf,
+			"BONEMATRIX\n"
+			"%f %f %f %f\n"
+			"%f %f %f %f\n"
+			"%f %f %f %f\n"
+			"%f %f %f %f\n",
+			m._11, m._12, m._13, m._14,
+			m._21, m._22, m._23, m._24,
+			m._31, m._32, m._33, m._34,
+			m._41, m._42, m._43, m._44);
+
+		//OutputDebugStringA(buf);
+
+		auto& off = bones_[0].offsetMatrix;
+		auto& glo = bones_[0].globalMatrix;
+
+		sprintf_s(buf,
+		"OFFSET\n"
+		"%f %f %f %f\n"
+		"%f %f %f %f\n"
+		"%f %f %f %f\n"
+		"%f %f %f %f\n",
+		off[0][0], off[0][1], off[0][2], off[0][3],
+		off[1][0], off[1][1], off[1][2], off[1][3],
+		off[2][0], off[2][1], off[2][2], off[2][3],
+		off[3][0], off[3][1], off[3][2], off[3][3]);
+		//OutputDebugStringA(buf);
+	}
+
 
 	//offsetマトリックスのデバッグ用
 	//auto& m = bones_[0].offsetMatrix;
@@ -710,7 +735,18 @@ void Fbx::LoadBoneWeight(FbxMesh* mesh)
 			FbxNode* boneNode = cluster->GetLink();
 
 			int boneIndex = FindBoneIndex(boneNode);
-						
+			
+			FbxAMatrix transformMatrix;
+			cluster->GetTransformMatrix(transformMatrix);
+
+			FbxAMatrix transformLinkMatrix;
+			cluster->GetTransformLinkMatrix(transformLinkMatrix);
+
+			if (boneIndex >= 0)
+			{
+				bones_[boneIndex].offsetMatrix =
+					transformLinkMatrix.Inverse() * transformMatrix;
+			}
 			int* indices = cluster->GetControlPointIndices();
 			double* weights = cluster->GetControlPointWeights();
 
