@@ -262,45 +262,17 @@ HRESULT Fbx::Load(std::string fileName)
 }
 
 void Fbx::Draw(Transform& transform)
-{
-	/*char buf[128];
-	sprintf_s(buf,
-		"DRAW this=%p bones=%d\n",
-		this,
-		(int)bones_.size());*/
-	//OutputDebugStringA(buf);
-	
-	auto m = transform.GetWorldMatrix();
-
-	XMFLOAT4X4 f;
-	XMStoreFloat4x4(&f, m);
-
-	char buf[512];
-	sprintf_s(buf,
-		"WORLD\n"
-		"%f %f %f %f\n"
-		"%f %f %f %f\n"
-		"%f %f %f %f\n"
-		"%f %f %f %f\n",
-		f._11, f._12, f._13, f._14,
-		f._21, f._22, f._23, f._24,
-		f._31, f._32, f._33, f._34,
-		f._41, f._42, f._43, f._44);
-
-	//OutputDebugStringA(buf);
-	
+{	
 	//BoneHierarchy();
 	UpdateBoneMatrices();
 
-	if (!bones_.empty())
-	{		
+	if (!bones_.empty()) {		
 
 		Direct3D::SetShader(SHADER_SKINNING_ANIM);
 		Direct3D::UpdateBoneBuffer(boneMatrix_);
 
 	}
-	else
-	{
+	else {
 		Direct3D::SetShader(SHADER_3D);
 	}
 	transform.Calculation();
@@ -312,7 +284,7 @@ void Fbx::Draw(Transform& transform)
 	//頂点バッファ
 	UINT stride = sizeof(FBX_VERTEX);
 	UINT offset = 0;
-
+	
 	Direct3D::pContext->IASetVertexBuffers(0, 1, &pVertexBuffer_, &stride, &offset);
 
 	for (int i = 0; i < materialCount_;i++)
@@ -559,34 +531,10 @@ void Fbx::UpdateAnimation(float frame)
 	time.SetFrame(frame);
 
 	for (auto& bone : bones_) {
-		if (!bone.node)
-		{
-			OutputDebugStringA("bone.node == nullptr\n");
-			continue;
-		}
-
 		bone.globalMatrix = bone.node->EvaluateGlobalTransform(time);
 	}
 
 	currentFrame_ = frame;
-	
-	/*char buf[128];
-	sprintf_s(buf,
-		"this=%p frame=%f\n",
-		this,
-		frame);*/
-	//OutputDebugStringA(buf);
-
-	auto& g = bones_[0].globalMatrix;
-
-	char buf[256];
-	sprintf_s(buf,
-		"GLOBAL POS = %f %f %f\n",
-		g[3][0],
-		g[3][1],
-		g[3][2]);
-
-	//OutputDebugStringA(buf);
 }
 
 void Fbx::BoneHierarchy()
@@ -605,128 +553,16 @@ void Fbx::BoneHierarchy()
 
 void Fbx::UpdateBoneMatrices()
 {
-	
 	boneMatrix_.resize(bones_.size());
-	//if (bones_.size() > 0)
-	//	OutputDebugStringA(("BoneCount = " + std::to_string(bones_.size()) + "\n").c_str());
-	//
 
 	if (boneMatrix_.empty()) {
 		
 		return;
 	}
-	/*FbxTime t;
-		t.SetFrame(0);
-
-		auto fbxGlobal = bones_[0].node->EvaluateGlobalTransform(t);
-
-		auto myGlobal = bones_[0].globalMatrix;
-
-		char buf[512];
-
-		sprintf_s(buf,
-			"FBX Global : %f %f %f\n"
-			"My  Global : %f %f %f\n",
-			fbxGlobal[3][0],
-			fbxGlobal[3][1],
-			fbxGlobal[3][2],
-			myGlobal[3][0],
-			myGlobal[3][1],
-			myGlobal[3][2]);
-
-		OutputDebugStringA(buf);*/
-
-
 
 	for (int i = 0; i < bones_.size(); i++) {
 		boneMatrix_[i] = ToMatrix(bones_[i].offsetMatrix * bones_[i].globalMatrix);
-		
-		if (!boneMatrix_.empty())
-		{
-			auto& g = bones_[0].globalMatrix;
-			char buf[512];
-			sprintf_s(buf,
-				"GLOBAL [3] = %f %f %f\n",
-				(float)g[3][0],
-				(float)g[3][1],
-				(float)g[3][2]);
-
-			//OutputDebugStringA(buf);
-		}
 	}
-
-	if (!boneMatrix_.empty())
-	{
-		XMFLOAT4X4 m;
-		XMStoreFloat4x4(&m, boneMatrix_[0]);
-
-		char buf[512];
-
-		sprintf_s(buf,
-			"BONEMATRIX\n"
-			"%f %f %f %f\n"
-			"%f %f %f %f\n"
-			"%f %f %f %f\n"
-			"%f %f %f %f\n",
-			m._11, m._12, m._13, m._14,
-			m._21, m._22, m._23, m._24,
-			m._31, m._32, m._33, m._34,
-			m._41, m._42, m._43, m._44);
-
-		//OutputDebugStringA(buf);
-
-		sprintf_s(buf,
-			"OFFSET %f %f %f\n"
-			"GLOBAL %f %f %f\n",
-			bones_[0].offsetMatrix[3][0],
-			bones_[0].offsetMatrix[3][1],
-			bones_[0].offsetMatrix[3][2],
-			bones_[0].globalMatrix[3][0],
-			bones_[0].globalMatrix[3][1],
-			bones_[0].globalMatrix[3][2]);
-		//OutputDebugStringA(buf);
-	}
-
-
-	//offsetマトリックスのデバッグ用
-	//auto& m = bones_[0].offsetMatrix;
-
-	//char buf[512];
-
-	//sprintf_s(buf,
-	//	"FBX OFFSET\n"
-	//	"%f %f %f %f\n"
-	//	"%f %f %f %f\n"
-	//	"%f %f %f %f\n"
-	//	"%f %f %f %f\n",
-	//	m[0][0], m[0][1], m[0][2], m[0][3],
-	//	m[1][0], m[1][1], m[1][2], m[1][3],
-	//	m[2][0], m[2][1], m[2][2], m[2][3],
-	//	m[3][0], m[3][1], m[3][2], m[3][3]);
-
-	//OutputDebugStringA(buf);
-
-
-	//auto m = ToMatrix(
-	//	bones_[0].offsetMatrix *
-	//	bones_[0].globalMatrix);
-
-
-	//XMFLOAT4X4 f;
-	//XMStoreFloat4x4(&f, m);
-
-	//char buf[512];
-	//sprintf_s(buf,
-	//	"%f %f %f %f\n"
-	//	"%f %f %f %f\n"
-	//	"%f %f %f %f\n"
-	//	"%f %f %f %f\n",
-	//	f._11, f._12, f._13, f._14,
-	//	f._21, f._22, f._23, f._24,
-	//	f._31, f._32, f._33, f._34,
-	//	f._41, f._42, f._43, f._44);
-
-	//OutputDebugStringA(buf);
 }
 
 void Fbx::CollectBone(FbxNode* node)
@@ -794,9 +630,9 @@ void Fbx::LoadBoneWeight(FbxMesh* mesh)
 
 			if (boneIndex >= 0)
 			{
-				bones_[boneIndex].offsetMatrix =
-					transformLinkMatrix.Inverse() * transformMatrix;
+				bones_[boneIndex].offsetMatrix = transformMatrix * transformLinkMatrix.Inverse();
 			}
+			
 			int* indices = cluster->GetControlPointIndices();
 			double* weights = cluster->GetControlPointWeights();
 

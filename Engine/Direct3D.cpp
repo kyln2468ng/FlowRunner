@@ -279,7 +279,13 @@ void Direct3D::UpdateBoneBuffer(const std::vector<XMMATRIX>& bones)
 
     Direct3D::pContext->Map(pBoneConstantBuffer_, 0, D3D11_MAP_WRITE_DISCARD, 0, &mapped);
 
-    memcpy(mapped.pData, bones.data(), sizeof(XMMATRIX) * bones.size());
+    XMFLOAT4X4 m[128];
+
+    for (int i = 0; i < bones.size(); i++) {
+        XMStoreFloat4x4(&m[i], XMMatrixTranspose(bones[i]));
+    }
+
+    memcpy(mapped.pData, m, sizeof(XMFLOAT4X4) * bones.size());
 
     Direct3D::pContext->Unmap(pBoneConstantBuffer_, 0);
 

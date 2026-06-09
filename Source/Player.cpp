@@ -39,7 +39,7 @@ void Player::Initialize()
 	//pFbx_がnullptrじゃなかった時のチェックあったほういい
 	//pFbx_->Load("OdenA.fbx");
 	//hModel_ = Model::Load("BoxGrass.fbx");//おでんじゃなくしたら判定取れてた
-	hModel_ = Model::Load("model/testAnim.fbx");
+	hModel_ = Model::Load("model/hmjum.fbx");
 	assert(hModel_ >= 0);
 	transform_.scale_.x = 1.0f;
 	transform_.scale_.y = 1.0f;

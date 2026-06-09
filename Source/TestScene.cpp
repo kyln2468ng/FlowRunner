@@ -15,7 +15,7 @@ TestScene::~TestScene()
 
 void TestScene::Initialize()
 {
-	hModel_ = Model::Load("cube.fbx");
+	hModel_ = Model::Load("Title.fbx");
 	assert(hModel_ >= 0);
 	transform_.scale_ = { 1.0f ,1.0f ,1.0f };
 	transform_.position_.y = -10.0f;

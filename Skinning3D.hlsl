@@ -43,28 +43,24 @@ VS_OUT VS(float4 pos : POSITION, float4 uv : TEXCOORD, float4 normal : NORMAL, u
     //ピクセルシェーダーへ渡す情報
     VS_OUT outData;
     
-    //float4x4 skinMat = bones[boneIndex.x] * weight.x + bones[boneIndex.y] * weight.y +
-    //                   bones[boneIndex.z] * weight.z + bones[boneIndex.w] * weight.w;
-        
-    float4x4 skinMat = bones[0];
+    float4x4 skinMat = bones[boneIndex.x] * weight.x +
+                       bones[boneIndex.y] * weight.y +
+                       bones[boneIndex.z] * weight.z +
+                       bones[boneIndex.w] * weight.w;
+ 
+    float4 skinned = mul(pos, skinMat);
     
-    //float4x4 skinMat = float4x4(
-    //1, 0, 0, 0,
-    //0, 1, 0, 0,
-    //0, 0, 1, 0,
-    //0, 0, 0, 1);
-    pos = mul(pos, skinMat);
-    
-    //pos = mul(pos, skinMat);
-
     //normal.w = 0;
     //normal = mul(normal, skinMat);
     
 	//ローカル座標に、ワールド・ビュー・プロジェクション行列をかけて
 	//スクリーン座標に変換し、ピクセルシェーダーへ
     
-    outData.pos = mul(pos, matWVP);
-    outData.uv = uv; // UV座標はそのまま
+    outData.pos = mul(skinned, matWVP);
+    outData.uv = uv;
+
+    // とりあえず法線は一旦切る
+    //outData.color = float4(1, 1, 1, 1);
     
     // 法線を回転
     normal = normalize(mul(normal, matW));
