@@ -63,8 +63,8 @@ void Player::Initialize()
 	velocity_ = { 0.0f, 0.0f, 0.0f };
 	anim_.Initialize();
 	anim_.SetMaxFrame(60.0f);
-	model_ = new Fbx();
-	model_->Load("model/testAnim.fbx");
+	//model_ = new Fbx();
+	//model_->Load("model/testAnim.fbx");
 }
 
 void Player::Update()
@@ -88,8 +88,8 @@ void Player::Update()
 		anim_.Update(1.0f);
 	}
 	
-	model_->UpdateAnimation(anim_.GetTime());
-
+	//model_->UpdateAnimation(anim_.GetTime());
+	Model::GetFbx(hModel_)->UpdateAnimation(anim_.GetTime());
 
 	//Ž‹“_ˆÚ“®‚ð‚·‚é
 	if (Input::IsKey(DIK_RIGHT)) {

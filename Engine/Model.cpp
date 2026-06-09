@@ -65,6 +65,13 @@ void Model::Release()
     modelList.clear();
 }
 
+Fbx* Model::GetFbx(int hModel)
+{
+    
+    return modelList[hModel]->pfbx_;
+    
+}
+
 void Model::RayCast(int hModel, RayCastData& data)
 {
     /*

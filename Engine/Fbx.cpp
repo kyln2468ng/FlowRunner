@@ -190,7 +190,7 @@ HRESULT Fbx::Load(std::string fileName)
 	currPath = fs::current_path();
 	basePath = currPath;
 	currPath = currPath / subDir;
-
+	
 	//fs::path subPath(currPath.string() + "\\" + subDir);
 	assert(fs::exists(currPath));// subPathはあります、という確認
 	fs::current_path(currPath);
@@ -263,6 +263,32 @@ HRESULT Fbx::Load(std::string fileName)
 
 void Fbx::Draw(Transform& transform)
 {
+	/*char buf[128];
+	sprintf_s(buf,
+		"DRAW this=%p bones=%d\n",
+		this,
+		(int)bones_.size());*/
+	//OutputDebugStringA(buf);
+	
+	auto m = transform.GetWorldMatrix();
+
+	XMFLOAT4X4 f;
+	XMStoreFloat4x4(&f, m);
+
+	char buf[512];
+	sprintf_s(buf,
+		"WORLD\n"
+		"%f %f %f %f\n"
+		"%f %f %f %f\n"
+		"%f %f %f %f\n"
+		"%f %f %f %f\n",
+		f._11, f._12, f._13, f._14,
+		f._21, f._22, f._23, f._24,
+		f._31, f._32, f._33, f._34,
+		f._41, f._42, f._43, f._44);
+
+	//OutputDebugStringA(buf);
+	
 	//BoneHierarchy();
 	UpdateBoneMatrices();
 
@@ -481,6 +507,13 @@ void Fbx::InitMaterial(FbxNode* pNode)
 		//テクスチャ情報
 		FbxProperty IProperty = pMaterial->FindProperty(FbxSurfaceMaterial::sDiffuse);
 		//テクスチャの数数
+		if (!IProperty.IsValid())
+		{
+			pMaterialList_[i].pTexture = nullptr;
+			pMaterialList_[i].diffuse = { 1.0f, 1.0f, 1.0f, 1.0f };
+
+			continue;
+		}
 		int fileTextureCount = IProperty.GetSrcObjectCount<FbxFileTexture>();
 
 		//テクスチャあり
@@ -516,6 +549,7 @@ void Fbx::InitMaterial(FbxNode* pNode)
 		}
 
 	}
+	
 }
 
 void Fbx::UpdateAnimation(float frame)
@@ -525,6 +559,12 @@ void Fbx::UpdateAnimation(float frame)
 	time.SetFrame(frame);
 
 	for (auto& bone : bones_) {
+		if (!bone.node)
+		{
+			OutputDebugStringA("bone.node == nullptr\n");
+			continue;
+		}
+
 		bone.globalMatrix = bone.node->EvaluateGlobalTransform(time);
 	}
 
@@ -546,7 +586,7 @@ void Fbx::UpdateAnimation(float frame)
 		g[3][1],
 		g[3][2]);
 
-	OutputDebugStringA(buf);
+	//OutputDebugStringA(buf);
 }
 
 void Fbx::BoneHierarchy()
@@ -565,6 +605,7 @@ void Fbx::BoneHierarchy()
 
 void Fbx::UpdateBoneMatrices()
 {
+	
 	boneMatrix_.resize(bones_.size());
 	//if (bones_.size() > 0)
 	//	OutputDebugStringA(("BoneCount = " + std::to_string(bones_.size()) + "\n").c_str());
@@ -598,7 +639,20 @@ void Fbx::UpdateBoneMatrices()
 
 
 	for (int i = 0; i < bones_.size(); i++) {
-		boneMatrix_[i] = XMMatrixTranspose(ToMatrix(bones_[i].offsetMatrix * bones_[i].globalMatrix));
+		boneMatrix_[i] = ToMatrix(bones_[i].offsetMatrix * bones_[i].globalMatrix);
+		
+		if (!boneMatrix_.empty())
+		{
+			auto& g = bones_[0].globalMatrix;
+			char buf[512];
+			sprintf_s(buf,
+				"GLOBAL [3] = %f %f %f\n",
+				(float)g[3][0],
+				(float)g[3][1],
+				(float)g[3][2]);
+
+			//OutputDebugStringA(buf);
+		}
 	}
 
 	if (!boneMatrix_.empty())
@@ -621,19 +675,15 @@ void Fbx::UpdateBoneMatrices()
 
 		//OutputDebugStringA(buf);
 
-		auto& off = bones_[0].offsetMatrix;
-		auto& glo = bones_[0].globalMatrix;
-
 		sprintf_s(buf,
-		"OFFSET\n"
-		"%f %f %f %f\n"
-		"%f %f %f %f\n"
-		"%f %f %f %f\n"
-		"%f %f %f %f\n",
-		off[0][0], off[0][1], off[0][2], off[0][3],
-		off[1][0], off[1][1], off[1][2], off[1][3],
-		off[2][0], off[2][1], off[2][2], off[2][3],
-		off[3][0], off[3][1], off[3][2], off[3][3]);
+			"OFFSET %f %f %f\n"
+			"GLOBAL %f %f %f\n",
+			bones_[0].offsetMatrix[3][0],
+			bones_[0].offsetMatrix[3][1],
+			bones_[0].offsetMatrix[3][2],
+			bones_[0].globalMatrix[3][0],
+			bones_[0].globalMatrix[3][1],
+			bones_[0].globalMatrix[3][2]);
 		//OutputDebugStringA(buf);
 	}
 
@@ -770,12 +820,23 @@ void Fbx::LoadBoneWeight(FbxMesh* mesh)
 
 XMMATRIX Fbx::ToMatrix(const FbxMatrix& mat)//
 {
-	return XMMATRIX(
+	/*return XMMATRIX(
 		(float)mat[0][0], (float)mat[0][1], (float)mat[0][2], (float)mat[0][3],
 		(float)mat[1][0], (float)mat[1][1], (float)mat[1][2], (float)mat[1][3],
 		(float)mat[2][0], (float)mat[2][1], (float)mat[2][2], (float)mat[2][3],
 		(float)mat[3][0], (float)mat[3][1], (float)mat[3][2], (float)mat[3][3]
-	);
+	);*/
+	XMFLOAT4X4 pose;
+
+	for (int x = 0; x < 4; x++)
+	{
+		for (int y = 0; y < 4; y++)
+		{
+			(&pose.m[0][0])[x * 4 + y] = (float)mat.Get(x, y);
+		}
+	}
+
+	return XMLoadFloat4x4(&pose);
 }
 
 void Fbx::RayCast(RayCastData& rayData)
