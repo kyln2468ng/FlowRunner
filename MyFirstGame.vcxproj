@@ -140,6 +140,7 @@
   <ItemGroup>
     <ClInclude Include="Editor\MapEditor.h" />
     <ClInclude Include="Engine\Animation.h" />
+    <ClInclude Include="Engine\BoneHierarchy.h" />
     <ClInclude Include="Engine\Quaternion.h" />
     <ClInclude Include="Source\Bullet.h" />
     <ClInclude Include="Source\ChildOden.h" />

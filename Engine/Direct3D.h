@@ -16,7 +16,6 @@ enum SHADER_TYPE
 {
 	SHADER_3D,//3D用シェーダー
 	SHADER_2D,//2D用シェーダー
-	SHADER_SKINNING_ANIM,
 	SHADER_MAX//シェーダーの最大数
 };
 
@@ -30,12 +29,8 @@ namespace Direct3D // namespace==グローバル関数
 	HRESULT InitShader();
 	HRESULT InitShader3D(); // 2D用シェーダー初期化
 	HRESULT InitShader2D();	// 3D用シェーダー初期化
-	HRESULT InitShaderSkinning(); //スキニングのアニメーションのシェーダ初期化
-
-	HRESULT InitBoneConstantBuffer();
 
 	void SetShader(SHADER_TYPE type); // シェーダーのセット
-	void UpdateBoneBuffer(const std::vector<DirectX::XMMATRIX>& bones);
 
 	//初期化
 	HRESULT Initialize(int winW, int winH, HWND hWnd);

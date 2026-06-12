@@ -5,10 +5,8 @@
 
 namespace Direct3D
 {
-	ID3D11Device* pDevice;		                //デバイス
-	ID3D11DeviceContext* pContext;		        //デバイスコンテキスト
-	IDXGISwapChain* pSwapChain;		            //スワップチェイン
-	ID3D11RenderTargetView* pRenderTargetView;	//レンダーターゲットビュー
+	IDXGISwapChain* pSwapChain = nullptr;		            //スワップチェイン
+	ID3D11RenderTargetView* pRenderTargetView = nullptr;	//レンダーターゲットビュー
     ID3D11Texture2D* pDepthStencil;			//深度ステンシル
     ID3D11DepthStencilView* pDepthStencilView;		//深度ステンシルビュー
 
@@ -20,11 +18,11 @@ namespace Direct3D
         ID3D11RasterizerState* pRasterizerState;	//ラスタライザー
     };
 
-    ID3D11Buffer* pBoneConstantBuffer_ = nullptr; //骨のコンスタントバッファ
+    ID3D11Device* pDevice = nullptr;		                //デバイス
+    ID3D11DeviceContext* pContext = nullptr;		        //デバイスコンテキスト
 
     ID3D11VertexShader* pVertexShader = nullptr;	//頂点シェーダー
     ID3D11PixelShader* pPixelShader = nullptr;		//ピクセルシェーダー
-
     ID3D11InputLayout* pVertexLayout = nullptr;	//頂点インプットレイアウト
     ID3D11RasterizerState* pRasterizerState = nullptr;	//ラスタライザー
        
@@ -38,14 +36,6 @@ HRESULT Direct3D::InitShader()
         return E_FAIL;
     }
     if (FAILED(InitShader2D()))
-    {
-        return E_FAIL;
-    }
-    if (FAILED(InitBoneConstantBuffer()))
-    {
-        return E_FAIL;
-    }
-    if (FAILED(InitShaderSkinning()))
     {
         return E_FAIL;
     }
@@ -105,12 +95,6 @@ HRESULT Direct3D::InitShader3D()
     rdc.FrontCounterClockwise = FALSE;
     pDevice->CreateRasterizerState(&rdc, &(shaderBundle[SHADER_3D].pRasterizerState));
 
-    //それぞれをデバイスコンテキストにセット
-    //pContext->VSSetShader(pVertexShader, NULL, 0);	//頂点シェーダー
-    //pContext->PSSetShader(pPixelShader, NULL, 0);	//ピクセルシェーダー
-    //pContext->IASetInputLayout(pVertexLayout);	//頂点インプットレイアウト
-    //pContext->RSSetState(pRasterizerState);		//ラスタライザー
-
     return S_OK; // サクセスおｋ　※問題なしって返す
 }
 
@@ -135,7 +119,6 @@ HRESULT Direct3D::InitShader2D()
     D3D11_INPUT_ELEMENT_DESC layout[] = {
         { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0,  D3D11_INPUT_PER_VERTEX_DATA, 0 },	//位置
         { "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, sizeof(XMVECTOR)  , D3D11_INPUT_PER_VERTEX_DATA, 0 },//UV座標
-        //{ "NORMAL", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, sizeof(XMVECTOR) * 2, D3D11_INPUT_PER_VERTEX_DATA, 0}
     };
     hr = pDevice->CreateInputLayout(layout, 2, pCompileVS->GetBufferPointer(), pCompileVS->GetBufferSize(), &(shaderBundle[SHADER_2D].pVertexLayout));
 
@@ -166,97 +149,7 @@ HRESULT Direct3D::InitShader2D()
     rdc.FrontCounterClockwise = FALSE;
     pDevice->CreateRasterizerState(&rdc, &(shaderBundle[SHADER_2D].pRasterizerState));
 
-    //それぞれをデバイスコンテキストにセット
-    //pContext->VSSetShader(pVertexShader, NULL, 0);	//頂点シェーダー
-    //pContext->PSSetShader(pPixelShader, NULL, 0);	//ピクセルシェーダー
-    //pContext->IASetInputLayout(pVertexLayout);	//頂点インプットレイアウト
-    //pContext->RSSetState(pRasterizerState);		//ラスタライザー
-
     return S_OK; // サクセスおｋ　※問題なしって返す
-}
-
-HRESULT Direct3D::InitShaderSkinning()
-{
-    HRESULT hr;
-
-    // 頂点シェーダの作成（コンパイル）
-    ID3DBlob* pCompileVS = nullptr;
-    D3DCompileFromFile(L"Skinning3D.hlsl", nullptr, nullptr, "VS", "vs_5_0", NULL, 0, &pCompileVS, NULL);
-    assert(pCompileVS != nullptr);
-
-    hr = pDevice->CreateVertexShader(pCompileVS->GetBufferPointer(), pCompileVS->GetBufferSize(), NULL, &(shaderBundle[SHADER_SKINNING_ANIM].pVertexShader));
-
-    if (FAILED(hr))
-    {
-        MessageBox(nullptr, L"頂点シェーダーの作成に失敗しました", L"エラー", MB_OK);
-        return hr;
-    }
-
-    //頂点インプットレイアウト
-    D3D11_INPUT_ELEMENT_DESC layout[] = {
-        { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0,  D3D11_INPUT_PER_VERTEX_DATA, 0 },	//位置
-        { "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 16  , D3D11_INPUT_PER_VERTEX_DATA, 0 },//UV座標
-        { "NORMAL",	0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 32,	D3D11_INPUT_PER_VERTEX_DATA, 0 },//法線
-        { "BLENDINDICES",  0, DXGI_FORMAT_R32G32B32A32_UINT,    0, 48, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-        { "BLENDWEIGHT",   0, DXGI_FORMAT_R32G32B32A32_FLOAT,   0, 64, D3D11_INPUT_PER_VERTEX_DATA, 0 }
-    };
-    hr = pDevice->CreateInputLayout(layout, 5, pCompileVS->GetBufferPointer(), pCompileVS->GetBufferSize(), &(shaderBundle[SHADER_SKINNING_ANIM].pVertexLayout));
-
-    if (FAILED(hr))
-    {
-        MessageBox(nullptr, L"頂点インプットレイアウトの作成に失敗しました", L"エラー", MB_OK);
-        return hr;
-    }
-
-    // ピクセルシェーダの作成（コンパイル）
-    ID3DBlob* pCompilePS = nullptr;
-    D3DCompileFromFile(L"Skinning3D.hlsl", nullptr, nullptr, "PS", "ps_5_0", NULL, 0, &pCompilePS, NULL);
-    assert(pCompilePS != nullptr);
-    hr = pDevice->CreatePixelShader(pCompilePS->GetBufferPointer(), pCompilePS->GetBufferSize(), NULL, &(shaderBundle[SHADER_SKINNING_ANIM].pPixelShader));
-    if (FAILED(hr))
-    {
-        MessageBox(nullptr, L"ピクセルシェーダーの作成に失敗しました", L"エラー", MB_OK);
-        return hr;
-    }
-
-    pCompileVS->Release();
-    pCompilePS->Release();
-
-    //ラスタライザ作成
-    D3D11_RASTERIZER_DESC rdc = {};
-    rdc.CullMode = D3D11_CULL_BACK;
-    rdc.FillMode = D3D11_FILL_SOLID;
-    rdc.FrontCounterClockwise = FALSE;
-    pDevice->CreateRasterizerState(&rdc, &(shaderBundle[SHADER_SKINNING_ANIM].pRasterizerState));
-
-    //それぞれをデバイスコンテキストにセット
-    //pContext->VSSetShader(pVertexShader, NULL, 0);	//頂点シェーダー
-    //pContext->PSSetShader(pPixelShader, NULL, 0);	//ピクセルシェーダー
-    //pContext->IASetInputLayout(pVertexLayout);	//頂点インプットレイアウト
-    //pContext->RSSetState(pRasterizerState);		//ラスタライザー
-
-    return S_OK; // サクセスおｋ　※問題なしって返す
-}
-
-HRESULT Direct3D::InitBoneConstantBuffer()
-{
-    D3D11_BUFFER_DESC bd = {};
-
-    bd.ByteWidth = sizeof(XMMATRIX) * 128;
-    bd.Usage = D3D11_USAGE_DYNAMIC;
-    bd.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
-    bd.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
-
-    HRESULT hr;
-
-    hr = pDevice->CreateBuffer(&bd, nullptr, &pBoneConstantBuffer_);
-
-    if (FAILED(hr))
-    {
-        MessageBox(nullptr, L"ボーンコンスタントバッファの作成に失敗しました", L"エラー", MB_OK);
-        return hr;
-    }
-    return S_OK;
 }
 
 void Direct3D::SetShader(SHADER_TYPE type)
@@ -267,37 +160,14 @@ void Direct3D::SetShader(SHADER_TYPE type)
     pContext->RSSetState(shaderBundle[type].pRasterizerState);		//ラスタライザー
 }
 
-void Direct3D::UpdateBoneBuffer(const std::vector<XMMATRIX>& bones)
-{
-    // GPU転送
-    D3D11_MAPPED_SUBRESOURCE mapped;
-
-    if (!pDevice || !pContext || !pBoneConstantBuffer_)
-    {
-        return;
-    }
-
-    Direct3D::pContext->Map(pBoneConstantBuffer_, 0, D3D11_MAP_WRITE_DISCARD, 0, &mapped);
-
-    XMFLOAT4X4 m[128];
-
-    for (int i = 0; i < bones.size(); i++) {
-        XMStoreFloat4x4(&m[i], XMMatrixTranspose(bones[i]));
-    }
-
-    memcpy(mapped.pData, m, sizeof(XMFLOAT4X4) * bones.size());
-
-    Direct3D::pContext->Unmap(pBoneConstantBuffer_, 0);
-
-    Direct3D::pContext->VSSetConstantBuffers(1, 1, &pBoneConstantBuffer_);
-}
-
 HRESULT Direct3D::Initialize(int winW, int winH, HWND hWnd)
 {
     // Direct3Dの初期化
     DXGI_SWAP_CHAIN_DESC scDesc = {};
+
     // とりあえず全部０
     ZeroMemory(&scDesc, sizeof(scDesc));
+   
     //描画先のフォーマット
     scDesc.BufferDesc.Width = winW;		//画面幅
     scDesc.BufferDesc.Height = winH;	//画面高さ
@@ -317,7 +187,8 @@ HRESULT Direct3D::Initialize(int winW, int winH, HWND hWnd)
 
     // デバイス、コンテキスト、スワップチェインの作成
     D3D_FEATURE_LEVEL level;
-    D3D11CreateDeviceAndSwapChain(
+    HRESULT  hr;
+    hr = D3D11CreateDeviceAndSwapChain(
         nullptr,				// どのビデオアダプタを使用するか？既定ならばnullptrで
         D3D_DRIVER_TYPE_HARDWARE,		// ドライバのタイプを渡す。ふつうはHARDWARE
         nullptr,				// 上記をD3D_DRIVER_TYPE_SOFTWAREに設定しないかぎりnullptr
@@ -331,16 +202,25 @@ HRESULT Direct3D::Initialize(int winW, int winH, HWND hWnd)
         &level,					// 無事完成したDevice、Contextのレベルが返ってくる
         &pContext);				// 無事完成したContextのアドレスが返ってくる
 
+    if (FAILED(hr))
+        return hr;
+
+
     // レンダーターゲットビューの作成
     //スワップチェーンからバックバッファを取得（バックバッファ ＝ レンダーターゲット）
     ID3D11Texture2D* pBackBuffer;
-    pSwapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), (LPVOID*)&pBackBuffer);
+    hr = pSwapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), (LPVOID*)&pBackBuffer);
+    if (FAILED(hr))
+        return hr;
 
     //レンダーターゲットビューを作成
-    pDevice->CreateRenderTargetView(pBackBuffer, NULL, &pRenderTargetView);
+    hr = pDevice->CreateRenderTargetView(pBackBuffer, NULL, &pRenderTargetView);
+    if (FAILED(hr))
+        return hr;
 
     //一時的にバックバッファを取得しただけなので解放
     pBackBuffer->Release();
+
 
     // ビューポートの作成
     //レンダリング結果を表示する範囲
@@ -351,6 +231,10 @@ HRESULT Direct3D::Initialize(int winW, int winH, HWND hWnd)
     vp.MaxDepth = 1.0f;	//奥
     vp.TopLeftX = 0;	//左
     vp.TopLeftY = 0;	//上
+
+    //各パターンのシェーダーセット準備
+    //InitShaderBundle();
+    //Direct3D::SetShader(Direct3D::SHADER_3D);
 
     //深度ステンシルビューの作成
     D3D11_TEXTURE2D_DESC descDepth;
@@ -373,7 +257,6 @@ HRESULT Direct3D::Initialize(int winW, int winH, HWND hWnd)
     pContext->OMSetRenderTargets(1, &pRenderTargetView, pDepthStencilView);            // 描画先を設定
     pContext->RSSetViewports(1, &vp);
 
-    HRESULT hr;
     //シェーダー準備
     hr = InitShader();
     if (FAILED(hr))
@@ -387,6 +270,11 @@ HRESULT Direct3D::Initialize(int winW, int winH, HWND hWnd)
 
 void Direct3D::BeginDraw()
 {
+    if (NULL == pDevice) return;
+    if (NULL == pContext) return;
+    if (NULL == pRenderTargetView) return;
+    if (NULL == pSwapChain) return;
+
     //背景の色
     float clearColor[4] = { 0.0f, 0.5f, 0.5f, 1.0f };//R,G,B,A
     pContext->ClearRenderTargetView(pRenderTargetView, clearColor);
@@ -399,18 +287,23 @@ void Direct3D::BeginDraw()
 void Direct3D::EndDraw()
 {
     pSwapChain->Present(0, 0);
-    //pSwapChain->Release();        // スワップチェイン
 }
 
 void Direct3D::Release()
 {
     //解放処理
+    for (int i = 0; i < SHADER_MAX; i++)
+    {
+        SAFE_RELEASE(shaderBundle[i].pRasterizerState);
+        SAFE_RELEASE(shaderBundle[i].pVertexLayout);
+        SAFE_RELEASE(shaderBundle[i].pPixelShader);
+        SAFE_RELEASE(shaderBundle[i].pVertexShader);
+    }
 
-    SAFE_RELEASE(pRasterizerState);
-    SAFE_RELEASE(pVertexLayout);
-    SAFE_RELEASE(pPixelShader);
-    SAFE_RELEASE(pVertexShader);
-    
+    if (pContext) {
+        pContext->ClearState();
+    }
+
     SAFE_RELEASE(pDevice);           // デバイス
     SAFE_RELEASE(pContext);          // デバイスコンテキスト
     SAFE_RELEASE(pSwapChain);        // スワップチェイン
