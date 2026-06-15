@@ -12,6 +12,8 @@
 #pragma comment(lib, "LibXml2-MD.lib")
 #pragma comment(lib, "zlib-MD.lib")
 
+class FbxParts;
+
 struct RayCastData
 {
 	XMFLOAT4 start;	//Rayの始点
@@ -41,83 +43,37 @@ class Fbx
 {
 public:
 	Fbx();
-	HRESULT Load(std::string fileName);
-	void Draw(Transform& transform);
+
+	//ロード
+	virtual HRESULT Load(std::string fileName);
+
+	//描画
+	void Draw(Transform& transform, int frame);
+
+	//解放
 	void Release();
 
-	void InitVertex(FbxMesh* mesh);
-	void InitIndex(FbxMesh* mesh);
-	void InitConstantBuffer();
-	void InitMaterial(FbxNode* pNode);
+	//任意のボーンの位置を取得
+	XMFLOAT3 GetBonePosition(std::string boneName);
 
-	void UpdateAnimation(float frame);
-	void BoneHierarchy();
-	void UpdateBoneMatrices();
-
-	void CollectBone(FbxNode* node);
-	int FindBoneIndex(FbxNode* node);
-	FbxNode* FindMeshNode(FbxNode* node);
-
-	void LoadBoneWeight(FbxMesh* mesh);
-
-	XMMATRIX ToMatrix(const FbxMatrix& mat);
 	void RayCast(RayCastData& rayData);
+
 private:
-	struct MATERIAL
-	{
-		Texture* pTexture;
-		XMFLOAT4 diffuse;
-	};
+	friend class FbxParts; 	//FbxPartクラスをフレンドクラスにする
+	std::vector<FbxParts*>	parts_; //モデルの各パーツ
+	FbxManager* pFbxManager_; //FBXファイルを扱う機能の本体
+	FbxScene* pFbxScene_; //FBXファイルのシーン（Mayaで作ったすべての物体）を扱う
 
-	struct CONSTANT_BUFFER
-	{
-		XMMATRIX	matWVP;
-		XMMATRIX	matNormal;
-		XMFLOAT4	diffuse;
-		BOOL		materialFlag; // マテリアルがあるかないか
-	};
+	//後で分離//
+	FbxTime::EMode _frameRate;	// アニメーションのフレームレート
 
-	struct Bone
-	{
-		std::string name;
+	float animSpeed_; //アニメーション速度
 
-		FbxNode* node;
+	//アニメーションの最初と最後のフレーム
+	int startFrame_;
+	int endFrame_; 
 
-		FbxAMatrix localMatrix;
-		FbxAMatrix globalMatrix;
-
-		FbxAMatrix offsetMatrix;
-
-		int parentIndex;
-	};
-
-	int vertexCount_;	//頂点数
-	int polygonCount_;	//ポリゴン数
-	int materialCount_;	//マテリアルの個数
-
-	ID3D11Buffer* pVertexBuffer_;
-	ID3D11Buffer** pIndexBuffer_;
-	ID3D11Buffer* pConstantBuffer_;
-	//ID3D11Buffer* pBoneConstantBuffer_;
-
-	std::vector<MATERIAL> pMaterialList_;
-	std::vector<int> indexCount_; // マテリアルごとのインデックス数
-
-	std::vector<FBX_VERTEX>             pVertices_;        // 頂点データ全部
-	std::vector<std::vector<int>>       ppIndex_;   // マテリアルごとのインデックスデータ[material][index]
-
-	XMFLOAT3 hitPos_;
-	XMFLOAT3 nolmal_;
-
-	FbxManager* pFbxManager_;
-	FbxScene* pFbxScene_;
-	FbxNode* pRootNode_;
-
-	float currentFrame_;
-	std::vector<Bone> bones_;
-	std::vector<XMMATRIX> boneMatrix_;
-
-	//auto& arr = ppIndex_[1];
-	//arr[0]～arr[index - 1];
+	//ノードの中身を調べる
+	void CheckNode(FbxNode* pNode, std::vector<FbxParts*>* pPartsList);
 };
 

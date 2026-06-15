@@ -129,7 +129,7 @@
     <ClInclude Include="Engine\Animation.h">
       <Filter>ソース ファイル\Engine</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\BoneHierarchy.h">
+    <ClInclude Include="Engine\FbxParts.h">
       <Filter>ソース ファイル\Engine</Filter>
     </ClInclude>
   </ItemGroup>
@@ -218,6 +218,9 @@
     <ClCompile Include="Engine\Animation.cpp">
       <Filter>ソース ファイル\Engine</Filter>
     </ClCompile>
+    <ClCompile Include="Engine\FbxParts.cpp">
+      <Filter>ソース ファイル\Engine</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="MyFirstGame.rc">
@@ -235,7 +238,6 @@
   <ItemGroup>
     <FxCompile Include="Simple3D.hlsl" />
     <FxCompile Include="Simple2D.hlsl" />
-    <FxCompile Include="Skinning3D.hlsl" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

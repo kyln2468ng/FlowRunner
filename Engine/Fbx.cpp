@@ -1,4 +1,5 @@
 #include "Fbx.h"
+#include "FbxParts.h"
 #include "Direct3D.h"
 #include "Camera.h"
 #include <filesystem>
@@ -173,17 +174,13 @@ namespace Math
 }
 
 Fbx::Fbx()
-    :pVertexBuffer_(nullptr),
-    pIndexBuffer_(nullptr),
-    pConstantBuffer_(nullptr),
-    vertexCount_(0),
-    polygonCount_(0),
-	materialCount_(0)
+	:animSpeed_(0)
 {
 }
 
 HRESULT Fbx::Load(std::string fileName)
 {
+	//FBXの読み込み
 	using std::string;
 	std::string subDir("Assets");
 	fs::path currPath, basePath;
@@ -200,670 +197,130 @@ HRESULT Fbx::Load(std::string fileName)
 
 	//インポーターを生成
 	FbxImporter* fbxImporter = fbxsdk::FbxImporter::Create(pFbxManager_, "imp");
-	fbxImporter->Initialize(fileName.c_str(), -1, pFbxManager_->GetIOSettings());
+	if (fbxImporter->Initialize(fileName.c_str(), -1, pFbxManager_->GetIOSettings())) {
+		//失敗
+		return E_FAIL;
+	}
 
 	//シーンオブジェクトにFBXファイルの情報を流し込む
 	pFbxScene_ = fbxsdk::FbxScene::Create(pFbxManager_, "fbxscene");
 	fbxImporter->Import(pFbxScene_);
 	fbxImporter->Destroy();
 
-	//メッシュ情報を取得
-	FbxNode* meshNode = nullptr;
+	//アニメーションのタイムモード取得
+	_frameRate = pFbxScene_->GetGlobalSettings().GetTimeMode();
 
-	// Root取得
-	pRootNode_ = pFbxScene_->GetRootNode();
+	// 現在のカレントディレクトリを保存
+	fs::path oldPath = fs::current_path();
 
-	// ボーン全部取得
-	CollectBone(pRootNode_);
+	// FBXのパス
+	fs::path fbxPath(fileName);
 
-	for (auto& bone : bones_) {
-		bone.parentIndex = FindBoneIndex(bone.node->GetParent());
+	// FBXがあるフォルダへ移動
+	fs::current_path(fbxPath.parent_path());
+
+
+
+	//ルートノードを取得して
+	FbxNode* rootNode = pFbxScene_->GetRootNode();
+
+	//そいつの子供の数を調べて
+	int childCount = rootNode->GetChildCount();
+
+	//1個ずつチェック
+	for (int i = 0; childCount > i; i++)
+	{
+		CheckNode(rootNode->GetChild(i), &parts_);
 	}
 
-	/*FbxTime bindTime;
-	bindTime.SetFrame(0);
-	for (auto& bone : bones_) {
-		bone.offsetMatrix = bone.node->EvaluateGlobalTransform(bindTime).Inverse();
-	}*/
-	
-
-	// Meshは別で取得
-	meshNode = FindMeshNode(pRootNode_);
-
-	// mesh node取得失敗
-	if (!meshNode) {
-		return E_FAIL;
-	}
-
-	FbxMesh* mesh = meshNode->GetMesh();
-
-	// 頂点数確保
-	vertexCount_ = mesh->GetControlPointsCount();//頂点の数
-	pVertices_.resize(vertexCount_);
-
-	// ウェイト読み込み
-	LoadBoneWeight(mesh);
-
-	//各情報の個数を取得
-	polygonCount_ = mesh->GetPolygonCount();	//ポリゴンの数
-	materialCount_ = meshNode->GetMaterialCount();
-
-	InitVertex(mesh);		//頂点バッファ準備
-	InitIndex(mesh);		//インデックスバッファ準備
-	InitConstantBuffer();	//コンスタントバッファ準備
-	InitMaterial(meshNode);
-
-	fs::current_path(basePath);
-
-	//マネージャ解放
-	//pFbxManager_->Destroy();
+	// 元に戻す
+	fs::current_path(oldPath);
 
 	return S_OK;
 }
 
-void Fbx::Draw(Transform& transform)
-{	
-	//BoneHierarchy();
-	UpdateBoneMatrices();
-
-	if (!bones_.empty()) {		
-
-		Direct3D::SetShader(SHADER_SKINNING_ANIM);
-		Direct3D::UpdateBoneBuffer(boneMatrix_);
-
-	}
-	else {
-		Direct3D::SetShader(SHADER_3D);
-	}
-	transform.Calculation();
-
-	CONSTANT_BUFFER cb;
-	cb.matWVP = XMMatrixTranspose(transform.GetWorldMatrix() * Camera::GetViewMatrix() * Camera::GetProjectionMatrix());
-	cb.matNormal = transform.GetNormalMatrix();
-	
-	//頂点バッファ
-	UINT stride = sizeof(FBX_VERTEX);
-	UINT offset = 0;
-	
-	Direct3D::pContext->IASetVertexBuffers(0, 1, &pVertexBuffer_, &stride, &offset);
-
-	for (int i = 0; i < materialCount_;i++)
+void Fbx::CheckNode(FbxNode* pNode, std::vector<FbxParts*>* pPartsList)
+{
+	//そのノードにはメッシュ情報が入っているか調べる
+	FbxNodeAttribute* attr = pNode->GetNodeAttribute();
+	if (attr != nullptr && attr->GetAttributeType() == FbxNodeAttribute::eMesh)
 	{
-		if (pMaterialList_[i].pTexture)
+		//パーツ用意
+		FbxParts* pParts = new FbxParts;
+		pParts->Init(pNode);
+
+		//パーツ情報を動的配列に追加
+		pPartsList->push_back(pParts);
+	}
+
+
+	//子ノードのデータも調べる
+	{
+		//子供の数を調べる
+		int childCount = pNode->GetChildCount();
+
+		//チェック
+		for (int i = 0; i < childCount; i++)
 		{
-			cb.materialFlag = TRUE;
-			cb.diffuse = XMFLOAT4(1, 1, 1, 1);
+			CheckNode(pNode->GetChild(i), pPartsList);
 		}
+	}
+}
+
+void Fbx::Draw(Transform& transform, int frame)
+{	
+	//パーツを1個ずつ描画
+	for (int k = 0; k < parts_.size(); k++)
+	{
+		// その瞬間の自分の姿勢行列を得る
+		FbxTime     time;
+		time.SetTime(0, 0, 0, frame, 0, 0, _frameRate);
+
+		//スキンアニメーション（ボーン有り）の描画
+		if (parts_[k]->GetSkinInfo() != nullptr)
+		{
+			parts_[k]->DrawSkinAnime(transform, time);
+		}
+
+		//メッシュアニメーションの描画
 		else
 		{
-			cb.materialFlag = FALSE;
-			cb.diffuse = pMaterialList_[i].diffuse;
+			parts_[k]->DrawMeshAnime(transform, time, pFbxScene_);
 		}
-
-
-		D3D11_MAPPED_SUBRESOURCE pdata;
-		Direct3D::pContext->Map(pConstantBuffer_, 0, D3D11_MAP_WRITE_DISCARD, 0, &pdata);	// GPUからのデータアクセスを止める
-		memcpy_s(pdata.pData, pdata.RowPitch, (void*)(&cb), sizeof(cb));	// データを値を送る
-
-		Direct3D::pContext->Unmap(pConstantBuffer_, 0);	//再開
-
-		// インデックスバッファーをセット
-		stride = sizeof(int);
-		offset = 0;
-		Direct3D::pContext->IASetIndexBuffer(pIndexBuffer_[i], DXGI_FORMAT_R32_UINT, 0);
-
-		//コンスタントバッファ
-		Direct3D::pContext->VSSetConstantBuffers(0, 1, &pConstantBuffer_);	//頂点シェーダー用	
-		Direct3D::pContext->PSSetConstantBuffers(0, 1, &pConstantBuffer_);	//ピクセルシェーダー用
-
-
-		if (pMaterialList_[i].pTexture)
-		{
-			ID3D11SamplerState* pSampler = pMaterialList_[i].pTexture->GetSampler();
-			Direct3D::pContext->PSSetSamplers(0, 1, &pSampler);
-
-			ID3D11ShaderResourceView* pSRV = pMaterialList_[i].pTexture->GetSRV();
-			Direct3D::pContext->PSSetShaderResources(0, 1, &pSRV);
-		}
-
-		// 描画
-		Direct3D::pContext->DrawIndexed(indexCount_[i], 0, 0);
 	}
 }
 
 void Fbx::Release()
 {
+	for (int i = 0; i < parts_.size(); i++)
+	{
+		delete parts_[i];
+	}
+	parts_.clear();
+
+	pFbxScene_->Destroy();
 	pFbxManager_->Destroy();
 }
 
-void Fbx::InitVertex(FbxMesh* mesh)
+XMFLOAT3 Fbx::GetBonePosition(std::string boneName)
 {
-	//頂点情報を入れる配列
-	//VERTEX* vertices = new VERTEX[vertexCount_];
-	pVertices_.resize(vertexCount_);
-
-	//全ポリゴン
-	for (long poly = 0; poly < polygonCount_; poly++)
+	XMFLOAT3 position = XMFLOAT3(0, 0, 0);
+	for (int i = 0; i < parts_.size(); i++)
 	{
-		//3頂点分
-		for (int vertex = 0; vertex < 3; vertex++)
-		{
-			//調べる頂点の番号
-			int index = mesh->GetPolygonVertex(poly, vertex);
-
-			//頂点の位置
-			FbxVector4 pos = mesh->GetControlPointAt(index);
-			//vertices[index].position = XMVectorSet((float)pos[0], (float)pos[1], (float)pos[2], 0.0f);
-			pVertices_[index].position = XMVectorSet((float)pos[0], (float)pos[1], (float)pos[2], 0.0f);
-
-			//頂点のUV
-			FbxLayerElementUV* pUV = mesh->GetLayer(0)->GetUVs();
-			int uvIndex = mesh->GetTextureUVIndex(poly, vertex, FbxLayerElement::eTextureDiffuse);
-			FbxVector2  uv = pUV->GetDirectArray().GetAt(uvIndex);
-			//vertices[index].uv = XMVectorSet((float)uv.mData[0], (float)(1.0f - uv.mData[1]), 0.0f, 0.0f);
-			pVertices_[index].uv = XMVectorSet((float)uv.mData[0], (float)(1.0f - uv.mData[1]), 0.0f, 1.0f);
-			//頂点の法線
-			FbxVector4 normal;
-			mesh->GetPolygonVertexNormal(poly, vertex, normal);
-			//vertices[index].normal = XMVectorSet((float)normal[0], (float)normal[1], (float)normal[2], 0.0f);
-			pVertices_[index].normal = XMVectorSet((float)normal[0], (float)normal[1], (float)normal[2], 0.0f);
-		}
+		if (parts_[i]->GetBonePosition(boneName, &position))
+			break;
 	}
 
-	// 頂点データ用バッファの設定
-	D3D11_BUFFER_DESC bd_vertex;
-	bd_vertex.ByteWidth = sizeof(FBX_VERTEX) * vertexCount_;
-	bd_vertex.Usage = D3D11_USAGE_DEFAULT;
-	bd_vertex.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-	bd_vertex.CPUAccessFlags = 0;
-	bd_vertex.MiscFlags = 0;
-	bd_vertex.StructureByteStride = 0;
-	D3D11_SUBRESOURCE_DATA data_vertex;
-	//data_vertex.pSysMem = vertices;
-	data_vertex.pSysMem = pVertices_.data();
-
-	HRESULT hr;
-	hr = Direct3D::pDevice->CreateBuffer(&bd_vertex, &data_vertex, &pVertexBuffer_);
-	if (FAILED(hr))
-	{
-		MessageBox(nullptr, L"頂点バッファの作成に失敗しました",L"エラー", MB_OK);
-	}
-}
-
-void Fbx::InitIndex(FbxMesh* mesh)
-{
-	pIndexBuffer_ = new ID3D11Buffer * [materialCount_];
-
-	//int* index = new int[polygonCount_ * 3];
-	ppIndex_.resize(materialCount_);
-	indexCount_ = std::vector<int>(materialCount_);
-
-	for (int i = 0; i < materialCount_; i++)
-	{
-		//int count = 0;
-		auto& indeces = ppIndex_[i];
-		
-		//全ポリゴン
-		for (long poly = 0; poly < polygonCount_; poly++)
-		{
-			FbxLayerElementMaterial* mtl = mesh->GetLayer(0)->GetMaterials();
-			int mtlId = mtl->GetIndexArray().GetAt(poly);
-
-			if (mtlId == i)
-			{
-				//3頂点分
-				for (long vertex = 0; vertex < 3; vertex++)
-				{
-					//index[count] = mesh->GetPolygonVertex(poly, vertex);
-					indeces.push_back(mesh->GetPolygonVertex(poly, vertex));
-					//count++;
-				}
-			}
-		}
-
-		//indexCount_[i] = count;
-		indexCount_[i] = (int)indeces.size();
-
-		// インデックスバッファを生成する
-		D3D11_BUFFER_DESC   bd;
-		bd.Usage = D3D11_USAGE_DEFAULT;
-		//bd.ByteWidth = sizeof(int) * polygonCount_ * 3;
-		bd.ByteWidth = sizeof(int) * indexCount_[i];
-		bd.BindFlags = D3D11_BIND_INDEX_BUFFER;
-		bd.CPUAccessFlags = 0;
-		bd.MiscFlags = 0;
-
-		D3D11_SUBRESOURCE_DATA InitData;
-		//InitData.pSysMem = index;
-		InitData.pSysMem = indeces.data();
-		InitData.SysMemPitch = 0;
-		InitData.SysMemSlicePitch = 0;
-
-		HRESULT hr;
-		hr = Direct3D::pDevice->CreateBuffer(&bd, &InitData, &pIndexBuffer_[i]);
-		if (FAILED(hr))
-		{
-			MessageBox(nullptr, L"インデックスバッファの作成に失敗しました", L"エラー", MB_OK);
-		}
-	}
-}
-
-void Fbx::InitConstantBuffer()
-{
-	//コンスタントバッファ作成
-	D3D11_BUFFER_DESC cb;
-	cb.ByteWidth = sizeof(CONSTANT_BUFFER);
-	cb.Usage = D3D11_USAGE_DYNAMIC;
-	cb.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
-	cb.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
-	cb.MiscFlags = 0;
-	cb.StructureByteStride = 0;
-
-	// コンスタントバッファの作成
-	HRESULT hr;
-	hr = Direct3D::pDevice->CreateBuffer(&cb, nullptr, &pConstantBuffer_);
-	if (FAILED(hr))
-	{
-		MessageBox(nullptr, L"コンスタントバッファの作成に失敗しました", L"エラー", MB_OK);
-	}
-}
-
-void Fbx::InitMaterial(FbxNode* pNode)
-{
-	//materialCount_の数だけ配列を準備
-	pMaterialList_.resize(materialCount_);
-	for (int i = 0; i < materialCount_; i++)
-	{
-		//i番目のマテリアル情報を取得
-		FbxSurfaceMaterial* pMaterial = pNode->GetMaterial(i);
-		//テクスチャ情報
-		FbxProperty IProperty = pMaterial->FindProperty(FbxSurfaceMaterial::sDiffuse);
-		//テクスチャの数数
-		if (!IProperty.IsValid())
-		{
-			pMaterialList_[i].pTexture = nullptr;
-			pMaterialList_[i].diffuse = { 1.0f, 1.0f, 1.0f, 1.0f };
-
-			continue;
-		}
-		int fileTextureCount = IProperty.GetSrcObjectCount<FbxFileTexture>();
-
-		//テクスチャあり
-		if (fileTextureCount > 0)
-		{
-			FbxFileTexture* textureInfo = IProperty.GetSrcObject<FbxFileTexture>(0);
-			const char* textureFilePath = textureInfo->GetRelativeFileName();
-
-			fs::path tPath(textureFilePath);
-			if (fs::is_regular_file(tPath))
-			{
-				//ここでテクスチャの読み込み
-				pMaterialList_[i].pTexture = new Texture;
-				pMaterialList_[i].pTexture->Load(textureFilePath);
-				//int a = 0;
-				//a++;
-			}
-			else
-			{
-				//テクスチャファイルが無いときの処理(エラー）
-
-			}
-
-		}
-		//テクスチャ無し
-		else
-		{
-			//テスクチャないときの処理
-			pMaterialList_[i].pTexture = nullptr;
-			FbxDouble3 color = ((FbxSurfaceLambert*)pMaterial)->Diffuse.Get();
-			pMaterialList_[i].diffuse = { (float)color[0],(float)color[1],(float)color[2],1.0f };
-			//pMaterialList_[i].diffuse = XMDLOAT4{ (float)color[0],(float)color[1],(float)color[2],1.0f };
-		}
-
-	}
-	
-}
-
-void Fbx::UpdateAnimation(float frame)
-{
-	fbxsdk::FbxTime time;
-
-	time.SetFrame(frame);
-
-	for (auto& bone : bones_) {
-		bone.globalMatrix = bone.node->EvaluateGlobalTransform(time);
-	}
-
-	currentFrame_ = frame;
-}
-
-void Fbx::BoneHierarchy()
-{
-	for (int i = 0; i < bones_.size(); i++) {
-		auto& bone = bones_[i];
-
-		if (bone.parentIndex == -1)	{
-			bone.globalMatrix = bone.localMatrix;
-		}
-		else {
-			bone.globalMatrix =	bones_[bone.parentIndex].globalMatrix * bone.localMatrix;
-		}
-	}
-}
-
-void Fbx::UpdateBoneMatrices()
-{
-	boneMatrix_.resize(bones_.size());
-
-	if (boneMatrix_.empty()) {
-		
-		return;
-	}
-
-	for (int i = 0; i < bones_.size(); i++) {
-		boneMatrix_[i] = ToMatrix(bones_[i].offsetMatrix * bones_[i].globalMatrix);
-	}
-}
-
-void Fbx::CollectBone(FbxNode* node)
-{
-	if (node->GetNodeAttribute() &&	node->GetNodeAttribute()->GetAttributeType() == FbxNodeAttribute::eSkeleton) {
-		Bone b;
-		b.node = node;
-		bones_.push_back(b);
-	}
-	
-
-	for (int i = 0; i < node->GetChildCount(); i++)
-	{
-		CollectBone(node->GetChild(i));
-	}
-}
-
-int Fbx::FindBoneIndex(FbxNode* node)
-{
-	for (int i = 0;i < bones_.size();i++) {
-		if (bones_[i].node == node)
-			return i;
-	}
-	return -1;
-}
-
-FbxNode* Fbx::FindMeshNode(FbxNode* node)
-{
-	if (node) {
-		auto* attr = node->GetNodeAttribute();
-
-		if (attr && attr->GetAttributeType() == FbxNodeAttribute::eMesh)
-			return node;
-
-		for (int i = 0; i < node->GetChildCount(); i++) {
-			FbxNode* res = FindMeshNode(node->GetChild(i));
-			if (res) 
-				return res;
-		}
-	}
-	return nullptr;
-}
-
-void Fbx::LoadBoneWeight(FbxMesh* mesh)
-{
-	int skinCount = mesh->GetDeformerCount(FbxDeformer::eSkin);
-
-	for (int skinIndex = 0; skinIndex < skinCount; skinIndex++)	{
-		FbxSkin* skin =	(FbxSkin*)mesh->GetDeformer(skinIndex, FbxDeformer::eSkin);
-
-		int clusterCount = skin->GetClusterCount();
-
-		for (int clusterIndex = 0; clusterIndex < clusterCount; clusterIndex++)	{
-			FbxCluster* cluster = skin->GetCluster(clusterIndex);
-
-			FbxNode* boneNode = cluster->GetLink();
-
-			int boneIndex = FindBoneIndex(boneNode);
-			
-			FbxAMatrix transformMatrix;
-			cluster->GetTransformMatrix(transformMatrix);
-
-			FbxAMatrix transformLinkMatrix;
-			cluster->GetTransformLinkMatrix(transformLinkMatrix);
-
-			if (boneIndex >= 0)
-			{
-				bones_[boneIndex].offsetMatrix = transformMatrix * transformLinkMatrix.Inverse();
-			}
-			
-			int* indices = cluster->GetControlPointIndices();
-			double* weights = cluster->GetControlPointWeights();
-
-			int count = cluster->GetControlPointIndicesCount();
-
-			for (int i = 0; i < count; i++)	{
-				int vertexId = indices[i];
-				float weight = (float)weights[i];
-
-				for (int slot = 0; slot < 4; slot++) {
-					if (pVertices_[vertexId].weight[slot] == 0.0f) {
-						pVertices_[vertexId].boneIndex[slot] = boneIndex;
-						pVertices_[vertexId].weight[slot] = weight;
-						break;
-					}
-				}
-			}
-		}
-	}
-}
-
-XMMATRIX Fbx::ToMatrix(const FbxMatrix& mat)//
-{
-	/*return XMMATRIX(
-		(float)mat[0][0], (float)mat[0][1], (float)mat[0][2], (float)mat[0][3],
-		(float)mat[1][0], (float)mat[1][1], (float)mat[1][2], (float)mat[1][3],
-		(float)mat[2][0], (float)mat[2][1], (float)mat[2][2], (float)mat[2][3],
-		(float)mat[3][0], (float)mat[3][1], (float)mat[3][2], (float)mat[3][3]
-	);*/
-	XMFLOAT4X4 pose;
-
-	for (int x = 0; x < 4; x++)
-	{
-		for (int y = 0; y < 4; y++)
-		{
-			(&pose.m[0][0])[x * 4 + y] = (float)mat.Get(x, y);
-		}
-	}
-
-	return XMLoadFloat4x4(&pose);
+	return position;
 }
 
 void Fbx::RayCast(RayCastData& rayData)
 {
-	//XMVECTOR start = XMLoadFloat4(&rayData.start);
-	//XMVECTOR dir = XMLoadFloat4(&rayData.dir);
-	//XMVECTOR dirN = XMVector4Normalize(dir); // dirの単位ベクトル
-
-	//XMFLOAT3 start = { rayData.start.x,rayData.start.y,rayData.start.z };
-	//XMFLOAT3 dir = { rayData.dir.x,rayData.dir.y, rayData.dir.z };
-	//XMVECTOR vDir = XMLoadFloat3(&dir);
-	//XMVECTOR vDirN = XMVector3Normalize(vDir);
-	//XMStoreFloat3(&dir, vDirN);
-
-	//XMFLOAT3 F0, F1, F2;
-
-
-
-
-
-
-	//for (int material = 0;material < materialCount_;material++)
-	//{
-	//	auto& indices = ppIndex_[material];
-
-	//	//全ポリゴンに対して
-	//	for (int i = 0;i < (int)indices.size();i += 3)
-	//	{
-	//		VERTEX& V0 = pVertices_[ indices[i + 0] ];
-	//		VERTEX& V1 = pVertices_[ indices[i + 1] ];
-	//		VERTEX& V2 = pVertices_[ indices[i + 2] ];
-
-	//		rayData.isHit = Math::Intersect(
-	//			XMLoadFloat4(&rayData.start),
-	//			XMLoadFloat4(&rayData.dir),
-	//			V0.position,
-	//			V1.position,
-	//			V2.position,
-	//			rayData.dist
-	//		);
-
-	//		if (rayData.isHit)
-	//		{
-	//			return;
-	//		}
-	//	}
-	//}
-	//rayData.isHit = false;
-
-
-	////////
-	//rayData.isHit = false;
-	//rayData.dist = rayData.maxDist;
-
-
-	//XMVECTOR origin = XMLoadFloat4(&rayData.start);
-	//XMVECTOR dir = XMVector3Normalize(XMLoadFloat4(&rayData.dir)); // ★必須
-
-	//for (int material = 0; material < materialCount_; material++)
-	//{
-	//	auto& indices = ppIndex_[material];
-
-	//	for (int i = 0; i < (int)indices.size(); i += 3)
-	//	{
-	//		VERTEX& V0 = pVertices_[indices[i + 0]];
-	//		VERTEX& V1 = pVertices_[indices[i + 1]];
-	//		VERTEX& V2 = pVertices_[indices[i + 2]];
-
-	//		float t;
-	//		/*bool hit = false;
-
-	//		hit = Math::Intersect(origin, dir, V0.position, V1.position, V2.position,t);
-
-	//		if (hit && t < rayData.dist) {
-	//			rayData.isHit = true;
-	//			rayData.dist = t;
-	//		}*/
-
-
-
-
-	//		if (Math::Intersect(origin, dir,
-	//			V0.position, V1.position, V2.position, t))
-	//		{
-	//			if (t <= rayData.maxDist && t < rayData.dist) // レイの長さを制限した
-	//			{
-	//				rayData.dist = t;
-	//				rayData.isHit = true;
-
-	//				// ヒットポス
-	//				XMVECTOR hitPos = origin + dir * t;
-	//				XMStoreFloat3(&rayData.hitPos, hitPos);
-
-	//				// 法線
-	//				XMVECTOR normal = XMVector3Normalize(
-	//					XMVector3Cross(
-	//						V1.position - V0.position,
-	//						V2.position - V0.position
-	//					)
-	//				);
-	//				XMStoreFloat3(&rayData.normal, normal);
-	//			}
-	//		}
-	//	}
-	//}
-
-//////////
-	rayData.dist = FLT_MAX;
-	float closest = rayData.dist;
-	bool hit = false;
-	XMVECTOR nearNormal = XMVectorZero(); // 一番近いとこ取る用変数
-	
-	for (int material = 0; material < materialCount_; material++)
+	//すべてのパーツと判定
+	for (int i = 0; i < parts_.size(); i++)
 	{
-		auto& indices = ppIndex_[material];
-		//全ポリゴンに対して
-		for (int i = 0; i < (int)indices.size(); i += 3)
-		{
-			FBX_VERTEX& V0 = pVertices_[indices[i + 0]];
-			FBX_VERTEX& V1 = pVertices_[indices[i + 1]];
-			FBX_VERTEX& V2 = pVertices_[indices[i + 2]];
-	
-			float t;
-			bool result = TriangleTests::Intersects(
-				XMLoadFloat4(&rayData.start),
-				XMLoadFloat4(&rayData.dir),
-				V0.position,
-				V1.position,
-				V2.position,
-				t
-			);
-	
-	
-			if (result && t < closest && t < rayData.maxDist)
-			{
-				closest = t;
-				hit = true;
-	
-				XMVECTOR origin = XMLoadFloat4(&rayData.start);
-				XMVECTOR dir = XMVector3Normalize(XMLoadFloat4(&rayData.dir));
-				XMVECTOR localHitPos = origin + dir * t;
-				XMStoreFloat3(&rayData.localHit, localHitPos);
-
-				XMVECTOR normal = XMVector3Normalize(XMVector3Cross(
-					V1.position - V0.position, V2.position - V0.position));
-
-
-				if (XMVectorGetX(XMVector3Dot(dir, normal)) > 0.0f)
-				{
-					normal *= -1.0f;
-				}
-
-				nearNormal = normal;
-			}
-		}
+		parts_[i]->RayCast(rayData);
 	}
-	rayData.isHit = hit;
-	
-	rayData.dist = closest;
-	
-	if (hit)
-	{
-		XMStoreFloat3(&rayData.hitNormal, nearNormal); 
-	}
-	
-	//rayData.isHit = InterSects();
-
-	//using namespace DirectX;
-
-	//XMVECTOR start = XMLoadFloat4(&rayData.start);
-	//XMVECTOR dir = XMVector3Normalize(XMLoadFloat4(&rayData.dir));
-
-	//for (int m = 0; m < materialCount_; ++m)
-	//{
-	//	const auto& indices = indicesPerMat_[m];
-
-	//	for (size_t i = 0; i + 2 < indices.size(); i += 3)
-	//	{
-	//		const VERTEX& v0 = vertices_[indices[i + 0]];
-	//		const VERTEX& v1 = vertices_[indices[i + 1]];
-	//		const VERTEX& v2 = vertices_[indices[i + 2]];
-
-	//		//if (TriangleTests::Intersects(
-	//		//	start, dir,
-	//		//	v0.position, v1.position, v2.position,
-	//		//	rayData.dist))
-	//		//{
-	//		//	rayData.hit = true;
-	//		//	return;
-	//		//}
-	//	}
-	//}
-	//rayData.hit = false;
 }
+
+
