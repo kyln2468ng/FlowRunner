@@ -2,6 +2,10 @@
 #include "Fbx.h"
 #include "Direct3D.h"
 #include "Camera.h"
+#include <filesystem>
+#include <string>
+
+namespace fs = std::filesystem;
 
 //コンストラクタ
 FbxParts::FbxParts():
@@ -14,35 +18,6 @@ FbxParts::FbxParts():
 //デストラクタ
 FbxParts::~FbxParts()
 {
-	SAFE_DELETE_ARRAY(pBoneArray_);
-	SAFE_DELETE_ARRAY(ppCluster_);
-
-	if (pWeightArray_ != nullptr)
-	{
-		for (DWORD i = 0; i < vertexCount_; i++)
-		{
-			SAFE_DELETE_ARRAY(pWeightArray_[i].pBoneIndex);
-			SAFE_DELETE_ARRAY(pWeightArray_[i].pBoneWeight);
-		}
-		SAFE_DELETE_ARRAY(pWeightArray_);
-	}
-
-
-
-	SAFE_DELETE_ARRAY(pVertexData_);
-	for (DWORD i = 0; i < materialCount_; i++)
-	{
-		SAFE_RELEASE(ppIndexBuffer_[i]);
-		SAFE_DELETE(ppIndexData_[i]);
-		SAFE_DELETE(pMaterial_[i].pTexture);
-
-	}
-	SAFE_DELETE_ARRAY(ppIndexBuffer_);
-	SAFE_DELETE_ARRAY(ppIndexData_);
-	SAFE_DELETE_ARRAY(pMaterial_);
-
-	SAFE_RELEASE(pVertexBuffer_);
-	SAFE_RELEASE(pConstantBuffer_);
 }
 
 //FBXファイルから情報をロードして諸々準備する
@@ -61,7 +36,7 @@ HRESULT FbxParts::Init(FbxNode *pNode)
 	InitMaterial(pNode);	//マテリアル準備
 	InitIndex(mesh);		//インデックスバッファ準備
 	InitSkelton(mesh);		//骨の情報を準備
-	IntConstantBuffer();	//コンスタントバッファ（シェーダーに情報を送るやつ）準備
+	InitConstantBuffer();	//コンスタントバッファ（シェーダーに情報を送るやつ）準備
 
 	return E_NOTIMPL;
 }
@@ -75,20 +50,20 @@ void FbxParts::InitVertex(fbxsdk::FbxMesh * mesh)
 	for (DWORD poly = 0; poly < polygonCount_; poly++)
 	{
 		//3頂点分
-		for (int vertex = 0; vertex < 3; vertex++)
+		for (DWORD vertex = 0; vertex < 3; vertex++)
 		{
-			int index = mesh->GetPolygonVertex(poly, vertex);
+			DWORD index = mesh->GetPolygonVertex(poly, vertex);
 
-			/////////////////////////頂点の位置/////////////////////////////////////
+			///頂点の位置///
 			FbxVector4 pos = mesh->GetControlPointAt(index);
 			pVertexData_[index].position = XMFLOAT3((float)pos[0], (float)pos[1], (float)pos[2]);
 
-			/////////////////////////頂点の法線/////////////////////////////////////
+			///頂点の法線///
 			FbxVector4 Normal;
-			mesh->GetPolygonVertexNormal(poly, vertex, Normal);	//ｉ番目のポリゴンの、ｊ番目の頂点の法線をゲット
+			mesh->GetPolygonVertexNormal(poly, vertex, Normal);	//ｉ番目のポリゴンの、ｊ番目の頂点の法線を取得
 			pVertexData_[index].normal = XMFLOAT3((float)Normal[0], (float)Normal[1], (float)Normal[2]);
 
-			///////////////////////////頂点のＵＶ/////////////////////////////////////
+			///頂点のＵＶ///
 			FbxLayerElementUV * pUV = mesh->GetLayer(0)->GetUVs();
 			int uvIndex = mesh->GetTextureUVIndex(poly, vertex, FbxLayerElement::eTextureDiffuse);
 			FbxVector2  uv = pUV->GetDirectArray().GetAt(uvIndex);
@@ -120,7 +95,7 @@ void FbxParts::InitVertex(fbxsdk::FbxMesh * mesh)
 	bd_vertex.StructureByteStride = 0;
 	D3D11_SUBRESOURCE_DATA data_vertex;
 	data_vertex.pSysMem = pVertexData_;
-	Direct3D::pDevice_->CreateBuffer(&bd_vertex, &data_vertex, &pVertexBuffer_);
+	Direct3D::pDevice->CreateBuffer(&bd_vertex, &data_vertex, &pVertexBuffer_);
 
 
 }
@@ -174,7 +149,7 @@ void FbxParts::InitMaterial(fbxsdk::FbxNode * pNode)
 }
 
 //テクスチャ準備
-void FbxParts::InitTexture(fbxsdk::FbxSurfaceMaterial * pMaterial, const DWORD &i)
+void FbxParts::InitTexture(fbxsdk::FbxSurfaceMaterial * pMaterial, const DWORD&i)
 {
 	pMaterial_[i].pTexture = nullptr;
 
@@ -187,19 +162,15 @@ void FbxParts::InitTexture(fbxsdk::FbxSurfaceMaterial * pMaterial, const DWORD &
 
 	if (fileTextureCount > 0)
 	{
-		FbxFileTexture* texture = lProperty.GetSrcObject<FbxFileTexture>(0);
-
-		//ファイル名+拡張だけにする
-		char name[_MAX_FNAME];	//ファイル名
-		char ext[_MAX_EXT];		//拡張子
-		_splitpath_s(texture->GetRelativeFileName(), nullptr, 0, nullptr, 0, name, _MAX_FNAME, ext, _MAX_EXT);
-		wsprintf(name, "%s%s", name, ext);
-
-
-
-		pMaterial_[i].pTexture = new Texture;
-		pMaterial_[i].pTexture->Load(name);
-
+		FbxFileTexture* textureInfo = lProperty.GetSrcObject<FbxFileTexture>(0);
+		const char* textureFilePath = textureInfo->GetRelativeFileName();
+		
+		fs::path tPath(textureFilePath);
+		if (fs::is_regular_file(tPath))
+		{
+			pMaterial_[i].pTexture = new Texture;
+			pMaterial_[i].pTexture->Load(textureFilePath);
+		}
 
 	}
 }
@@ -209,7 +180,7 @@ void FbxParts::InitIndex(fbxsdk::FbxMesh * mesh)
 {
 	// マテリアルの数だけインデックスバッファーを作成
 	ppIndexBuffer_ = new ID3D11Buffer*[materialCount_];
-	ppIndexData_ = new DWORD*[materialCount_];
+	ppIndexData_ = new DWORD *[materialCount_];
 
 	
 
@@ -219,7 +190,7 @@ void FbxParts::InitIndex(fbxsdk::FbxMesh * mesh)
 	for (DWORD i = 0; i < materialCount_; i++)
 	{
 		count = 0;
-		DWORD *pIndex = new DWORD[polygonCount_ * 3];
+		DWORD*pIndex = new DWORD[polygonCount_ * 3];
 		ZeroMemory(&pIndex[i], sizeof(pIndex[i]));
 
 		// ポリゴンを構成する三角形平面が、
@@ -250,7 +221,7 @@ void FbxParts::InitIndex(fbxsdk::FbxMesh * mesh)
 		InitData.pSysMem = pIndex;
 		InitData.SysMemPitch = 0;
 		InitData.SysMemSlicePitch = 0;
-		if (FAILED(Direct3D::pDevice_->CreateBuffer(&bd, &InitData, &ppIndexBuffer_[i])))
+		if (FAILED(Direct3D::pDevice->CreateBuffer(&bd, &InitData, &ppIndexBuffer_[i])))
 		{
 			//MessageBox(0, "インデックスバッファの生成に失敗", fbxFileName, MB_OK);
 			//return FALSE;
@@ -402,7 +373,7 @@ void FbxParts::InitSkelton(FbxMesh * pMesh)
 }
 
 //コンスタントバッファ（シェーダーに情報を送るやつ）準備
-void FbxParts::IntConstantBuffer()
+void FbxParts::InitConstantBuffer()
 {
 	// 定数バッファの作成(パラメータ受け渡し用)
 	D3D11_BUFFER_DESC cb;
@@ -412,7 +383,7 @@ void FbxParts::IntConstantBuffer()
 	cb.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
 	cb.MiscFlags = 0;
 	cb.StructureByteStride = 0;
-	Direct3D::pDevice_->CreateBuffer(&cb, NULL, &pConstantBuffer_);
+	Direct3D::pDevice->CreateBuffer(&cb, NULL, &pConstantBuffer_);
 }
 
 //描画
@@ -421,12 +392,13 @@ void FbxParts::Draw(Transform& transform)
 	//今から描画する頂点情報をシェーダに伝える
 	UINT stride = sizeof(VERTEX);
 	UINT offset = 0;
-	Direct3D::pContext_->IASetVertexBuffers(0, 1, &pVertexBuffer_, &stride, &offset);
+	Direct3D::pContext->IASetVertexBuffers(0, 1, &pVertexBuffer_, &stride, &offset);
 
 	//使用するコンスタントバッファをシェーダに伝える
-	Direct3D::pContext_->VSSetConstantBuffers(0, 1, &pConstantBuffer_);
-	Direct3D::pContext_->PSSetConstantBuffers(0, 1, &pConstantBuffer_);
+	Direct3D::pContext->VSSetConstantBuffers(0, 1, &pConstantBuffer_);
+	Direct3D::pContext->PSSetConstantBuffers(0, 1, &pConstantBuffer_);
 
+	transform.Calculation();
 
 	//シェーダーのコンスタントバッファーに各種データを渡す
 	for (DWORD i = 0; i < materialCount_; i++)
@@ -434,7 +406,7 @@ void FbxParts::Draw(Transform& transform)
 		// インデックスバッファーをセット
 		UINT    stride = sizeof(int);
 		UINT    offset = 0;
-		Direct3D::pContext_->IASetIndexBuffer(ppIndexBuffer_[i], DXGI_FORMAT_R32_UINT, 0);
+		Direct3D::pContext->IASetIndexBuffer(ppIndexBuffer_[i], DXGI_FORMAT_R32_UINT, 0);
 
 
 		// パラメータの受け渡し
@@ -442,7 +414,7 @@ void FbxParts::Draw(Transform& transform)
 		CONSTANT_BUFFER cb;
 		cb.worldVewProj =	XMMatrixTranspose(transform.GetWorldMatrix() * Camera::GetViewMatrix() * Camera::GetProjectionMatrix());						// リソースへ送る値をセット
 		cb.world =		XMMatrixTranspose(transform.GetWorldMatrix());
-		cb.normalTrans =	XMMatrixTranspose(transform.matRotate_ * XMMatrixInverse(nullptr, transform.matScale_));
+		cb.normalTrans =	XMMatrixTranspose(transform.GetNormalMatrix());
 		cb.ambient = pMaterial_[i].ambient;
 		cb.diffuse = pMaterial_[i].diffuse;
 		cb.speculer = pMaterial_[i].specular;
@@ -452,7 +424,7 @@ void FbxParts::Draw(Transform& transform)
 		cb.isTexture = pMaterial_[i].pTexture != nullptr;
 
 
-		Direct3D::pContext_->Map(pConstantBuffer_, 0, D3D11_MAP_WRITE_DISCARD, 0, &pdata);	// GPUからのリソースアクセスを一時止める
+		Direct3D::pContext->Map(pConstantBuffer_, 0, D3D11_MAP_WRITE_DISCARD, 0, &pdata);	// GPUからのリソースアクセスを一時止める
 		memcpy_s(pdata.pData, pdata.RowPitch, (void*)(&cb), sizeof(cb));		// リソースへ値を送る
 
 
@@ -462,17 +434,50 @@ void FbxParts::Draw(Transform& transform)
 		if (cb.isTexture)
 		{
 			ID3D11SamplerState*			pSampler = pMaterial_[i].pTexture->GetSampler();
-			Direct3D::pContext_->PSSetSamplers(0, 1, &pSampler);
+			Direct3D::pContext->PSSetSamplers(0, 1, &pSampler);
 
 			ID3D11ShaderResourceView*	pSRV = pMaterial_[i].pTexture->GetSRV();
-			Direct3D::pContext_->PSSetShaderResources(0, 1, &pSRV);
+			Direct3D::pContext->PSSetShaderResources(0, 1, &pSRV);
 		}
-		Direct3D::pContext_->Unmap(pConstantBuffer_, 0);									// GPUからのリソースアクセスを再開
+		Direct3D::pContext->Unmap(pConstantBuffer_, 0);									// GPUからのリソースアクセスを再開
 
 		 //ポリゴンメッシュを描画する
-		Direct3D::pContext_->DrawIndexed(pMaterial_[i].polygonCount * 3, 0, 0);
+		Direct3D::pContext->DrawIndexed(pMaterial_[i].polygonCount * 3, 0, 0);
 	}
 
+}
+
+void FbxParts::Release()
+{
+
+	SAFE_DELETE_ARRAY(pBoneArray_);
+	SAFE_DELETE_ARRAY(ppCluster_);
+
+	if (pWeightArray_ != nullptr)
+	{
+		for (DWORD i = 0; i < vertexCount_; i++)
+		{
+			SAFE_DELETE_ARRAY(pWeightArray_[i].pBoneIndex);
+			SAFE_DELETE_ARRAY(pWeightArray_[i].pBoneWeight);
+		}
+		SAFE_DELETE_ARRAY(pWeightArray_);
+	}
+
+
+	SAFE_DELETE_ARRAY(pVertexData_);
+	for (DWORD i = 0; i < materialCount_; i++)
+	{
+		SAFE_RELEASE(ppIndexBuffer_[i]);
+		SAFE_DELETE(ppIndexData_[i]);
+		SAFE_DELETE(pMaterial_[i].pTexture);
+
+	}
+	SAFE_DELETE_ARRAY(ppIndexBuffer_);
+	SAFE_DELETE_ARRAY(ppIndexData_);
+	SAFE_DELETE_ARRAY(pMaterial_);
+
+	SAFE_RELEASE(pVertexBuffer_);
+	SAFE_RELEASE(pConstantBuffer_);
 }
 
 //ボーン有りのモデルを描画
@@ -527,11 +532,11 @@ void FbxParts::DrawSkinAnime(Transform& transform, FbxTime time)
 
 	// 頂点バッファをロックして、変形させた後の頂点情報で上書きする
 	D3D11_MAPPED_SUBRESOURCE msr = {};
-	Direct3D::pContext_->Map(pVertexBuffer_, 0, D3D11_MAP_WRITE_DISCARD, 0, &msr);
+	Direct3D::pContext->Map(pVertexBuffer_, 0, D3D11_MAP_WRITE_DISCARD, 0, &msr);
 	if (msr.pData)
 	{
 		memcpy_s(msr.pData, msr.RowPitch, pVertexData_, sizeof(VERTEX) * vertexCount_);
-		Direct3D::pContext_->Unmap(pVertexBuffer_, 0);
+		Direct3D::pContext->Unmap(pVertexBuffer_, 0);
 	}
 
 
@@ -580,13 +585,13 @@ bool FbxParts::GetBonePosition(std::string boneName, XMFLOAT3 * position)
 
 void FbxParts::RayCast(RayCastData& data)
 {
-	data->hit = FALSE;
+	data.isHit= FALSE;
 
 	//マテリアル毎
-	for (DWORD i = 0; i < materialCount_; i++)
+	for (int i = 0; i < materialCount_; i++)
 	{
 		//そのマテリアルのポリゴン毎
-		for (DWORD j = 0; j < pMaterial_[i].polygonCount; j++)
+		for (int j = 0; j < pMaterial_[i].polygonCount; j++)
 		{
 			//3頂点
 			XMFLOAT3 ver[3];
@@ -597,208 +602,79 @@ void FbxParts::RayCast(RayCastData& data)
 			BOOL  hit = FALSE;
 			float dist = 0.0f;
 
-			hit = Direct3D::Intersect(data->start, data->dir, ver[0], ver[1], ver[2], &dist);
+			XMFLOAT3 start = { data.start.x, data.start.y, data.start.z };
+
+			XMFLOAT3 dir = { data.dir.x, data.dir.y, data.dir.z };
+
+			hit = Direct3D::Intersect(start, dir, ver[0], ver[1], ver[2], &dist);
 
 
-			if (hit && dist < data->dist)
+			if (hit && dist < data.dist)
 			{
-				data->hit = TRUE;
-				data->dist = dist;
+				data.isHit = TRUE;
+				data.dist = dist;
 			}
 		}
 	}
 
 
-	/*
-	
-	//XMVECTOR start = XMLoadFloat4(&rayData.start);
-	//XMVECTOR dir = XMLoadFloat4(&rayData.dir);
-	//XMVECTOR dirN = XMVector4Normalize(dir); // dirの単位ベクトル
+	//data.dist = FLT_MAX;
+	//float closest = data.dist;
+	//data.isHit = false;
+	//XMVECTOR nearNormal = XMVectorZero(); // 一番近いとこ取る用変数
 
-	//XMFLOAT3 start = { rayData.start.x,rayData.start.y,rayData.start.z };
-	//XMFLOAT3 dir = { rayData.dir.x,rayData.dir.y, rayData.dir.z };
-	//XMVECTOR vDir = XMLoadFloat3(&dir);
-	//XMVECTOR vDirN = XMVector3Normalize(vDir);
-	//XMStoreFloat3(&dir, vDirN);
-
-	//XMFLOAT3 F0, F1, F2;
-
-
-
-
-
-
-	//for (int material = 0;material < materialCount_;material++)
+	//for (int i = 0; i < materialCount_; i++)
 	//{
-	//	auto& indices = ppIndex_[material];
-
 	//	//全ポリゴンに対して
-	//	for (int i = 0;i < (int)indices.size();i += 3)
+	//	for (int j = 0; j < pMaterial_[i].polygonCount; j++)
 	//	{
-	//		VERTEX& V0 = pVertices_[ indices[i + 0] ];
-	//		VERTEX& V1 = pVertices_[ indices[i + 1] ];
-	//		VERTEX& V2 = pVertices_[ indices[i + 2] ];
+	//		//3頂点
+	//		XMFLOAT3 ver[3];
+	//		VERTEX& v0 = pVertexData_[ppIndexData_[i][j * 3 + 0]].position;
+	//		ver[1] = pVertexData_[ppIndexData_[i][j * 3 + 1]].position;
+	//		ver[2] = pVertexData_[ppIndexData_[i][j * 3 + 2]].position;
 
-	//		rayData.isHit = Math::Intersect(
-	//			XMLoadFloat4(&rayData.start),
-	//			XMLoadFloat4(&rayData.dir),
-	//			V0.position,
-	//			V1.position,
-	//			V2.position,
-	//			rayData.dist
+	//		float dist = 0.0f;
+	//		bool result = TriangleTests::Intersects(
+	//			XMLoadFloat4(&data.start),
+	//			XMLoadFloat4(&data.dir),
+	//			ver[0].position,
+	//			ver[0].position,
+	//			ver[0].position,
+	//			dist
 	//		);
 
-	//		if (rayData.isHit)
+
+	//		if (result && dist < closest && t < data.maxDist)
 	//		{
-	//			return;
-	//		}
-	//	}
-	//}
-	//rayData.isHit = false;
+	//			closest = dist;
+	//			hit = true;
+
+	//			XMVECTOR origin = XMLoadFloat4(&data.start);
+	//			XMVECTOR dir = XMVector3Normalize(XMLoadFloat4(&data.dir));
+	//			XMVECTOR localHitPos = origin + dir * dist;
+	//			XMStoreFloat3(&data.localHit, localHitPos);
+
+	//			XMVECTOR normal = XMVector3Normalize(XMVector3Cross(
+	//				V1.position - V0.position, V2.position - V0.position));
 
 
-	////////
-	//rayData.isHit = false;
-	//rayData.dist = rayData.maxDist;
-
-
-	//XMVECTOR origin = XMLoadFloat4(&rayData.start);
-	//XMVECTOR dir = XMVector3Normalize(XMLoadFloat4(&rayData.dir)); // ★必須
-
-	//for (int material = 0; material < materialCount_; material++)
-	//{
-	//	auto& indices = ppIndex_[material];
-
-	//	for (int i = 0; i < (int)indices.size(); i += 3)
-	//	{
-	//		VERTEX& V0 = pVertices_[indices[i + 0]];
-	//		VERTEX& V1 = pVertices_[indices[i + 1]];
-	//		VERTEX& V2 = pVertices_[indices[i + 2]];
-
-	//		float t;
-	//		/*bool hit = false;
-
-	//		hit = Math::Intersect(origin, dir, V0.position, V1.position, V2.position,t);
-
-	//		if (hit && t < rayData.dist) {
-	//			rayData.isHit = true;
-	//			rayData.dist = t;
-	//		}*/
-
-
-
-
-	//		if (Math::Intersect(origin, dir,
-	//			V0.position, V1.position, V2.position, t))
-	//		{
-	//			if (t <= rayData.maxDist && t < rayData.dist) // レイの長さを制限した
+	//			if (XMVectorGetX(XMVector3Dot(dir, normal)) > 0.0f)
 	//			{
-	//				rayData.dist = t;
-	//				rayData.isHit = true;
-
-	//				// ヒットポス
-	//				XMVECTOR hitPos = origin + dir * t;
-	//				XMStoreFloat3(&rayData.hitPos, hitPos);
-
-	//				// 法線
-	//				XMVECTOR normal = XMVector3Normalize(
-	//					XMVector3Cross(
-	//						V1.position - V0.position,
-	//						V2.position - V0.position
-	//					)
-	//				);
-	//				XMStoreFloat3(&rayData.normal, normal);
+	//				normal *= -1.0f;
 	//			}
+
+	//			nearNormal = normal;
 	//		}
 	//	}
 	//}
+	//data.isHit = hit;
 
-//////////
-	rayData.dist = FLT_MAX;
-	float closest = rayData.dist;
-	bool hit = false;
-	XMVECTOR nearNormal = XMVectorZero(); // 一番近いとこ取る用変数
+	//data.dist = closest;
 
-	for (int material = 0; material < materialCount_; material++)
-	{
-		auto& indices = ppIndex_[material];
-		//全ポリゴンに対して
-		for (int i = 0; i < (int)indices.size(); i += 3)
-		{
-			FBX_VERTEX& V0 = pVertices_[indices[i + 0]];
-			FBX_VERTEX& V1 = pVertices_[indices[i + 1]];
-			FBX_VERTEX& V2 = pVertices_[indices[i + 2]];
-
-			float t;
-			bool result = TriangleTests::Intersects(
-				XMLoadFloat4(&rayData.start),
-				XMLoadFloat4(&rayData.dir),
-				V0.position,
-				V1.position,
-				V2.position,
-				t
-			);
-
-
-			if (result && t < closest && t < rayData.maxDist)
-			{
-				closest = t;
-				hit = true;
-
-				XMVECTOR origin = XMLoadFloat4(&rayData.start);
-				XMVECTOR dir = XMVector3Normalize(XMLoadFloat4(&rayData.dir));
-				XMVECTOR localHitPos = origin + dir * t;
-				XMStoreFloat3(&rayData.localHit, localHitPos);
-
-				XMVECTOR normal = XMVector3Normalize(XMVector3Cross(
-					V1.position - V0.position, V2.position - V0.position));
-
-
-				if (XMVectorGetX(XMVector3Dot(dir, normal)) > 0.0f)
-				{
-					normal *= -1.0f;
-				}
-
-				nearNormal = normal;
-			}
-		}
-	}
-	rayData.isHit = hit;
-
-	rayData.dist = closest;
-
-	if (hit)
-	{
-		XMStoreFloat3(&rayData.hitNormal, nearNormal);
-	}
-
-	//rayData.isHit = InterSects();
-
-	//using namespace DirectX;
-
-	//XMVECTOR start = XMLoadFloat4(&rayData.start);
-	//XMVECTOR dir = XMVector3Normalize(XMLoadFloat4(&rayData.dir));
-
-	//for (int m = 0; m < materialCount_; ++m)
+	//if (hit)
 	//{
-	//	const auto& indices = indicesPerMat_[m];
-
-	//	for (size_t i = 0; i + 2 < indices.size(); i += 3)
-	//	{
-	//		const VERTEX& v0 = vertices_[indices[i + 0]];
-	//		const VERTEX& v1 = vertices_[indices[i + 1]];
-	//		const VERTEX& v2 = vertices_[indices[i + 2]];
-
-	//		//if (TriangleTests::Intersects(
-	//		//	start, dir,
-	//		//	v0.position, v1.position, v2.position,
-	//		//	rayData.dist))
-	//		//{
-	//		//	rayData.hit = true;
-	//		//	return;
-	//		//}
-	//	}
+	//	XMStoreFloat3(&data.hitNormal, nearNormal);
 	//}
-	//rayData.hit = false;
-	*/
+
 }

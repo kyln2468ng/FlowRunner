@@ -9,6 +9,8 @@
 #pragma comment(lib, "d3d11.lib")
 #pragma comment(lib, "d3dcompiler.lib")
 
+using namespace DirectX;
+
 #define SAFE_DELETE(p) if(p != nullptr){ delete p; p = nullptr;}
 #define SAFE_RELEASE(p) if(p != nullptr){ p->Release(); p = nullptr;}
 
@@ -23,7 +25,6 @@ namespace Direct3D // namespace==グローバル関数
 {
 	extern ID3D11Device* pDevice;
 	extern ID3D11DeviceContext* pContext;
-	extern ID3D11Buffer* pBoneConstantBuffer_;
 
 	// シェーダー準備
 	HRESULT InitShader();
@@ -43,4 +44,7 @@ namespace Direct3D // namespace==グローバル関数
 
 	//解放
 	void Release();
+
+	bool Intersect(const XMFLOAT3& start, const XMFLOAT3& direction, const XMFLOAT3& v0, const XMFLOAT3& v1, const XMFLOAT3& v2, float* distance);
+
 };

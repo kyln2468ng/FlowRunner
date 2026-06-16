@@ -7,6 +7,10 @@
 
 using namespace DirectX;
 
+#define SAFE_DELETE(p) {if ((p)!=nullptr) { delete (p); (p)=nullptr;}}
+#define SAFE_DELETE_ARRAY(p) {if ((p)!=nullptr) { delete[] (p); (p)=nullptr;}}
+#define SAFE_RELEASE(p) {if ((p)!=nullptr) { p->Release(); (p)=nullptr;}}
+
 class Fbx;
 struct RayCastData;
 
@@ -99,7 +103,7 @@ class FbxParts
 	// ボーン制御情報
 	FbxSkin*		pSkinInfo_;		// スキンメッシュ情報（スキンメッシュアニメーションのデータ本体）
 	FbxCluster**	ppCluster_;		// クラスタ情報（関節ごとに関連付けられた頂点情報）
-	int				numBone_;		// FBXに含まれている関節の数
+	DWORD				numBone_;		// FBXに含まれている関節の数
 	Bone*			pBoneArray_;	// 各関節の情報
 	Weight*			pWeightArray_;	// ウェイト情報（頂点の対する各関節の影響度合い）
 
@@ -111,7 +115,7 @@ class FbxParts
 	void InitTexture(fbxsdk::FbxSurfaceMaterial * pMaterial, const DWORD &i);	//テクスチャ準備
 	void InitIndex(fbxsdk::FbxMesh * mesh);		//インデックスバッファ準備
 	void InitSkelton(FbxMesh * pMesh);			//骨の情報を準備
-	void IntConstantBuffer();	//コンスタントバッファ（シェーダーに情報を送るやつ）準備
+	void InitConstantBuffer();	//コンスタントバッファ（シェーダーに情報を送るやつ）準備
 
 public:
 	FbxParts();
@@ -126,6 +130,9 @@ public:
 	//描画
 	//引数：world	ワールド行列
 	void Draw(Transform& transform);
+
+	//解放
+	void Release();
 
 	//ボーン有りのモデルを描画
 	//引数：transform	行列情報

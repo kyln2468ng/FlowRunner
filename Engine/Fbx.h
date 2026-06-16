@@ -7,7 +7,6 @@
 #include <vector>
 //#include "Camera.h"
 
-
 #pragma comment(lib, "LibFbxSDK-MD.lib")
 #pragma comment(lib, "LibXml2-MD.lib")
 #pragma comment(lib, "zlib-MD.lib")
