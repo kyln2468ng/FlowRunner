@@ -210,15 +210,6 @@ HRESULT Fbx::Load(std::string fileName)
 	//アニメーションのタイムモード取得
 	_frameRate = pFbxScene_->GetGlobalSettings().GetTimeMode();
 
-	// 現在のカレントディレクトリを保存
-	fs::path oldPath = fs::current_path();
-
-	// FBXのパス
-	fs::path fbxPath(fileName);
-
-	// FBXがあるフォルダへ移動
-	fs::current_path(fbxPath.parent_path());
-
 
 
 	//ルートノードを取得して
@@ -234,7 +225,7 @@ HRESULT Fbx::Load(std::string fileName)
 	}
 
 	// 元に戻す
-	fs::current_path(oldPath);
+	fs::current_path(basePath);
 
 	return S_OK;
 }

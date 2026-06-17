@@ -39,7 +39,16 @@ void Model::SetTransform(int hModel, Transform transform)
 
 void Model::Draw(int hModel)
 {
-    modelList[hModel]->pfbx_->Draw(modelList[hModel]->transform_);
+    if (hModel < 0 || hModel >= modelList.size() || modelList[hModel] == nullptr)
+    {
+        return;
+    }
+    modelList[hModel]->nowFrame += modelList[hModel]->animSpeed;
+
+    if (modelList[hModel]->pfbx_)
+    {
+        modelList[hModel]->pfbx_->Draw(modelList[hModel]->transform_, (int)modelList[hModel]->nowFrame);
+    }
 }
 
 void Model::Release()
@@ -70,6 +79,16 @@ Fbx* Model::GetFbx(int hModel)
     
     return modelList[hModel]->pfbx_;
     
+}
+
+void Model::SetAnimFrame(int hModel, int startFrame, int endFrame, float animSpeed)
+{
+    modelList[hModel]->SetAnimFrame(startFrame, endFrame, animSpeed);
+}
+
+int Model::GetAnimFrame(int hModel)
+{
+    return (int)modelList[hModel]->nowFrame;
 }
 
 void Model::RayCast(int hModel, RayCastData& data)

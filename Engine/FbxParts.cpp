@@ -18,6 +18,35 @@ FbxParts::FbxParts():
 //デストラクタ
 FbxParts::~FbxParts()
 {
+
+	SAFE_DELETE_ARRAY(pBoneArray_);
+	SAFE_DELETE_ARRAY(ppCluster_);
+
+	if (pWeightArray_ != nullptr)
+	{
+		for (DWORD i = 0; i < vertexCount_; i++)
+		{
+			SAFE_DELETE_ARRAY(pWeightArray_[i].pBoneIndex);
+			SAFE_DELETE_ARRAY(pWeightArray_[i].pBoneWeight);
+		}
+		SAFE_DELETE_ARRAY(pWeightArray_);
+	}
+
+
+	SAFE_DELETE_ARRAY(pVertexData_);
+	for (DWORD i = 0; i < materialCount_; i++)
+	{
+		SAFE_RELEASE(ppIndexBuffer_[i]);
+		SAFE_DELETE(ppIndexData_[i]);
+		SAFE_DELETE(pMaterial_[i].pTexture);
+
+	}
+	SAFE_DELETE_ARRAY(ppIndexBuffer_);
+	SAFE_DELETE_ARRAY(ppIndexData_);
+	SAFE_DELETE_ARRAY(pMaterial_);
+
+	SAFE_RELEASE(pVertexBuffer_);
+	SAFE_RELEASE(pConstantBuffer_);
 }
 
 //FBXファイルから情報をロードして諸々準備する
@@ -115,15 +144,20 @@ void FbxParts::InitMaterial(fbxsdk::FbxNode * pNode)
 		ZeroMemory(&pMaterial_[i], sizeof(pMaterial_[i]));
 
 		// フォンシェーディングを想定したマテリアルバッファの抽出
+		//FbxSurfaceMaterial* pMaterial = pNode->GetMaterial(i);
+		//FbxSurfacePhong* pPhong = (FbxSurfacePhong*)pMaterial;
+
 		FbxSurfaceMaterial* pMaterial = pNode->GetMaterial(i);
-		FbxSurfacePhong* pPhong = (FbxSurfacePhong*)pMaterial;
+
+		if (!pMaterial)
+			continue;
+
 
 		// 環境光＆拡散反射光＆鏡面反射光の反射成分値を取得
 		FbxDouble3  ambient = FbxDouble3(0, 0, 0);
-		FbxDouble3  diffuse = FbxDouble3(0, 0, 0);
+		FbxDouble3  diffuse = FbxDouble3(1, 1, 1);
 		FbxDouble3  specular = FbxDouble3(0, 0, 0);
-		ambient = pPhong->Ambient;
-		diffuse = pPhong->Diffuse;
+
 
 
 
@@ -136,10 +170,31 @@ void FbxParts::InitMaterial(fbxsdk::FbxNode * pNode)
 
 		if (pMaterial->GetClassId().Is(FbxSurfacePhong::ClassId))
 		{
+			FbxSurfacePhong* pPhong = (FbxSurfacePhong*)pMaterial;
+
+			ambient = pPhong->Ambient;
+			diffuse = pPhong->Diffuse;
 			specular = pPhong->Specular;
 			pMaterial_[i].specular = XMFLOAT4((float)specular[0], (float)specular[1], (float)specular[2], 1.0f);
 			pMaterial_[i].shininess = (float)pPhong->Shininess;
 		}
+		else if (pMaterial->GetClassId().Is(FbxSurfaceLambert::ClassId))
+		{
+			FbxSurfaceLambert* pLambert =
+				(FbxSurfaceLambert*)pMaterial;
+
+			ambient = pLambert->Ambient;
+			diffuse = pLambert->Diffuse;
+		}
+
+		pMaterial_[i].ambient =
+			XMFLOAT4((float)ambient[0], (float)ambient[1], (float)ambient[2], 1.0f);
+
+		pMaterial_[i].diffuse =
+			XMFLOAT4((float)diffuse[0], (float)diffuse[1], (float)diffuse[2], 1.0f);
+
+		pMaterial_[i].specular =
+			XMFLOAT4((float)specular[0], (float)specular[1], (float)specular[2], 1.0f);
 
 
 		InitTexture(pMaterial, i);
@@ -450,34 +505,6 @@ void FbxParts::Draw(Transform& transform)
 void FbxParts::Release()
 {
 
-	SAFE_DELETE_ARRAY(pBoneArray_);
-	SAFE_DELETE_ARRAY(ppCluster_);
-
-	if (pWeightArray_ != nullptr)
-	{
-		for (DWORD i = 0; i < vertexCount_; i++)
-		{
-			SAFE_DELETE_ARRAY(pWeightArray_[i].pBoneIndex);
-			SAFE_DELETE_ARRAY(pWeightArray_[i].pBoneWeight);
-		}
-		SAFE_DELETE_ARRAY(pWeightArray_);
-	}
-
-
-	SAFE_DELETE_ARRAY(pVertexData_);
-	for (DWORD i = 0; i < materialCount_; i++)
-	{
-		SAFE_RELEASE(ppIndexBuffer_[i]);
-		SAFE_DELETE(ppIndexData_[i]);
-		SAFE_DELETE(pMaterial_[i].pTexture);
-
-	}
-	SAFE_DELETE_ARRAY(ppIndexBuffer_);
-	SAFE_DELETE_ARRAY(ppIndexData_);
-	SAFE_DELETE_ARRAY(pMaterial_);
-
-	SAFE_RELEASE(pVertexBuffer_);
-	SAFE_RELEASE(pConstantBuffer_);
 }
 
 //ボーン有りのモデルを描画
