@@ -42,6 +42,8 @@ namespace Model
 	void SetAnimFrame(int hModel, int startFrame, int endFrame, float animSpeed);
 	//現在のアニメーションのフレームを取得
 	int GetAnimFrame(int hModel);
+	
+	XMFLOAT3 GetBonePosition(int hModel, std::string boneName);
 
 	void RayCast(int hModel,RayCastData& data);
 	bool RayCastAll(int hModel, RayCastData& data,int& outModel);

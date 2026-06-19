@@ -15,7 +15,7 @@ public:
 	void Draw() override;
 	void Release() override;
 private:
-	Fbx* pFbx_;
+	//Fbx* pFbx_;
 	int hModel_;
 };
 

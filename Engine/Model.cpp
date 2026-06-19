@@ -91,6 +91,14 @@ int Model::GetAnimFrame(int hModel)
     return (int)modelList[hModel]->nowFrame;
 }
 
+XMFLOAT3 Model::GetBonePosition(int hModel, std::string boneName)
+{
+    XMFLOAT3 pos = modelList[hModel]->pfbx_->GetBonePosition(boneName);
+    XMVECTOR vec = XMVector3TransformCoord(XMLoadFloat3(&pos), modelList[hModel]->transform_.GetWorldMatrix());
+    XMStoreFloat3(&pos, vec);
+    return pos;
+}
+
 void Model::RayCast(int hModel, RayCastData& data)
 {
     /*

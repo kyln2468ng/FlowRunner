@@ -5,7 +5,7 @@
 
 
 TestScene::TestScene(GameObject* parent)
-	:GameObject(parent, "TestScene"), pFbx_(nullptr), hModel_(-1)
+	:GameObject(parent, "TestScene"), hModel_(-1)//, pFbx_(nullptr)
 {
 }
 
