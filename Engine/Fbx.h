@@ -28,15 +28,15 @@ struct RayCastData
 
 };
 
-struct FBX_VERTEX
-{
-	XMVECTOR position;
-	XMVECTOR uv;
-	XMVECTOR normal;
-
-	UINT boneIndex[4];
-	float weight[4];
-};
+//struct FBX_VERTEX
+//{
+//	XMVECTOR position;
+//	XMVECTOR uv;
+//	XMVECTOR normal;
+//
+//	UINT boneIndex[4];
+//	float weight[4];
+//};
 
 class Fbx
 {

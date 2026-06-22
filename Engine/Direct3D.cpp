@@ -35,10 +35,10 @@ HRESULT Direct3D::InitShader()
     {
         return E_FAIL;
     }
-    if (FAILED(InitShader2D()))
-    {
-        return E_FAIL;
-    }
+    //if (FAILED(InitShader2D()))
+    //{
+    //    return E_FAIL;
+    //}
     return S_OK;
 
 }
@@ -59,12 +59,12 @@ HRESULT Direct3D::InitShader3D()
         MessageBox(nullptr, L"頂点シェーダーの作成に失敗しました", L"エラー", MB_OK);
         return hr;
     }
-
+    DWORD vectorSize = sizeof(XMFLOAT3);
     //頂点インプットレイアウト
     D3D11_INPUT_ELEMENT_DESC layout[] = {
-        { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0,  D3D11_INPUT_PER_VERTEX_DATA, 0 },	//位置
-        { "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, sizeof(XMVECTOR)  , D3D11_INPUT_PER_VERTEX_DATA, 0 },//UV座標
-        { "NORMAL",	0, DXGI_FORMAT_R32G32B32_FLOAT, 0, sizeof(XMVECTOR) * 2 ,	D3D11_INPUT_PER_VERTEX_DATA, 0 },//法線
+        { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, vectorSize * 0,  D3D11_INPUT_PER_VERTEX_DATA, 0 },	//位置
+        { "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, vectorSize * 1  , D3D11_INPUT_PER_VERTEX_DATA, 0 },//UV座標
+        { "NORMAL",	0, DXGI_FORMAT_R32G32B32_FLOAT, 0, vectorSize * 2,	D3D11_INPUT_PER_VERTEX_DATA, 0 },//法線
     };
     hr = pDevice->CreateInputLayout(layout, 3, pCompileVS->GetBufferPointer(), pCompileVS->GetBufferSize(), &(shaderBundle[SHADER_3D].pVertexLayout));
 
@@ -163,7 +163,7 @@ void Direct3D::SetShader(SHADER_TYPE type)
 HRESULT Direct3D::Initialize(int winW, int winH, HWND hWnd)
 {
     // Direct3Dの初期化
-    DXGI_SWAP_CHAIN_DESC scDesc = {};
+    DXGI_SWAP_CHAIN_DESC scDesc;// = {};
 
     // とりあえず全部０
     ZeroMemory(&scDesc, sizeof(scDesc));
@@ -236,6 +236,14 @@ HRESULT Direct3D::Initialize(int winW, int winH, HWND hWnd)
     //InitShaderBundle();
     //Direct3D::SetShader(Direct3D::SHADER_3D);
 
+    //シェーダー準備
+    hr = InitShader();
+    if (FAILED(hr))
+    {
+        MessageBox(nullptr, L"シェーダーの準備に失敗しました", L"エラー", MB_OK);
+        return hr;
+    }
+
     //深度ステンシルビューの作成
     D3D11_TEXTURE2D_DESC descDepth;
     descDepth.Width = winW;
@@ -257,13 +265,7 @@ HRESULT Direct3D::Initialize(int winW, int winH, HWND hWnd)
     pContext->OMSetRenderTargets(1, &pRenderTargetView, pDepthStencilView);            // 描画先を設定
     pContext->RSSetViewports(1, &vp);
 
-    //シェーダー準備
-    hr = InitShader();
-    if (FAILED(hr))
-    {
-        MessageBox(nullptr, L"シェーダーの準備に失敗しました", L"エラー", MB_OK);
-        return hr;
-    }
+
     return S_OK;
 
 }

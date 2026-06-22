@@ -105,5 +105,18 @@ float4 PS(VS_OUT inData) : SV_Target
     }
 
 	//最終的な色
-    return diffuse * shade + diffuse * ambient + speculer;
+    //return diffuse * shade + diffuse * ambient + speculer;
+
+    //一旦一定で仮置き
+    float4 color;
+    if (useTextrue == 1)
+    {
+        color = g_texture.Sample(g_sampler, inData.uv); // * inData.color;
+    }
+    else
+    {
+        color = float4(0.9, 0.7, 0.5, 1);
+    }
+    
+    return color;
 }

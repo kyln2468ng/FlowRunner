@@ -467,26 +467,28 @@ void FbxParts::Draw(Transform& transform)
 		// パラメータの受け渡し
 		D3D11_MAPPED_SUBRESOURCE pdata;
 		CONSTANT_BUFFER cb;
-		cb.worldVewProj =	XMMatrixTranspose(transform.GetWorldMatrix() * Camera::GetViewMatrix() * Camera::GetProjectionMatrix());						// リソースへ送る値をセット
-		cb.world =		XMMatrixTranspose(transform.GetWorldMatrix());
-		cb.normalTrans =	XMMatrixTranspose(transform.GetNormalMatrix());
-		cb.ambient = pMaterial_[i].ambient;
-		cb.diffuse = pMaterial_[i].diffuse;
-		cb.speculer = pMaterial_[i].specular;
+		cb.matWVP =	XMMatrixTranspose(transform.GetWorldMatrix() * Camera::GetViewMatrix() * Camera::GetProjectionMatrix());						// リソースへ送る値をセット
+		cb.matWorld =		XMMatrixTranspose(transform.GetWorldMatrix());
+		cb.matNormalTrans =	XMMatrixTranspose(transform.GetNormalMatrix());
+		cb.ambientColor = pMaterial_[i].ambient;
+		cb.diffuseColor = pMaterial_[i].diffuse;
+		cb.speculerColor = pMaterial_[i].specular;
 		cb.shininess = pMaterial_[i].shininess;
 		cb.cameraPosition = XMFLOAT4(Camera::GetPosition().x, Camera::GetPosition().y, Camera::GetPosition().z, 0);
-		cb.lightDirection = XMFLOAT4(1, -1, 1, 0);
-		cb.isTexture = pMaterial_[i].pTexture != nullptr;
-
+		cb.vecLightDir = XMFLOAT4(1, -1, 1, 0);
+		cb.useTextrue = pMaterial_[i].pTexture != nullptr;
 
 		Direct3D::pContext->Map(pConstantBuffer_, 0, D3D11_MAP_WRITE_DISCARD, 0, &pdata);	// GPUからのリソースアクセスを一時止める
 		memcpy_s(pdata.pData, pdata.RowPitch, (void*)(&cb), sizeof(cb));		// リソースへ値を送る
-
-
-
+		HRESULT hr = Direct3D::pContext->Map(pConstantBuffer_, 0, D3D11_MAP_WRITE_DISCARD, 0, &pdata);
+		if (FAILED(hr))
+		{
+			OutputDebugStringA("Map Failed\n");
+		}
+		cb.matWVP.r[0];
+		
 		// テクスチャをシェーダーに設定
-
-		if (cb.isTexture)
+		if (cb.useTextrue)
 		{
 			ID3D11SamplerState*			pSampler = pMaterial_[i].pTexture->GetSampler();
 			Direct3D::pContext->PSSetSamplers(0, 1, &pSampler);
