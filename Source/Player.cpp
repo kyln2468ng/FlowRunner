@@ -39,11 +39,12 @@ void Player::Initialize()
 	//pFbx_がnullptrじゃなかった時のチェックあったほういい
 	//pFbx_->Load("OdenA.fbx");
 	//hModel_ = Model::Load("BoxGrass.fbx");//おでんじゃなくしたら判定取れてた
-	hModel_ = Model::Load("model/hmjum.fbx");
+	hModel_ = Model::Load("model/workAnimTest.fbx");
 	assert(hModel_ >= 0);
-	transform_.scale_.x = 1.0f;
-	transform_.scale_.y = 1.0f;
-	transform_.scale_.z = 1.0f;
+	Model::SetAnimFrame(hModel_, 1, 60, 1.0f);
+	transform_.scale_.x = 0.5f;
+	transform_.scale_.y = 0.5f;
+	transform_.scale_.z = 0.5f;
 
 	transform_.position_ = { 0.0f,-1.0,3.0f };
 
@@ -131,7 +132,7 @@ void Player::Update()
 	}
 
 	if (inputX != 0.0f || inputZ != 0.0f) {
-		float angle = atan2f(-inputX, inputZ);
+		float angle = atan2f(inputX, inputZ);
 		transform_.SetVectorRotation(XMFLOAT3(0, XMConvertToDegrees(angle), 0));
 	}
 
@@ -210,7 +211,7 @@ void Player::Update()
 		WallCling(WallData);
 	}
 	else if (WallData.isHit == false) {
-		velocity_.y -= param_.GRAVITY;
+		//velocity_.y -= param_.GRAVITY;
 	}
 
 	vPos += move;
@@ -234,7 +235,7 @@ void Player::Update()
 
 	
 	//XMVECTOR camOffset = transform_.rotate_.Up() * 5.0f + (-transform_.rotate_.Forward() * 13.0f);
-	XMVECTOR camOffset = XMVectorSet(0, 5, -13, 0);
+	XMVECTOR camOffset = XMVectorSet(0, 5, -8, 0);
 	XMFLOAT3 camPos;
 	DirectX::XMStoreFloat3(&camPos, vPos + camOffset);
 

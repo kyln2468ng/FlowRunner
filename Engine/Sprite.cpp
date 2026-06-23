@@ -87,7 +87,7 @@ HRESULT Sprite::Initialize()
 
 void Sprite::Draw(XMMATRIX& worldMatrix)
 {
-	Direct3D::SetShader(SHADER_2D); // シェーダーの設定
+	Direct3D::SetShader(Direct3D::SHADER_2D); // シェーダーの設定
 
 	CONSTANT_BUFFER_2D cb;
 	cb.matWVP = XMMatrixTranspose(worldMatrix);

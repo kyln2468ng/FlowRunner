@@ -105,7 +105,7 @@ class FbxParts
 	// ボーン制御情報
 	FbxSkin*		pSkinInfo_;		// スキンメッシュ情報（スキンメッシュアニメーションのデータ本体）
 	FbxCluster**	ppCluster_;		// クラスタ情報（関節ごとに関連付けられた頂点情報）
-	DWORD				numBone_;		// FBXに含まれている関節の数
+	DWORD			numBone_;		// FBXに含まれている関節の数
 	Bone*			pBoneArray_;	// 各関節の情報
 	Weight*			pWeightArray_;	// ウェイト情報（頂点の対する各関節の影響度合い）
 

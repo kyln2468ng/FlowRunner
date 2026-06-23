@@ -14,17 +14,19 @@ using namespace DirectX;
 #define SAFE_DELETE(p) if(p != nullptr){ delete p; p = nullptr;}
 #define SAFE_RELEASE(p) if(p != nullptr){ p->Release(); p = nullptr;}
 
-enum SHADER_TYPE
-{
-	SHADER_3D,//3D用シェーダー
-	SHADER_2D,//2D用シェーダー
-	SHADER_MAX//シェーダーの最大数
-};
+
 
 namespace Direct3D // namespace==グローバル関数
 {
 	extern ID3D11Device* pDevice;
 	extern ID3D11DeviceContext* pContext;
+
+	enum SHADER_TYPE
+	{
+		SHADER_3D,//3D用シェーダー
+		SHADER_2D,//2D用シェーダー
+		SHADER_MAX//シェーダーの最大数
+	};
 
 	// シェーダー準備
 	HRESULT InitShader();

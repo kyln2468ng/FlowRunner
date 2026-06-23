@@ -62,9 +62,9 @@ HRESULT Direct3D::InitShader3D()
     DWORD vectorSize = sizeof(XMFLOAT3);
     //頂点インプットレイアウト
     D3D11_INPUT_ELEMENT_DESC layout[] = {
-        { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, vectorSize * 0,  D3D11_INPUT_PER_VERTEX_DATA, 0 },	//位置
-        { "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, vectorSize * 1  , D3D11_INPUT_PER_VERTEX_DATA, 0 },//UV座標
-        { "NORMAL",	0, DXGI_FORMAT_R32G32B32_FLOAT, 0, vectorSize * 2,	D3D11_INPUT_PER_VERTEX_DATA, 0 },//法線
+        { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, vectorSize * 0,  D3D11_INPUT_PER_VERTEX_DATA, 0 },	//頂点位置
+        { "NORMAL",   0, DXGI_FORMAT_R32G32B32_FLOAT, 0, vectorSize * 1, D3D11_INPUT_PER_VERTEX_DATA, 0 },	//法線
+        { "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT,    0, vectorSize * 2, D3D11_INPUT_PER_VERTEX_DATA, 0 },	//テクスチャ（UV）座標
     };
     hr = pDevice->CreateInputLayout(layout, 3, pCompileVS->GetBufferPointer(), pCompileVS->GetBufferSize(), &(shaderBundle[SHADER_3D].pVertexLayout));
 
@@ -90,7 +90,7 @@ HRESULT Direct3D::InitShader3D()
 
     //ラスタライザ作成
     D3D11_RASTERIZER_DESC rdc = {};
-    rdc.CullMode = D3D11_CULL_BACK;
+    rdc.CullMode = D3D11_CULL_NONE;//D3D11_CULL_BACK;
     rdc.FillMode = D3D11_FILL_SOLID;
     rdc.FrontCounterClockwise = FALSE;
     pDevice->CreateRasterizerState(&rdc, &(shaderBundle[SHADER_3D].pRasterizerState));
@@ -234,10 +234,10 @@ HRESULT Direct3D::Initialize(int winW, int winH, HWND hWnd)
 
     //各パターンのシェーダーセット準備
     //InitShaderBundle();
-    //Direct3D::SetShader(Direct3D::SHADER_3D);
-
+    
     //シェーダー準備
     hr = InitShader();
+    Direct3D::SetShader(Direct3D::SHADER_3D);
     if (FAILED(hr))
     {
         MessageBox(nullptr, L"シェーダーの準備に失敗しました", L"エラー", MB_OK);

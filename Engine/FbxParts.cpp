@@ -11,7 +11,10 @@ namespace fs = std::filesystem;
 FbxParts::FbxParts():
 	ppIndexBuffer_(nullptr), pMaterial_(nullptr), 
 	pVertexBuffer_(nullptr), pConstantBuffer_(nullptr),
-	pVertexData_(nullptr), ppIndexData_(nullptr)
+	pVertexData_(nullptr), ppIndexData_(nullptr),
+	ppCluster_(nullptr),	pBoneArray_(nullptr),
+	pWeightArray_(nullptr),	pSkinInfo_(nullptr),
+	numBone_(0)
 {
 }
 
@@ -210,7 +213,7 @@ void FbxParts::InitTexture(fbxsdk::FbxSurfaceMaterial * pMaterial, const DWORD&i
 
 
 	// テクスチャー情報の取得
-	FbxProperty  lProperty = pMaterial->FindProperty(FbxSurfaceMaterial::sDiffuse);
+	fbxsdk::FbxProperty  lProperty = pMaterial->FindProperty(FbxSurfaceMaterial::sDiffuse);
 
 	//テクスチャの数
 	int fileTextureCount = lProperty.GetSrcObjectCount<FbxFileTexture>();
@@ -225,6 +228,18 @@ void FbxParts::InitTexture(fbxsdk::FbxSurfaceMaterial * pMaterial, const DWORD&i
 		{
 			pMaterial_[i].pTexture = new Texture;
 			pMaterial_[i].pTexture->Load(textureFilePath);
+
+		}
+		else
+		{
+			fs::path altPath = "model";
+			altPath /= textureFilePath;
+
+			if (fs::is_regular_file(altPath))
+			{
+				pMaterial_[i].pTexture = new Texture;
+				pMaterial_[i].pTexture->Load(altPath.string());
+			}
 		}
 
 	}
@@ -312,31 +327,31 @@ void FbxParts::InitSkelton(FbxMesh * pMesh)
 		int     numRef;         // 頂点を共有するポリゴンの数
 	};
 
-	POLY_INDEX * polyTable = new POLY_INDEX[vertexCount_];
-	for (DWORD i = 0; i < vertexCount_; i++)
-	{
-		// 三角形ポリゴンに合わせて、頂点とポリゴンの関連情報を構築する
-		// 総頂点数＝ポリゴン数×３頂点
-		polyTable[i].polyIndex = new int[polygonCount_ * 3];
-		polyTable[i].vertexIndex = new int[polygonCount_ * 3];
-		polyTable[i].numRef = 0;
-		ZeroMemory(polyTable[i].polyIndex, sizeof(int)* polygonCount_ * 3);
-		ZeroMemory(polyTable[i].vertexIndex, sizeof(int)* polygonCount_ * 3);
+	//POLY_INDEX * polyTable = new POLY_INDEX[vertexCount_];
+	//for (DWORD i = 0; i < vertexCount_; i++)
+	//{
+	//	// 三角形ポリゴンに合わせて、頂点とポリゴンの関連情報を構築する
+	//	// 総頂点数＝ポリゴン数×３頂点
+	//	polyTable[i].polyIndex = new int[polygonCount_ * 3];
+	//	polyTable[i].vertexIndex = new int[polygonCount_ * 3];
+	//	polyTable[i].numRef = 0;
+	//	ZeroMemory(polyTable[i].polyIndex, sizeof(int)* polygonCount_ * 3);
+	//	ZeroMemory(polyTable[i].vertexIndex, sizeof(int)* polygonCount_ * 3);
 
-		// ポリゴン間で共有する頂点を列挙する
-		for (DWORD k = 0; k < polygonCount_; k++)
-		{
-			for (int m = 0; m < 3; m++)
-			{
-				if (pMesh->GetPolygonVertex(k, m) == i)
-				{
-					polyTable[i].polyIndex[polyTable[i].numRef] = k;
-					polyTable[i].vertexIndex[polyTable[i].numRef] = m;
-					polyTable[i].numRef++;
-				}
-			}
-		}
-	}
+	//	// ポリゴン間で共有する頂点を列挙する
+	//	for (DWORD k = 0; k < polygonCount_; k++)
+	//	{
+	//		for (int m = 0; m < 3; m++)
+	//		{
+	//			if (pMesh->GetPolygonVertex(k, m) == i)
+	//			{
+	//				polyTable[i].polyIndex[polyTable[i].numRef] = k;
+	//				polyTable[i].vertexIndex[polyTable[i].numRef] = m;
+	//				polyTable[i].numRef++;
+	//			}
+	//		}
+	//	}
+	//}
 
 	// ボーン情報を取得する
 	numBone_ = pSkinInfo_->GetClusterCount();
@@ -417,13 +432,13 @@ void FbxParts::InitSkelton(FbxMesh * pMesh)
 		pBoneArray_[i].bindPose = XMLoadFloat4x4(&pose);
 	}
 
-	// 一時的なメモリ領域を解放する
-	for (DWORD i = 0; i < vertexCount_; i++)
-	{
-		SAFE_DELETE_ARRAY(polyTable[i].polyIndex);
-		SAFE_DELETE_ARRAY(polyTable[i].vertexIndex);
-	}
-	SAFE_DELETE_ARRAY(polyTable);
+	//// 一時的なメモリ領域を解放する
+	//for (DWORD i = 0; i < vertexCount_; i++)
+	//{
+	//	SAFE_DELETE_ARRAY(polyTable[i].polyIndex);
+	//	SAFE_DELETE_ARRAY(polyTable[i].vertexIndex);
+	//}
+	//SAFE_DELETE_ARRAY(polyTable);
 
 }
 
@@ -480,12 +495,11 @@ void FbxParts::Draw(Transform& transform)
 
 		Direct3D::pContext->Map(pConstantBuffer_, 0, D3D11_MAP_WRITE_DISCARD, 0, &pdata);	// GPUからのリソースアクセスを一時止める
 		memcpy_s(pdata.pData, pdata.RowPitch, (void*)(&cb), sizeof(cb));		// リソースへ値を送る
-		HRESULT hr = Direct3D::pContext->Map(pConstantBuffer_, 0, D3D11_MAP_WRITE_DISCARD, 0, &pdata);
-		if (FAILED(hr))
-		{
-			OutputDebugStringA("Map Failed\n");
-		}
-		cb.matWVP.r[0];
+		//HRESULT hr = Direct3D::pContext->Map(pConstantBuffer_, 0, D3D11_MAP_WRITE_DISCARD, 0, &pdata);
+		//if (FAILED(hr))
+		//{
+		//	OutputDebugStringA("Map Failed\n");
+		//}
 		
 		// テクスチャをシェーダーに設定
 		if (cb.useTextrue)
@@ -515,7 +529,7 @@ void FbxParts::DrawSkinAnime(Transform& transform, FbxTime time)
 	// ボーンごとの現在の行列を取得する
 	for (int i = 0; i < numBone_; i++)
 	{
-		FbxAnimEvaluator * evaluator = ppCluster_[i]->GetLink()->GetScene()->GetAnimationEvaluator();
+		fbxsdk::FbxAnimEvaluator * evaluator = ppCluster_[i]->GetLink()->GetScene()->GetAnimationEvaluator();
 		FbxMatrix mCurrentOrentation = evaluator->GetNodeGlobalTransform(ppCluster_[i]->GetLink(), time);
 
 		// 行列コピー（Fbx形式からDirectXへの変換）
