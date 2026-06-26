@@ -426,7 +426,7 @@ void FbxParts::InitSkelton(FbxMesh * pMesh)
 		{
 			for (DWORD y = 0; y < 4; y++)
 			{
-				pose(x,y) = (float)matrix.Get(x, y);
+				pose(x, y) = (float)matrix.Get(x, y);
 			}
 		}
 		pBoneArray_[i].bindPose = XMLoadFloat4x4(&pose);
@@ -552,9 +552,8 @@ void FbxParts::DrawSkinAnime(Transform& transform, FbxTime time)
 	for (DWORD i = 0; i < vertexCount_; i++)
 	{
 		// 各頂点ごとに、「影響するボーン×ウェイト値」を反映させた関節行列を作成する
-		XMMATRIX  matrix;
-		//ZeroMemory(&matrix, sizeof(matrix));
-		matrix = XMMatrixIdentity();
+		XMMATRIX  matrix = {};
+		
 		for (int m = 0; m < numBone_; m++)
 		{
 			if (pWeightArray_[i].pBoneIndex[m] < 0)
