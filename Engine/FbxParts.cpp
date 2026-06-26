@@ -552,7 +552,12 @@ void FbxParts::DrawSkinAnime(Transform& transform, FbxTime time)
 	for (DWORD i = 0; i < vertexCount_; i++)
 	{
 		// 各頂点ごとに、「影響するボーン×ウェイト値」を反映させた関節行列を作成する
-		XMMATRIX  matrix = {};
+		XMMATRIX  matrix = XMMatrixSet(
+			0,0,0,0,
+			0,0,0,0,
+			0,0,0,0,
+			0,0,0,0
+		);
 		
 		for (int m = 0; m < numBone_; m++)
 		{

@@ -1,4 +1,6 @@
 #pragma once
+#include <unordered_map>
+#include <string>
 
 class Animation
 {
@@ -7,18 +9,24 @@ public:
 	~Animation();
 
 	void Initialize();
-	void Update(float deltatime);
-	void Play();
-	void Stop();
-	//void SetSpeed(float speed);				//モーションを何倍速で進めるかをセットする
-	//void SetMotionData(MotionData* motion);	//引数を呼びたいモーションにしセットする
-	void SetMaxFrame(float maxFrame);
-
-	float GetTime() const;
+	void Load();
+	void Update();
 
 private:
-	float currentTime_;
-	float maxFrame_;
-	bool isLoop_;
-	bool isPlay_;
+	struct AnimationClip
+	{
+		int hModel;
+
+		int startFrame;
+		int endFrame;
+
+		float speed;
+		bool loop;
+	};
+
+	std::unordered_map<std::string, AnimationClip> clips_;
+
+	AnimationClip* currentClip_;
+
+	float currentFrame_;
 };

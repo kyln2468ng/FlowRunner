@@ -41,7 +41,7 @@ void Player::Initialize()
 	//hModel_ = Model::Load("BoxGrass.fbx");//‚¨‚Å‚ñ‚¶‚á‚È‚­‚µ‚½‚ç”»’èŽæ‚ê‚Ä‚½
 	hModel_ = Model::Load("model/workAnimTest.fbx");
 	assert(hModel_ >= 0);
-	Model::SetAnimFrame(hModel_, 1, 60, 1.0f);
+	Model::SetAnimFrame(hModel_, 1, 60, 3.0f);
 	transform_.scale_.x = 0.5f;
 	transform_.scale_.y = 0.5f;
 	transform_.scale_.z = 0.5f;
