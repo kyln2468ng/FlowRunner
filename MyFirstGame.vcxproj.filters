@@ -132,6 +132,9 @@
     <ClInclude Include="Engine\FbxParts.h">
       <Filter>ソース ファイル\Engine</Filter>
     </ClInclude>
+    <ClInclude Include="Engine\CsvReader.h">
+      <Filter>ソース ファイル\Engine</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Engine\Camera.cpp">
@@ -219,6 +222,9 @@
       <Filter>ソース ファイル\Engine</Filter>
     </ClCompile>
     <ClCompile Include="Engine\FbxParts.cpp">
+      <Filter>ソース ファイル\Engine</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\CsvReader.cpp">
       <Filter>ソース ファイル\Engine</Filter>
     </ClCompile>
   </ItemGroup>

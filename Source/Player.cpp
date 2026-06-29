@@ -85,9 +85,9 @@ void Player::Update()
 
 	//coolTime_ -= deltatime_;
 	
-	if (Input::IsKey(DIK_U)) {
-		anim_.Update(1.0f);
-	}
+	//if (Input::IsKey(DIK_U)) {
+	//	anim_.Update(1.0f);
+	//}
 	
 	//model_->UpdateAnimation(anim_.GetTime());
 	//Model::GetFbx(hModel_)->UpdateAnimation(anim_.GetTime());
