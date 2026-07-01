@@ -1,8 +1,7 @@
 #pragma once
 #include "../Engine/GameObject.h"
 #include "PlayerParamConfig.h"
-#include "../Engine/Animation.h"
-#include "../Engine/Fbx.h"
+#include <unordered_map>
 
 class ChildOden;
 class Bullet;
@@ -15,6 +14,14 @@ struct WallHitData
 	XMVECTOR hitPos = XMVectorZero();
 };
 
+struct AnimationData
+{
+	int startFrame;
+	int endFrame;
+
+	float speed;
+	bool loop;
+};
 
 class Player : public GameObject
 {
@@ -39,6 +46,14 @@ private:
 	void WallMove(XMVECTOR& move, const WallHitData& wall);
 	void WallJump(const WallHitData& wall);
 
+	///////アニメーション関連の関数///////////
+	void LoadAnimData(const std::string& FilePath);	// アニメーションのロード。アニメーション情報を読み込む（パラメータ）
+	void LoadAnimFiles();										// アニメーションのパスの登録
+	void UpdateAnimation();										// 現在のアニメーションのフレーム更新
+	bool SetState(const std::string& state);					// アニメーションの状態切り替え
+	int GetFrame() const;										// 現在のフレーム取得
+	/////////////////////////////////////////
+
 	ChildOden* pRChildOden;
 	ChildOden* pLChildOden;
 	Bullet* bullet_;
@@ -50,7 +65,9 @@ private:
 
 	bool isWall_;
 	XMFLOAT3 wallNormal_;
-	Animation anim_;
-	Fbx* model_;
-};
 
+	/////アニメーション関連の変数////
+	std::unordered_map<std::string, AnimationData> animData_;	// アニメーション情報の配列（キー：状態名）
+	AnimationData* currentAnimData_;							// 現在再生中のアニメーション情報
+	float currentFrame_;										// 現在再生中のフレーム
+};

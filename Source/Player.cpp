@@ -7,6 +7,7 @@
 #include "../Engine/SceneManager.h"
 #include "../Engine/Camera.h"
 #include "Stage.h"
+#include "../Engine/CsvReader.h"
 
 
 namespace
@@ -39,9 +40,9 @@ void Player::Initialize()
 	//pFbx_がnullptrじゃなかった時のチェックあったほういい
 	//pFbx_->Load("OdenA.fbx");
 	//hModel_ = Model::Load("BoxGrass.fbx");//おでんじゃなくしたら判定取れてた
-	hModel_ = Model::Load("model/workAnimTest.fbx");
+	hModel_ = Model::Load("model/workAnimModel.fbx");
 	assert(hModel_ >= 0);
-	Model::SetAnimFrame(hModel_, 1, 60, 3.0f);
+	Model::SetAnimFrame(hModel_, 1, 60, 1.0f);
 	transform_.scale_.x = 0.5f;
 	transform_.scale_.y = 0.5f;
 	transform_.scale_.z = 0.5f;
@@ -62,7 +63,6 @@ void Player::Initialize()
 	onGround_ = false;
 	isWall_ = false;
 	velocity_ = { 0.0f, 0.0f, 0.0f };
-	anim_.Initialize();
 	//anim_.SetMaxFrame(60.0f);
 	//model_ = new Fbx();
 	//model_->Load("model/testAnim.fbx");
@@ -467,6 +467,66 @@ void Player::WallJump(const WallHitData& wall)
 	jumpDir = XMVector3Normalize(jumpDir);
 	jumpDir = XMVectorScale(jumpDir, JumpV0);
 	XMStoreFloat3(&velocity_, jumpDir);	
+}
+
+void Player::LoadAnimData(const std::string& FilePath)
+{
+	animData_.clear();
+
+	CsvReader csv(FilePath);
+	for (int i = 0; i < csv.GetLines();i++) {
+		AnimationData animParam;
+
+		std::string state = csv.GetString(i, 0);
+
+		animParam.startFrame = csv.GetInt(i, 1);
+		animParam.endFrame = csv.GetInt(i, 2);
+		animParam.speed = csv.GetFloat(i, 3);
+		animParam.loop = csv.GetInt(i, 4) != 0;
+
+		animData_[state] = animParam;
+	}
+}
+
+void Player::LoadAnimFiles()
+{
+
+}
+
+void Player::UpdateAnimation()
+{
+	if (!currentAnimData_) 
+		return;
+
+	currentFrame_ += currentAnimData_->speed;
+
+	if (currentAnimData_->loop)	{
+		if (currentFrame_ > currentAnimData_->endFrame)
+			currentFrame_ = currentAnimData_->startFrame;
+	}
+	else {
+		if (currentFrame_ > currentAnimData_->endFrame)
+			currentFrame_ = currentAnimData_->endFrame;
+	}
+}
+
+bool Player::SetState(const string& state)
+{
+	auto it = animData_.find(state);
+
+	if (it == animData_.end())
+		return false;
+
+	currentAnimData_ = &it->second;
+
+	currentFrame_ = (float)currentAnimData_->startFrame;
+
+	return true;
+}
+
+int Player::GetFrame() const
+{
+	return (int)currentFrame_;
 }
 
 void Player::Draw()
