@@ -47,11 +47,12 @@ private:
 	void WallJump(const WallHitData& wall);
 
 	///////アニメーション関連の関数///////////
-	void LoadAnimData(const std::string& FilePath);	// アニメーションのロード。アニメーション情報を読み込む（パラメータ）
-	void LoadAnimFiles();										// アニメーションのパスの登録
-	void UpdateAnimation();										// 現在のアニメーションのフレーム更新
-	bool SetState(const std::string& state);					// アニメーションの状態切り替え
-	int GetFrame() const;										// 現在のフレーム取得
+	void LoadAnimData(const std::string& filePath);		// アニメーションのロード。アニメーション情報を読み込む（パラメータ）
+	void AddAnimation(const std::string& state,const std::string& animPath);		// アニメーションのパスの登録するの関数
+	void LoadAnimation();								// アニメーションを実際に登録する
+	void UpdateAnimation();								// 現在のアニメーションのフレーム更新
+	bool SetState(const std::string& state);			// アニメーションの状態切り替え
+	int GetFrame() const;								// 現在のフレーム取得
 	/////////////////////////////////////////
 
 	ChildOden* pRChildOden;
@@ -70,4 +71,5 @@ private:
 	std::unordered_map<std::string, AnimationData> animData_;	// アニメーション情報の配列（キー：状態名）
 	AnimationData* currentAnimData_;							// 現在再生中のアニメーション情報
 	float currentFrame_;										// 現在再生中のフレーム
+	std::unordered_map<std::string, int> animPath_;
 };

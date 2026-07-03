@@ -66,6 +66,11 @@ void Player::Initialize()
 	//anim_.SetMaxFrame(60.0f);
 	//model_ = new Fbx();
 	//model_->Load("model/testAnim.fbx");
+
+
+
+	LoadAnimData("Assets/model/AnimationData.csv");
+
 }
 
 void Player::Update()
@@ -488,9 +493,16 @@ void Player::LoadAnimData(const std::string& FilePath)
 	}
 }
 
-void Player::LoadAnimFiles()
-{
+void Player::AddAnimation(const std::string& state, const std::string& animPath) {
+	
+}
 
+void Player::LoadAnimation()
+{
+	std::vector<string> anim = {
+		"model/workAnimTest.fbx",
+		"model/workAnimModel.fbx"
+	};
 }
 
 void Player::UpdateAnimation()
