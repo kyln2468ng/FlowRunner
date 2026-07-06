@@ -13,7 +13,7 @@ namespace Model
 		Transform transform_;
 		std::string filename_;
 
-
+		/*
 		//アニメーションのフレーム
 		float nowFrame, animSpeed;
 		int startFrame, endFrame;
@@ -31,17 +31,14 @@ namespace Model
 			endFrame = end;
 			animSpeed = speed;
 		}
+		*/
 	};
 	int Load(std::string fileName);
 	void SetTransform(int hModel, Transform transform);
-	void Draw(int hModel);
+	void Draw(int hModel, int frame);
 	void Release();
 
 	Fbx* GetFbx(int hModel);
-
-	void SetAnimFrame(int hModel, int startFrame, int endFrame, float animSpeed);
-	//現在のアニメーションのフレームを取得
-	int GetAnimFrame(int hModel);
 	
 	XMFLOAT3 GetBonePosition(int hModel, std::string boneName);
 

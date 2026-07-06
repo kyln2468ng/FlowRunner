@@ -37,17 +37,18 @@ void Model::SetTransform(int hModel, Transform transform)
     modelList[hModel]->transform_ = transform;
 }
 
-void Model::Draw(int hModel)
+void Model::Draw(int hModel,int frame)
 {
     if (hModel < 0 || hModel >= modelList.size() || modelList[hModel] == nullptr)
     {
         return;
     }
-    modelList[hModel]->nowFrame += modelList[hModel]->animSpeed;
+    //modelList[hModel]->nowFrame += modelList[hModel]->animSpeed;
 
     if (modelList[hModel]->pfbx_)
     {
-        modelList[hModel]->pfbx_->Draw(modelList[hModel]->transform_, (int)modelList[hModel]->nowFrame);
+        //modelList[hModel]->pfbx_->Draw(modelList[hModel]->transform_, (int)modelList[hModel]->nowFrame);
+        modelList[hModel]->pfbx_->Draw(modelList[hModel]->transform_, frame);
     }
 }
 
@@ -79,16 +80,6 @@ Fbx* Model::GetFbx(int hModel)
     
     return modelList[hModel]->pfbx_;
     
-}
-
-void Model::SetAnimFrame(int hModel, int startFrame, int endFrame, float animSpeed)
-{
-    modelList[hModel]->SetAnimFrame(startFrame, endFrame, animSpeed);
-}
-
-int Model::GetAnimFrame(int hModel)
-{
-    return (int)modelList[hModel]->nowFrame;
 }
 
 XMFLOAT3 Model::GetBonePosition(int hModel, std::string boneName)

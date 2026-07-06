@@ -42,7 +42,6 @@ void Player::Initialize()
 	//hModel_ = Model::Load("BoxGrass.fbx");//‚¨‚Å‚ñ‚¶‚á‚È‚­‚µ‚½‚ç”»’èŽæ‚ê‚Ä‚½
 	hModel_ = Model::Load("model/workAnimModel.fbx");
 	assert(hModel_ >= 0);
-	Model::SetAnimFrame(hModel_, 1, 60, 1.0f);
 	transform_.scale_.x = 0.5f;
 	transform_.scale_.y = 0.5f;
 	transform_.scale_.z = 0.5f;
@@ -67,14 +66,13 @@ void Player::Initialize()
 	//model_ = new Fbx();
 	//model_->Load("model/testAnim.fbx");
 
-
-
-	LoadAnimData("Assets/model/AnimationData.csv");
-
+	LoadAnimation();
+	
 }
 
 void Player::Update()
 {
+	UpdateAnimation();
 	//transform_.rotate_.y += 1.0f;
 	//transform_.position_.y -= 0.1f;
 	/*if (transform_.rotate_.y >= 720.0f)
@@ -474,35 +472,43 @@ void Player::WallJump(const WallHitData& wall)
 	XMStoreFloat3(&velocity_, jumpDir);	
 }
 
-void Player::LoadAnimData(const std::string& FilePath)
-{
-	animData_.clear();
-
-	CsvReader csv(FilePath);
-	for (int i = 0; i < csv.GetLines();i++) {
-		AnimationData animParam;
-
-		std::string state = csv.GetString(i, 0);
-
-		animParam.startFrame = csv.GetInt(i, 1);
-		animParam.endFrame = csv.GetInt(i, 2);
-		animParam.speed = csv.GetFloat(i, 3);
-		animParam.loop = csv.GetInt(i, 4) != 0;
-
-		animData_[state] = animParam;
-	}
-}
-
-void Player::AddAnimation(const std::string& state, const std::string& animPath) {
-	
-}
-
 void Player::LoadAnimation()
 {
-	std::vector<string> anim = {
-		"model/workAnimTest.fbx",
-		"model/workAnimModel.fbx"
-	};
+	AddAnimation(AnimationState::IDLE, "model/workAnimTest.fbx");
+	AddAnimation(AnimationState::WALK, "model/workAnimModel.fbx");
+
+	LoadAnimData("Assets/model/AnimationData.csv");
+}
+
+void Player::AddAnimation(AnimationState state, const std::string& animPath) {
+	int animModelPath = Model::Load(animPath);
+	animData_[state].animPath = animModelPath;
+}
+
+void Player::LoadAnimData(const std::string& FilePath)
+{
+	CsvReader csv(FilePath);
+	for (int i = 0; i < csv.GetLines();i++) {
+		
+		AnimationState state = StringToState(csv.GetString(i, 0));
+
+		if (state == AnimationState::STATE_MAX)
+		{
+			OutputDebugStringA("Unknown animation state.\n");
+			continue;
+		}
+
+		if (auto it = animData_.find(state); it != animData_.end()) {
+
+			it->second.startFrame = csv.GetInt(i, 1);
+			it->second.endFrame = csv.GetInt(i, 2);
+			it->second.speed = csv.GetFloat(i, 3);
+			it->second.loop = csv.GetInt(i, 4) != 0;		
+		}
+		else {
+			OutputDebugStringA("Animation state not found.\n");
+		}
+	}
 }
 
 void Player::UpdateAnimation()
@@ -522,15 +528,14 @@ void Player::UpdateAnimation()
 	}
 }
 
-bool Player::SetState(const string& state)
+bool Player::SetState(AnimationState state)
 {
 	auto it = animData_.find(state);
-
-	if (it == animData_.end())
+	if (it == animData_.end()) {
 		return false;
+	}
 
 	currentAnimData_ = &it->second;
-
 	currentFrame_ = (float)currentAnimData_->startFrame;
 
 	return true;
@@ -541,6 +546,14 @@ int Player::GetFrame() const
 	return (int)currentFrame_;
 }
 
+AnimationState Player::StringToState(const string& (str))
+{
+	if (str == "IDLE") return AnimationState::IDLE;
+	if (str == "WALK") return AnimationState::WALK;
+
+	return AnimationState::STATE_MAX;
+}
+
 void Player::Draw()
 {
 	/*if (pFbx_)
@@ -549,7 +562,7 @@ void Player::Draw()
 	}*/
 			
 	Model::SetTransform(hModel_, transform_);
-	Model::Draw(hModel_);
+	Model::Draw(hModel_,GetFrame());
 	
 	char buf[128];
 	//sprintf_s(buf, "dist: %.2f\n", drawDist);

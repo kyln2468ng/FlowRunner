@@ -16,11 +16,19 @@ struct WallHitData
 
 struct AnimationData
 {
+	int animPath;
 	int startFrame;
 	int endFrame;
 
 	float speed;
 	bool loop;
+};
+
+enum class AnimationState
+{
+	IDLE, 
+	WALK,
+	STATE_MAX
 };
 
 class Player : public GameObject
@@ -48,11 +56,12 @@ private:
 
 	///////アニメーション関連の関数///////////
 	void LoadAnimData(const std::string& filePath);		// アニメーションのロード。アニメーション情報を読み込む（パラメータ）
-	void AddAnimation(const std::string& state,const std::string& animPath);		// アニメーションのパスの登録するの関数
+	void AddAnimation(AnimationState state ,const std::string& animPath);		// アニメーションのパスの登録するの関数
 	void LoadAnimation();								// アニメーションを実際に登録する
 	void UpdateAnimation();								// 現在のアニメーションのフレーム更新
-	bool SetState(const std::string& state);			// アニメーションの状態切り替え
+	bool SetState(AnimationState state);			// アニメーションの状態切り替え
 	int GetFrame() const;								// 現在のフレーム取得
+	AnimationState StringToState(const std::string& (str));
 	/////////////////////////////////////////
 
 	ChildOden* pRChildOden;
@@ -68,8 +77,7 @@ private:
 	XMFLOAT3 wallNormal_;
 
 	/////アニメーション関連の変数////
-	std::unordered_map<std::string, AnimationData> animData_;	// アニメーション情報の配列（キー：状態名）
+	std::unordered_map<AnimationState, AnimationData> animData_;	// アニメーション情報の配列（キー：状態名）
 	AnimationData* currentAnimData_;							// 現在再生中のアニメーション情報
 	float currentFrame_;										// 現在再生中のフレーム
-	std::unordered_map<std::string, int> animPath_;
 };
