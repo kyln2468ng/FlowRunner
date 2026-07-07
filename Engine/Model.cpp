@@ -37,7 +37,7 @@ void Model::SetTransform(int hModel, Transform transform)
     modelList[hModel]->transform_ = transform;
 }
 
-void Model::Draw(int hModel,int frame)
+void Model::Draw(int hModel)
 {
     if (hModel < 0 || hModel >= modelList.size() || modelList[hModel] == nullptr)
     {
@@ -48,7 +48,7 @@ void Model::Draw(int hModel,int frame)
     if (modelList[hModel]->pfbx_)
     {
         //modelList[hModel]->pfbx_->Draw(modelList[hModel]->transform_, (int)modelList[hModel]->nowFrame);
-        modelList[hModel]->pfbx_->Draw(modelList[hModel]->transform_, frame);
+        modelList[hModel]->pfbx_->Draw(modelList[hModel]->transform_, modelList[hModel]->frame_);
     }
 }
 
@@ -73,6 +73,11 @@ void Model::Release()
         SAFE_DELETE(modelList[i]);
     }
     modelList.clear();
+}
+
+void Model::SetFrame(int hModel, int frame)
+{
+    modelList[hModel]->frame_ = frame;
 }
 
 Fbx* Model::GetFbx(int hModel)

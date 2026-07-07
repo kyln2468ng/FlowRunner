@@ -12,6 +12,7 @@ namespace Model
 		Fbx* pfbx_;
 		Transform transform_;
 		std::string filename_;
+		int frame_;
 
 		/*
 		//アニメーションのフレーム
@@ -35,8 +36,11 @@ namespace Model
 	};
 	int Load(std::string fileName);
 	void SetTransform(int hModel, Transform transform);
-	void Draw(int hModel, int frame);
+	void Draw(int hModel); //後で聞く。一旦これで
 	void Release();
+
+	void SetFrame(int hModel, int frame);
+	XMFLOAT3 GetRootDelta(int hModel);
 
 	Fbx* GetFbx(int hModel);
 	

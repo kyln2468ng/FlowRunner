@@ -55,6 +55,8 @@ public:
 	//”CˆÓ‚Ìƒ{[ƒ“‚ÌˆÊ’u‚ğæ“¾
 	XMFLOAT3 GetBonePosition(std::string boneName);
 
+	XMFLOAT3 GetRootDelta(int currentFrame);
+
 	void RayCast(RayCastData& rayData);
 
 private:

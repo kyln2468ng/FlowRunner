@@ -40,7 +40,7 @@ void Player::Initialize()
 	//pFbx_がnullptrじゃなかった時のチェックあったほういい
 	//pFbx_->Load("OdenA.fbx");
 	//hModel_ = Model::Load("BoxGrass.fbx");//おでんじゃなくしたら判定取れてた
-	hModel_ = Model::Load("model/workAnimModel.fbx");
+	hModel_ = Model::Load("model/baseModel.fbx");
 	assert(hModel_ >= 0);
 	transform_.scale_.x = 0.5f;
 	transform_.scale_.y = 0.5f;
@@ -67,12 +67,20 @@ void Player::Initialize()
 	//model_->Load("model/testAnim.fbx");
 
 	LoadAnimation();
-	
+	//SetState(AnimationState::IDLE);
 }
 
 void Player::Update()
 {
 	UpdateAnimation();
+
+	///アニメーションのテスト用
+	if (Input::IsKeyDown(DIK_W) || Input::IsKeyDown(DIK_A) || Input::IsKeyDown(DIK_S)||Input::IsKeyDown(DIK_D)) {
+		SetState(AnimationState::WALK);
+	}
+
+	///
+
 	//transform_.rotate_.y += 1.0f;
 	//transform_.position_.y -= 0.1f;
 	/*if (transform_.rotate_.y >= 720.0f)
@@ -185,8 +193,6 @@ void Player::Update()
 	if (!XMVector3Equal(move, XMVectorZero())) {
 		move = XMVector3Normalize(move);
 	}
-
-
 
 
 	move *= param_.MOVE_SPEED;
@@ -461,7 +467,7 @@ void Player::WallMove(XMVECTOR& move, const WallHitData& wall)
 			XMVector3Normalize(wallMove);
 	}
 
-	move = wallMove * param_.MOVE_SPEED;
+	move = wallMove *  param_.MOVE_SPEED;
 }
 
 void Player::WallJump(const WallHitData& wall)
@@ -474,15 +480,15 @@ void Player::WallJump(const WallHitData& wall)
 
 void Player::LoadAnimation()
 {
-	AddAnimation(AnimationState::IDLE, "model/workAnimTest.fbx");
+	AddAnimation(AnimationState::IDLE, "model/baseModel.fbx");
 	AddAnimation(AnimationState::WALK, "model/workAnimModel.fbx");
 
 	LoadAnimData("Assets/model/AnimationData.csv");
 }
 
 void Player::AddAnimation(AnimationState state, const std::string& animPath) {
-	int animModelPath = Model::Load(animPath);
-	animData_[state].animPath = animModelPath;
+	hModel_ = Model::Load(animPath);
+	animData_[state].animPath = hModel_;
 }
 
 void Player::LoadAnimData(const std::string& FilePath)
@@ -516,7 +522,12 @@ void Player::UpdateAnimation()
 	if (!currentAnimData_) 
 		return;
 
-	currentFrame_ += currentAnimData_->speed;
+	float animSpeed = currentAnimData_->speed;
+
+	// (一旦仮）
+	//animSpeed *= param_.MOVE_SPEED;
+
+	currentFrame_ += animSpeed;
 
 	if (currentAnimData_->loop)	{
 		if (currentFrame_ > currentAnimData_->endFrame)
@@ -561,8 +572,10 @@ void Player::Draw()
 		pFbx_->Draw(transform_);
 	}*/
 			
+
+	Model::SetFrame(hModel_, GetFrame());
 	Model::SetTransform(hModel_, transform_);
-	Model::Draw(hModel_,GetFrame());
+	Model::Draw(hModel_);
 	
 	char buf[128];
 	//sprintf_s(buf, "dist: %.2f\n", drawDist);
@@ -571,7 +584,8 @@ void Player::Draw()
 	XMStoreFloat3(&mx, m);
 	
 	sprintf_s(buf, "move: %.2f %.2f %.2f\n", mx.x, mx.y, mx.z);
-
+	sprintf_s(buf, "pos: %.2f %.2f %.2f\n", transform_.position_.x, transform_.position_.y, transform_.position_.z);
+	
 	//OutputDebugStringA(buf);
 
 }

@@ -62,6 +62,7 @@ private:
 	bool SetState(AnimationState state);			// アニメーションの状態切り替え
 	int GetFrame() const;								// 現在のフレーム取得
 	AnimationState StringToState(const std::string& (str));
+
 	/////////////////////////////////////////
 
 	ChildOden* pRChildOden;
