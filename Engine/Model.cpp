@@ -87,9 +87,9 @@ Fbx* Model::GetFbx(int hModel)
     
 }
 
-XMFLOAT3 Model::GetBonePosition(int hModel, std::string boneName)
+XMFLOAT3 Model::GetBonePosition(int hModel, std::string boneName,int frame)
 {
-    XMFLOAT3 pos = modelList[hModel]->pfbx_->GetBonePosition(boneName);
+    XMFLOAT3 pos = modelList[hModel]->pfbx_->GetBonePosition(boneName, frame);
     XMVECTOR vec = XMVector3TransformCoord(XMLoadFloat3(&pos), modelList[hModel]->transform_.GetWorldMatrix());
     XMStoreFloat3(&pos, vec);
     return pos;

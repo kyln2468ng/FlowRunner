@@ -609,12 +609,17 @@ void FbxParts::DrawMeshAnime(Transform& transform, FbxTime time, FbxScene * scen
 	Draw(transform);
 }
 
-bool FbxParts::GetBonePosition(std::string boneName, XMFLOAT3 * position)
+bool FbxParts::GetBonePosition(std::string boneName, int frame, XMFLOAT3 * position)
 {
 	for (int i = 0; i < numBone_; i++)
 	{
 		if (boneName == ppCluster_[i]->GetLink()->GetName())
 		{
+			FbxTime time;
+			time.SetFrame(frame);
+
+			FbxAnimEvaluator* evaluator = ppCluster_[i]->GetLink()->GetScene()->GetAnimationEvaluator();
+
 			FbxAMatrix  matrix;
 			ppCluster_[i]->GetTransformLinkMatrix(matrix);
 

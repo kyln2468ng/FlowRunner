@@ -40,11 +40,10 @@ namespace Model
 	void Release();
 
 	void SetFrame(int hModel, int frame);
-	XMFLOAT3 GetRootDelta(int hModel);
 
 	Fbx* GetFbx(int hModel);
 	
-	XMFLOAT3 GetBonePosition(int hModel, std::string boneName);
+	XMFLOAT3 GetBonePosition(int hModel, std::string boneName, int frame);
 
 	void RayCast(int hModel,RayCastData& data);
 	bool RayCastAll(int hModel, RayCastData& data,int& outModel);

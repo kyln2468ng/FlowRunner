@@ -53,9 +53,7 @@ public:
 	void Release();
 
 	//任意のボーンの位置を取得
-	XMFLOAT3 GetBonePosition(std::string boneName);
-
-	XMFLOAT3 GetRootDelta(int currentFrame);
+	XMFLOAT3 GetBonePosition(std::string boneName, int frame);
 
 	void RayCast(RayCastData& rayData);
 
@@ -65,7 +63,7 @@ private:
 	FbxManager* pFbxManager_; //FBXファイルを扱う機能の本体
 	FbxScene* pFbxScene_; //FBXファイルのシーン（Mayaで作ったすべての物体）を扱う
 
-	//後で分離//
+
 	FbxTime::EMode _frameRate;	// アニメーションのフレームレート
 
 	float animSpeed_; //アニメーション速度

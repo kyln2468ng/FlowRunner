@@ -293,12 +293,12 @@ void Fbx::Release()
 	pFbxManager_->Destroy();
 }
 
-XMFLOAT3 Fbx::GetBonePosition(std::string boneName)
+XMFLOAT3 Fbx::GetBonePosition(std::string boneName, int frame)
 {
 	XMFLOAT3 position = XMFLOAT3(0, 0, 0);
 	for (int i = 0; i < parts_.size(); i++)
 	{
-		if (parts_[i]->GetBonePosition(boneName, &position))
+		if (parts_[i]->GetBonePosition(boneName, frame, &position))
 			break;
 	}
 

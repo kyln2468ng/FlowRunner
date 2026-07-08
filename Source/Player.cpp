@@ -522,12 +522,16 @@ void Player::UpdateAnimation()
 	if (!currentAnimData_) 
 		return;
 
-	float animSpeed = currentAnimData_->speed;
 
 	// (ˆê’U‰¼j
 	//animSpeed *= param_.MOVE_SPEED;
 
-	currentFrame_ += animSpeed;
+	//float animSpeed = currentAnimData_->speed;
+	//currentFrame_ += animSpeed;
+
+	int prevFrame = (int)currentFrame_;
+
+	currentFrame_ += currentAnimData_->speed;
 
 	if (currentAnimData_->loop)	{
 		if (currentFrame_ > currentAnimData_->endFrame)
@@ -537,6 +541,21 @@ void Player::UpdateAnimation()
 		if (currentFrame_ > currentAnimData_->endFrame)
 			currentFrame_ = currentAnimData_->endFrame;
 	}
+
+	XMFLOAT3 prevPos = Model::GetBonePosition(currentAnimData_->animPath, "Root", prevFrame);
+
+	XMFLOAT3 currPos = Model::GetBonePosition(currentAnimData_->animPath, "Root", (int)currentFrame_);
+
+
+	XMFLOAT3 delta;
+	
+	delta.x = currPos.x - prevPos.x;
+	delta.y = currPos.y - prevPos.y;
+	delta.z	= currPos.z - prevPos.z;
+
+	transform_.position_.x += delta.x;
+	transform_.position_.y += delta.y;
+	transform_.position_.z += delta.z;
 }
 
 bool Player::SetState(AnimationState state)

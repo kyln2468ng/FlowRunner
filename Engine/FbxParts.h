@@ -151,7 +151,7 @@ public:
 	//引数：boneName	取得したいボーンの位置
 	//引数：position	ワールド座標での位置【out】
 	//戻値：見つかればtrue
-	bool GetBonePosition(std::string boneName, XMFLOAT3	* position);
+	bool GetBonePosition(std::string boneName, int frame, XMFLOAT3* position);
 
 	//スキンメッシュ情報を取得
 	//戻値：スキンメッシュ情報
