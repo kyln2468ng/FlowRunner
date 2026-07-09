@@ -376,7 +376,17 @@ void FbxParts::InitSkelton(FbxMesh * pMesh)
 		}
 	}
 
+	for (int i = 0; i < numBone_; i++)
+	{
+		ppCluster_[i] = pSkinInfo_->GetCluster(i);
 
+		FbxNode* pBoneNode = ppCluster_[i]->GetLink();
+		if (pBoneNode)
+		{
+			std::string str = "Bone " + std::to_string(i) + " : " + pBoneNode->GetName() + "\n";
+			OutputDebugStringA(str.c_str());
+		}
+	}
 
 
 	// それぞれのボーンに影響を受ける頂点を調べる
@@ -620,18 +630,29 @@ bool FbxParts::GetBonePosition(std::string boneName, int frame, XMFLOAT3 * posit
 
 			FbxAnimEvaluator* evaluator = ppCluster_[i]->GetLink()->GetScene()->GetAnimationEvaluator();
 
-			FbxAMatrix  matrix;
-			ppCluster_[i]->GetTransformLinkMatrix(matrix);
+			//FbxAMatrix  matrix;
+			//ppCluster_[i]->GetTransformLinkMatrix(matrix);
 
-			position->x = (float)matrix[3][0];
-			position->y = (float)matrix[3][1];
-			position->z = (float)matrix[3][2];
+			//position->x = (float)matrix[3][0];
+			//position->y = (float)matrix[3][1];
+			//position->z = (float)matrix[3][2];
 
+
+			FbxAMatrix matrix =
+				evaluator->GetNodeGlobalTransform(
+					ppCluster_[i]->GetLink(),
+					time);
+			position->x = (float)matrix.GetT()[0];
+			position->y = (float)matrix.GetT()[1];
+			position->z = (float)matrix.GetT()[2];
 			return true;
 		}
 
 	}
 
+	char buf[255];
+	sprintf_s(buf, "ボーンが存在してませんでした\n");
+	OutputDebugStringA(buf);
 	return false;
 }
 

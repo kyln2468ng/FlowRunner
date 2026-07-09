@@ -195,7 +195,7 @@ void Player::Update()
 	}
 
 
-	move *= param_.MOVE_SPEED;
+	//move *= param_.MOVE_SPEED;
 
 
 
@@ -542,9 +542,9 @@ void Player::UpdateAnimation()
 			currentFrame_ = currentAnimData_->endFrame;
 	}
 
-	XMFLOAT3 prevPos = Model::GetBonePosition(currentAnimData_->animPath, "Root", prevFrame);
+	XMFLOAT3 prevPos = Model::GetBonePosition(currentAnimData_->animPath, "mixamorig:Hips", prevFrame);
 
-	XMFLOAT3 currPos = Model::GetBonePosition(currentAnimData_->animPath, "Root", (int)currentFrame_);
+	XMFLOAT3 currPos = Model::GetBonePosition(currentAnimData_->animPath, "mixamorig:Hips", (int)currentFrame_);
 
 
 	XMFLOAT3 delta;
