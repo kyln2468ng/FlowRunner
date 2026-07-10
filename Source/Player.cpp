@@ -276,7 +276,7 @@ void Player::Update()
 	float groundY = 0.0f;
 	bool isGround = false;
 	
-	if (st && st->hitObject(data,hModel_)) {
+	if (st && st->hitObject(data, hModel_)) {
 		if (data.isHit && data.dist <= data.maxDist) {
 			if (velocity_.y <= 0.0f) {
 				groundY = data.hitPos.y;
@@ -285,7 +285,7 @@ void Player::Update()
 		}
 	}
 
-	//velocity_.y -= param_.GRAVITY;
+	velocity_.y -= param_.GRAVITY;
 	// d—Í‚Í‚·‚Å‚É velocity ‚É”½‰fÏ‚Ý‚Æ‚·‚é
 	float nextY = transform_.position_.y + velocity_.y;
 	float nextFoot = nextY - playerHeight;

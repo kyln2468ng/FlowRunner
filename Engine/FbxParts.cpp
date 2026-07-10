@@ -659,10 +659,14 @@ bool FbxParts::GetBonePosition(std::string boneName, int frame, XMFLOAT3 * posit
 void FbxParts::RayCast(RayCastData& data)
 {
 	data.isHit= FALSE;
+	float closest = data.dist;
+	bool hit = false;
+	XMVECTOR nearNormal = XMVectorZero(); // 一番近いとこ取る用変数
 
 	//マテリアル毎
 	for (int i = 0; i < materialCount_; i++)
 	{
+
 		//そのマテリアルのポリゴン毎
 		for (int j = 0; j < pMaterial_[i].polygonCount; j++)
 		{
@@ -672,24 +676,54 @@ void FbxParts::RayCast(RayCastData& data)
 			ver[1] = pVertexData_[ppIndexData_[i][j * 3 + 1]].position;
 			ver[2] = pVertexData_[ppIndexData_[i][j * 3 + 2]].position;
 
-			BOOL  hit = FALSE;
 			float dist = 0.0f;
 
 			XMFLOAT3 start = { data.start.x, data.start.y, data.start.z };
-
 			XMFLOAT3 dir = { data.dir.x, data.dir.y, data.dir.z };
 
-			hit = Direct3D::Intersect(start, dir, ver[0], ver[1], ver[2], &dist);
+			bool result = Direct3D::Intersect(start, dir, ver[0], ver[1], ver[2], &dist);
 
 
-			if (hit && dist < data.dist)
+			if (result && dist < closest && dist < data.maxDist)
 			{
-				data.isHit = TRUE;
-				data.dist = dist;
+				hit = true;
+				closest = dist;
+
+				XMVECTOR origin = XMLoadFloat4(&data.start);
+				XMVECTOR dir = XMVector3Normalize(XMLoadFloat4(&data.dir));
+				XMVECTOR localHitPos = origin + dir * dist;
+
+				XMStoreFloat3(&data.localHit, localHitPos);
+
+				XMVECTOR v0 = XMLoadFloat3(&ver[0]);
+				XMVECTOR v1 = XMLoadFloat3(&ver[1]);
+				XMVECTOR v2 = XMLoadFloat3(&ver[2]);
+
+				XMVECTOR edge1 = v1 - v0;
+				XMVECTOR edge2 = v2 - v0;
+				XMVECTOR normal = XMVector3Normalize(XMVector3Cross(edge1, edge2));
+
+				if (XMVectorGetX(XMVector3Dot(dir, normal)) > 0.0f) {
+					normal = normal * -1.0f;
+				}
+
+				nearNormal = normal;
 			}
+			else if (dist < data.maxDist) {
+				int f = 0;
+				f++;
+			}
+				
+
 		}
 	}
 
+	data.isHit = hit;
+	data.dist = closest;
+	
+	if (hit) {
+		XMStoreFloat3(&data.hitNormal, nearNormal);
+	}
 
 	//data.dist = FLT_MAX;
 	//float closest = data.dist;
