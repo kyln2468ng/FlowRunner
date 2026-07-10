@@ -659,6 +659,7 @@ bool FbxParts::GetBonePosition(std::string boneName, int frame, XMFLOAT3 * posit
 void FbxParts::RayCast(RayCastData& data)
 {
 	data.isHit= FALSE;
+	data.dist = FLT_MAX;
 	float closest = data.dist;
 	bool hit = false;
 	XMVECTOR nearNormal = XMVectorZero(); // ˆê”Ô‹ß‚¢‚Æ‚±æ‚é—p•Ï”
@@ -684,7 +685,7 @@ void FbxParts::RayCast(RayCastData& data)
 			bool result = Direct3D::Intersect(start, dir, ver[0], ver[1], ver[2], &dist);
 
 
-			if (result && dist < closest && dist < data.maxDist)
+			if (result && dist < closest)
 			{
 				hit = true;
 				closest = dist;
@@ -709,12 +710,6 @@ void FbxParts::RayCast(RayCastData& data)
 
 				nearNormal = normal;
 			}
-			else if (dist < data.maxDist) {
-				int f = 0;
-				f++;
-			}
-				
-
 		}
 	}
 
