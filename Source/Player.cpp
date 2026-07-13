@@ -244,11 +244,13 @@ void Player::Update()
 
 	
 	//XMVECTOR camOffset = transform_.rotate_.Up() * 5.0f + (-transform_.rotate_.Forward() * 13.0f);
-	XMVECTOR camOffset = XMVectorSet(0, 5, -8, 0);
-	XMFLOAT3 camPos;
-	DirectX::XMStoreFloat3(&camPos, vPos + camOffset);
+	
+	
+	//XMVECTOR camOffset = XMVectorSet(0, 5, -8, 0);
+	//XMFLOAT3 camPos;
+	//DirectX::XMStoreFloat3(&camPos, vPos + camOffset);
 
-	Camera::SetPosition(camPos);
+	//Camera::SetPosition(camPos);
 	Camera::SetTarget(transform_.position_);
 
 	//transform_.position_.y -= gravity_;

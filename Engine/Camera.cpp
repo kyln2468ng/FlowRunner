@@ -5,6 +5,13 @@ XMVECTOR position_;	//カメラの位置（視点）
 XMVECTOR target_;	//見る位置（焦点）
 XMMATRIX viewMatrix_;	//ビュー行列
 XMMATRIX projMatrix_;	//プロジェクション行列
+float yaw_;
+float pitch_;
+
+namespace {
+    static float distance_ = -8.0f;
+    static float height_ = 5.0f;
+}
 
 //初期化
 void Camera::Initialize()
@@ -19,6 +26,11 @@ void Camera::Initialize()
 //更新
 void Camera::Update()
 {
+    XMVECTOR offset = XMVectorSet(0.0f, height_, distance_, 0.0f);
+
+    // 今は回転なし
+    position_ = target_ + offset;
+    
     //ビュー行列の作成
     viewMatrix_ = XMMatrixLookAtLH(position_, target_, XMVectorSet(0, 1, 0, 0));
 }
