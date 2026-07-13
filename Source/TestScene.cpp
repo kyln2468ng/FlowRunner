@@ -44,6 +44,8 @@ void TestScene::Update()
 		XMQuaternionMultiply(transform_.rotate_.quaternion_, q);
 
 	//transform_.rotate_.y += 1.0f;
+
+	
 }
 
 void TestScene::Draw()

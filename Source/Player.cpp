@@ -78,6 +78,9 @@ void Player::Update()
 	if (Input::IsKeyDown(DIK_W) || Input::IsKeyDown(DIK_A) || Input::IsKeyDown(DIK_S)||Input::IsKeyDown(DIK_D)) {
 		SetState(AnimationState::WALK);
 	}
+	else if (Input::IsKeyUp(DIK_W) || Input::IsKeyUp(DIK_A) || Input::IsKeyUp(DIK_S) || Input::IsKeyUp(DIK_D)) {
+		SetState(AnimationState::IDLE);
+	}
 
 	///
 
