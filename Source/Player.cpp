@@ -68,6 +68,7 @@ void Player::Initialize()
 
 	LoadAnimation();
 	//SetState(AnimationState::IDLE);
+	Camera::SetMouseControl(true);
 }
 
 void Player::Update()
@@ -264,7 +265,7 @@ void Player::Update()
 		{ pos.x, pos.y, pos.z, 1},
 		{0.0f,-1.0f,0.0f,0.0f}
 	};
-	data.maxDist = playerHeight + fabs(velocity_.y) + 0.2f;
+	data.maxDist = playerHeight + fabs(velocity_.y) + 0.2f; //‚±‚±‚Íˆê’UŒã‚ÅC³
 
 	//int hStageModel = st->GetModel();
 
