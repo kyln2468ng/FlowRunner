@@ -5,11 +5,8 @@
 class StageObject : public GameObject {
 public:
 	StageObject(GameObject* parent);
-	StageObject(const std::string& filename,const XMVECTOR& position,const XMVECTOR& rotation, const XMVECTOR& scale);
 	~StageObject();
 	void Initialize() override;
-	//void AddObject();
-	bool CollideLine(RayCastData& data);
-private:
-	std::string filename_;
+	void Update() override;
+	void Draw() override;
 };
