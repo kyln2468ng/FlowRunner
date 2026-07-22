@@ -1,6 +1,8 @@
 #pragma once
 #include "../Engine/GameObject.h"
 
+class Stage;
+
 class PlayScene : public GameObject
 {
 public:
@@ -11,5 +13,7 @@ public:
 	void Update() override;
 	void Draw() override;
 	void Release() override;
+private:
+	Stage* stage_;
 };
 

@@ -22,7 +22,7 @@ void PlayScene::Initialize()
 
 	/*Instantiate<Player>(this);
 	Instantiate<Enemy>(this);*/
-	Instantiate<Stage>(this);
+	stage_ = (Stage*)Instantiate<Stage>(this);
 }
 
 void PlayScene::Update()
@@ -31,6 +31,11 @@ void PlayScene::Update()
 	{
 		SceneManager* sceneOb = (SceneManager*)FindObject("SceneManager");
 		sceneOb->ChangeScene(SCENE_ID_TEST);
+	}
+
+	if (stage_ == nullptr) {
+		SceneManager* sceneOb = (SceneManager*)FindObject("SceneManager");
+		sceneOb->ChangeScene(SCENE_ID_CLEAR);
 	}
 }
 

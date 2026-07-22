@@ -7,9 +7,12 @@ public:
 	~Goal();
 	void Initialize();
 	void Draw();
-
+	void Update();
+	void Release();
 	bool IsGoal();
+	void OnCollision(GameObject* pTarget) override;
 
 private:
 	bool isGoal_;
+	int gModel_;
 };

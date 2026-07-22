@@ -7,6 +7,8 @@
 #include "../Engine/Input.h"
 #include "../resource.h"
 #include "../Editor/MapEditor.h"
+#include "StageObject.h"
+#include "Goal.h"
 
 namespace
 {
@@ -42,7 +44,7 @@ void Stage::Initialize()
 
 	transform_.scale_ = { 1.0f,1.0f,1.0f };*/
 
-	Instantiate<Player>(this);
+	player_ = (Player*)Instantiate<Player>(this);
 
 	editor_ = new MapEditor();
 	editor_->Initialize(this);
@@ -98,6 +100,9 @@ void Stage::Initialize()
 			Model::SetTransform(block.handle, block.transform);
 			models_.push_back(block);
 		}
+
+		goal = (Goal*)Instantiate<Goal>(this); //ˆê’U‰¼
+		stageObjects_.push_back(goal);
 	}
 
 	/*
@@ -229,6 +234,14 @@ void Stage::Update()
 	//	i++;
 	//}
 
+	for (StageObject* obj : stageObjects_) {
+		player_->OnCollision(obj);
+	}
+
+	if (goal->IsGoal()) {
+		player_->KillMe();
+		this->KillMe();
+	}
 		
 	if (Input::IsKeyDown(DIK_M)) {
 		isEditor_ = !isEditor_;
@@ -237,7 +250,8 @@ void Stage::Update()
 	if (isEditor_ == true) {
 
 		editor_->Updata();
-	}	
+	}
+
 }
 
 void Stage::Draw()

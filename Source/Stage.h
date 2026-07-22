@@ -8,6 +8,8 @@
 class Enemy;
 class Player;
 class MapEditor;
+class StageObject;
+class Goal; //àÍíUâºÅAå„Ç≈è¡Ç∑
 
 namespace
 {
@@ -106,4 +108,8 @@ private:
 
 	bool isEditor_;
 	MapEditor* editor_;
+
+	Player* player_;
+	std::vector<StageObject*> stageObjects_;
+	Goal* goal;
 };
