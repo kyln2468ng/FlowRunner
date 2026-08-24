@@ -2,7 +2,7 @@
 #include "../Engine/Input.h"
 #include "../Engine/SceneManager.h"
 #include "../Engine/Model.h"
-
+#include "../Engine/Camera.h"
 
 TestScene::TestScene(GameObject* parent)
 	:GameObject(parent, "TestScene"), hModel_(-1)//, pFbx_(nullptr)
@@ -20,6 +20,8 @@ void TestScene::Initialize()
 	transform_.scale_ = { 1.0f ,1.0f ,1.0f };
 	transform_.position_.y = -10.0f;
 	transform_.position_.z = 20.0f;
+
+	Camera::SetMouseControl(false);
 }
 
 void TestScene::Update()

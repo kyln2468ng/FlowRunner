@@ -4,6 +4,7 @@
 #include "../Engine/SceneManager.h"
 #include "Stage.h"
 #include "../Engine/Input.h"
+#include "../Engine/Camera.h"
 
 PlayScene::PlayScene(GameObject* parent)
 	:GameObject(parent, "PlayScene")
@@ -23,6 +24,7 @@ void PlayScene::Initialize()
 	/*Instantiate<Player>(this);
 	Instantiate<Enemy>(this);*/
 	stage_ = (Stage*)Instantiate<Stage>(this);
+	Camera::SetMouseControl(true);
 }
 
 void PlayScene::Update()

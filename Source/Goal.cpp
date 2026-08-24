@@ -15,7 +15,7 @@ Goal::~Goal()
 
 void Goal::Initialize()
 {
-	gModel_ = Model::Load("BoxDefault.fbx");
+	gModel_ = Model::Load("BoxGrass.fbx");
 	transform_.position_ = { 0.0f,0.0f,50.0f };
 	transform_.scale_ = { 2.0f,2.0f,2.0f };
 	transform_.Calculation();
@@ -46,5 +46,6 @@ bool Goal::IsGoal()
 
 void Goal::OnCollision(GameObject* pTarget)
 {
+	OutputDebugStringA("Goal Collision\n");
 	isGoal_ = true;
 }

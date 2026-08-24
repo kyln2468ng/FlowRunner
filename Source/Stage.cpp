@@ -235,12 +235,13 @@ void Stage::Update()
 	//}
 
 	for (StageObject* obj : stageObjects_) {
-		player_->OnCollision(obj);
+		//player_->OnCollision(obj);
+		player_->Collision(obj);
 	}
 
 	if (goal->IsGoal()) {
-		player_->KillMe();
-		this->KillMe();
+		int i = 0;
+		i++;
 	}
 		
 	if (Input::IsKeyDown(DIK_M)) {
