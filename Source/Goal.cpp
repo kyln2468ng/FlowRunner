@@ -16,7 +16,7 @@ Goal::~Goal()
 void Goal::Initialize()
 {
 	gModel_ = Model::Load("BoxDefault.fbx");
-	transform_.position_ = { 0.0f,5.0f,8.0f };
+	transform_.position_ = { 0.0f,0.0f,50.0f };
 	transform_.scale_ = { 2.0f,2.0f,2.0f };
 	transform_.Calculation();
 
