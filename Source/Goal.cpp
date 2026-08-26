@@ -16,11 +16,11 @@ Goal::~Goal()
 void Goal::Initialize()
 {
 	gModel_ = Model::Load("BoxGrass.fbx");
-	transform_.position_ = { 0.0f,0.0f,50.0f };
+	transform_.position_ = { 3.0f,0.0f,15.0f };
 	transform_.scale_ = { 2.0f,2.0f,2.0f };
 	transform_.Calculation();
 
-	SphereCollider* col = new SphereCollider(0.5f);
+	SphereCollider* col = new SphereCollider(1.0f);
 	AddCollider(col);
 }
 
@@ -28,7 +28,6 @@ void Goal::Draw()
 {
 	Model::SetTransform(gModel_, transform_);
 	Model::Draw(gModel_);
-	OutputDebugStringA("goal");
 }
 
 void Goal::Update()
@@ -46,6 +45,8 @@ bool Goal::IsGoal()
 
 void Goal::OnCollision(GameObject* pTarget)
 {
-	OutputDebugStringA("Goal Collision\n");
-	isGoal_ = true;
+	if (pTarget->GetObjectName() == "Player")
+	{
+		isGoal_ = true;
+	}
 }

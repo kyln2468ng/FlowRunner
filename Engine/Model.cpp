@@ -135,6 +135,12 @@ void Model::RayCast(int hModel, RayCastData& data)
     */
 
     //‰ü‘PŒã
+    if (!modelList[hModel]->rayCastTarget_)
+    {
+        data.isHit = false;
+        return;
+    }
+
     RayCastData local = data;
 
     modelList[hModel]->transform_.Calculation();
@@ -197,6 +203,10 @@ bool Model::RayCastAll(int hModel, RayCastData& data,int& outModel)
         if (i == hModel)
             continue;
 
+        if (!modelList[i]->rayCastTarget_)
+            continue;
+        
+
         RayCastData rayData = data;
 
         Model::RayCast(i, rayData);
@@ -212,4 +222,9 @@ bool Model::RayCastAll(int hModel, RayCastData& data,int& outModel)
         }
     }
     return hit;
+}
+
+void Model::SetRayCastTarget(int hModel, bool isTarget)
+{
+    modelList[hModel]->rayCastTarget_ = isTarget;
 }

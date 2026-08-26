@@ -99,10 +99,10 @@ void Stage::Initialize()
 
 			Model::SetTransform(block.handle, block.transform);
 			models_.push_back(block);
+			Model::SetRayCastTarget(block.handle, true);
 		}
 
-		goal = (Goal*)Instantiate<Goal>(this); //ˆê’U‰¼
-		stageObjects_.push_back(goal);
+		
 	}
 
 	/*
@@ -129,6 +129,9 @@ void Stage::Initialize()
 		models_.push_back({ mol, t });
 	}
 	*/
+
+	goal = (Goal*)Instantiate<Goal>(this); //ˆê’U‰¼
+	stageObjects_.push_back(goal);
 	
 	isEditor_ = false;
 }
@@ -235,8 +238,8 @@ void Stage::Update()
 	//}
 
 	for (StageObject* obj : stageObjects_) {
-		//player_->OnCollision(obj);
-		player_->Collision(obj);
+		player_->OnCollision(obj);
+		//player_->Collision(obj);
 	}
 
 	if (goal->IsGoal()) {

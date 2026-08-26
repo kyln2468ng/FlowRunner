@@ -13,6 +13,12 @@ namespace Model
 		Transform transform_;
 		std::string filename_;
 		int frame_;
+		bool rayCastTarget_;
+
+		//初期化
+		ModelData() : pfbx_(nullptr), frame_(0), rayCastTarget_(false)
+		{
+		}
 
 		/*
 		//アニメーションのフレーム
@@ -20,10 +26,7 @@ namespace Model
 		int startFrame, endFrame;
 
 
-		//初期化
-		ModelData() : pfbx_(nullptr), nowFrame(0), startFrame(0), endFrame(0), animSpeed(0)
-		{
-		}
+
 
 		void SetAnimFrame(int start, int end, float speed)
 		{
@@ -47,5 +50,7 @@ namespace Model
 
 	void RayCast(int hModel,RayCastData& data);
 	bool RayCastAll(int hModel, RayCastData& data,int& outModel);
+
+	void SetRayCastTarget(int hModel, bool isTarget);
 
 }
