@@ -5,6 +5,7 @@
 #include "../Source/GameOverScene.h"
 #include "Direct3D.h"
 #include "Model.h"
+#include "Camera.h"
 
 SceneManager::SceneManager(GameObject* parent)
 	:GameObject(parent,"SceneManager")
@@ -30,6 +31,8 @@ void SceneManager::Update()
 		scene->ReleaseSub();
 		SAFE_DELETE(scene);
 		childList_.clear();
+
+		Camera::Initialize();
 
 		switch (nextSceneID_)
 		{

@@ -132,6 +132,7 @@ void Stage::Initialize()
 
 	goal = (Goal*)Instantiate<Goal>(this); //ˆê’U‰¼
 	stageObjects_.push_back(goal);
+	isGoal_ = false;
 	
 	isEditor_ = false;
 }
@@ -243,8 +244,7 @@ void Stage::Update()
 	}
 
 	if (goal->IsGoal()) {
-		int i = 0;
-		i++;
+		isGoal_ = true;
 	}
 		
 	if (Input::IsKeyDown(DIK_M)) {
@@ -425,6 +425,11 @@ bool Stage::hitObject(RayCastData& data,int selfHandle)
 		hit = true;
 	}
 	return hit;*/
+}
+
+bool Stage::IsGoal()
+{
+	return isGoal_;
 }
 
 float Stage::PlayerMaxDist(const PlayerParamConfig& param)

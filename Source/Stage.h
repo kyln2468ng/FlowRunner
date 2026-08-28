@@ -62,6 +62,8 @@ public:
 
 	bool hitObject(RayCastData& data,int selfHandle);//オブジェクト（ブロック）と当たったかを返す
 
+	bool IsGoal();
+
 
 	//bool CollideLine(RayCastData& data); //ステージオブジェクトとのレイキャスト取る
 	//int  GetModelCount() const;
@@ -112,4 +114,5 @@ private:
 	Player* player_;
 	std::vector<StageObject*> stageObjects_;
 	Goal* goal;
+	bool isGoal_;
 };

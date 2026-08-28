@@ -35,7 +35,7 @@ void PlayScene::Update()
 		sceneOb->ChangeScene(SCENE_ID_TEST);
 	}
 
-	if (stage_ == nullptr) {
+	if (stage_->IsGoal()) {
 		SceneManager* sceneOb = (SceneManager*)FindObject("SceneManager");
 		sceneOb->ChangeScene(SCENE_ID_CLEAR);
 	}
