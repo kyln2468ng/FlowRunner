@@ -63,6 +63,8 @@ private:
 	int GetFrame() const;								// 現在のフレーム取得
 	AnimationState StringToState(const std::string& (str));
 
+	float GetWalkAnimSpeed();
+
 	/////////////////////////////////////////
 
 	ChildOden* pRChildOden;
@@ -81,4 +83,5 @@ private:
 	std::unordered_map<AnimationState, AnimationData> animData_;	// アニメーション情報の配列（キー：状態名）
 	AnimationData* currentAnimData_;							// 現在再生中のアニメーション情報
 	float currentFrame_;										// 現在再生中のフレーム
+	AnimationState currentState_;
 };
