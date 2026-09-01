@@ -84,4 +84,8 @@ private:
 	AnimationData* currentAnimData_;							// 現在再生中のアニメーション情報
 	float currentFrame_;										// 現在再生中のフレーム
 	AnimationState currentState_;
+
+	float loopDistance;
+
+	int count = 0;
 };

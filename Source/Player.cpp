@@ -87,29 +87,6 @@ void Player::Update()
 		SetState(AnimationState::WALK);
 	}
 
-	///
-
-	//transform_.rotate_.y += 1.0f;
-	//transform_.position_.y -= 0.1f;
-	/*if (transform_.rotate_.y >= 720.0f)
-	{
-		KillMe();
-	}*/
-	/*if (Input::IsKey(DIK_W))
-	{
-		transform_.position_.z += 0.1;
-	}*/
-
-	//onGround_ = false;
-
-	//coolTime_ -= deltatime_;
-	
-	//if (Input::IsKey(DIK_U)) {
-	//	anim_.Update(1.0f);
-	//}
-	
-	//model_->UpdateAnimation(anim_.GetTime());
-	//Model::GetFbx(hModel_)->UpdateAnimation(anim_.GetTime());
 
 	//視点移動をする
 	if (Input::IsKey(DIK_RIGHT)) {
@@ -190,32 +167,14 @@ void Player::Update()
 		isWall_ = false;
 		WallData.isHit = false;
 		justJumped = true;
-		/*bullet_ = (Bullet*)Instantiate<Bullet>(FindObject("PlayScene"));
-		bullet_->SetPosition(transform_.position_);
-		coolTime_ = nextTime;*/
-		/*float jumpV0 = (1.0f - pow(1.0f - sin(3.1415926535 * JumpTime), distortion)) * JumpHeight;
-		velocity_.y = abs(jumpV0);*/
-
 	}
 
 	if (!XMVector3Equal(move, XMVectorZero())) {
 		move = XMVector3Normalize(move);
 	}
 
-
 	move *= param_.MOVE_SPEED;
 
-
-
-	//if (WallData.isHit) {
-	//	//壁に吸着する　////壁に吸着するパターンと重力のベクトルを壁方向に帰れる場所
-	//	
-	//	WallCollision(vPos, move, WallData);
-
-	//	WallMove(move, WallData);
-
-	//	WallCling(WallData);
-	//}
 
 	if (WallData.isHit && Input::IsKeyDown(DIK_S) && Input::IsKeyDown(DIK_SPACE)) {
 		WallJump(WallData);
@@ -243,22 +202,6 @@ void Player::Update()
 
 	DirectX::XMStoreFloat3(&transform_.position_, vPos);
 
-	//XMVECTOR camPos = XMLoadFloat3(&transform_.position_);
-	//XMFLOAT3 vTarget = transform_.position_;
-	//vTarget = vTarget + camPos;
-
-	//Camera::SetPosition(camPos);
-	//Camera::SetTarget(vTarget);
-
-	
-	//XMVECTOR camOffset = transform_.rotate_.Up() * 5.0f + (-transform_.rotate_.Forward() * 13.0f);
-	
-	
-	//XMVECTOR camOffset = XMVectorSet(0, 5, -8, 0);
-	//XMFLOAT3 camPos;
-	//DirectX::XMStoreFloat3(&camPos, vPos + camOffset);
-
-	//Camera::SetPosition(camPos);
 	Camera::SetTarget(transform_.position_);
 
 	//transform_.position_.y -= gravity_;
@@ -270,18 +213,6 @@ void Player::Update()
 		{0.0f,-1.0f,0.0f,0.0f}
 	};
 	data.maxDist = playerHeight + fabs(velocity_.y) + 0.2f; //ここは一旦後で修正
-
-	//int hStageModel = st->GetModel();
-
-	//Model::RayCast(hStageModel, data);
-	//if (data.isHit) {
-	//	transform_.position_.y = data.hitPos.y;
-	//}
-	/*if (data.isHit && data.dist > 0.01f && data.dist <= playerHeight + 0.2f)
-	{
-		transform_.position_.y = data.hitPos.y + playerHeight;
-	}*/
-
 
 	float groundY = 0.0f;
 	bool isGround = false;
@@ -532,48 +463,6 @@ void Player::UpdateAnimation()
 	if (!currentAnimData_) 
 		return;
 
-
-	// (一旦仮）
-	//animSpeed *= param_.MOVE_SPEED;
-
-	//float animSpeed = currentAnimData_->speed;
-	//currentFrame_ += animSpeed;
-
-	int prevFrame = (int)currentFrame_;
-
-	currentFrame_ += currentAnimData_->speed;
-
-	if (currentAnimData_->loop)	{
-		if (currentFrame_ > currentAnimData_->endFrame)
-			currentFrame_ = currentAnimData_->startFrame;
-	}
-	else {
-		if (currentFrame_ > currentAnimData_->endFrame)
-			currentFrame_ = currentAnimData_->endFrame;
-	}
-
-	//XMFLOAT3 prevPos = Model::GetBonePosition(currentAnimData_->animPath, "mixamorig:Hips", prevFrame);
-
-	//XMFLOAT3 currPos = Model::GetBonePosition(currentAnimData_->animPath, "mixamorig:Hips", (int)currentFrame_);
-
-
-	//XMFLOAT3 startPos =
-	//	Model::GetBonePosition(
-	//		currentAnimData_->animPath,
-	//		"mixamorig:Hips",
-	//		currentAnimData_->startFrame);
-
-	//XMFLOAT3 endPos =
-	//	Model::GetBonePosition(
-	//		currentAnimData_->animPath,
-	//		"mixamorig:Hips",
-	//		currentAnimData_->endFrame);
-
-	//float dx = endPos.x - startPos.x;
-	//float dz = endPos.z - startPos.z;
-
-	//float distance = sqrtf(dx * dx + dz * dz);
-
 	float animSpeed = currentAnimData_->speed;
 
 	if (currentState_ == AnimationState::WALK)
@@ -581,12 +470,63 @@ void Player::UpdateAnimation()
 		animSpeed = GetWalkAnimSpeed();
 	}
 
+	int prevFrame = (int)currentFrame_;
+
+	// アニメーションを進める
 	currentFrame_ += animSpeed;
 
-	//
-	// 2.81593943 ÷ 2
-	//= 約1.408m / 歩
-	//
+	bool isLoop = false;
+
+	if (currentAnimData_->loop)
+	{
+		if (currentFrame_ > currentAnimData_->endFrame)
+		{
+			currentFrame_ = currentAnimData_->startFrame;
+			isLoop = true;
+		}
+	}
+	else
+	{
+		if (currentFrame_ > currentAnimData_->endFrame)
+		{
+			currentFrame_ = currentAnimData_->endFrame;
+		}
+	}
+
+	// ループした瞬間はdeltaを計算しない
+	if (isLoop)
+		return;
+
+	XMFLOAT3 prevPos =
+		Model::GetBonePosition(
+			currentAnimData_->animPath,
+			"mixamorig:Hips",
+			prevFrame);
+
+	XMFLOAT3 currPos =
+		Model::GetBonePosition(
+			currentAnimData_->animPath,
+			"mixamorig:Hips",
+			(int)currentFrame_);
+
+	XMFLOAT3 delta;
+
+	delta.x = currPos.x - prevPos.x;
+	delta.y = 0.0f;
+	delta.z = currPos.z - prevPos.z;
+
+	// Root Motion
+	transform_.position_.x += delta.x;
+	transform_.position_.z += delta.z;
+
+	// 1ループの移動距離を計測
+	float dist = sqrtf(
+		delta.x * delta.x +
+		delta.z * delta.z);
+
+	loopDistance += dist;
+
+	
 }
 
 bool Player::SetState(AnimationState state)
@@ -618,22 +558,17 @@ AnimationState Player::StringToState(const string& (str))
 
 float Player::GetWalkAnimSpeed()
 {
-	float loopDist = 2.81593943f;
-	int steps = 2;
+	const float loopDistance = 2.890786f;
 
-	float stepDist = loopDist / steps;
+	float loopPerSec = param_.MOVE_SPEED / loopDistance;
 
-	// 1秒あたりの歩数
-	float stepPerSec =	param_.MOVE_SPEED / stepDist;
+	float frameCount =
+		float(currentAnimData_->endFrame -
+			currentAnimData_->startFrame);
 
-	// 1歩あたりのフレーム数
-	float framePerStep = float(currentAnimData_->endFrame - currentAnimData_->startFrame) / steps;
+	float framePerSec = loopPerSec * frameCount;
 
-	// 1秒あたり何f進めるか
-	float framePerSec = stepPerSec * framePerStep;
-
-	// 1fあたりの進行量
-	return framePerSec / 60.0f;
+	return framePerSec;
 }
 
 void Player::Draw()
