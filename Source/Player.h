@@ -31,6 +31,14 @@ enum class AnimationState
 	STATE_MAX
 };
 
+enum Playerstate
+{
+	IDLE,
+	WALK,
+	//RUN,
+	STATE_MAX
+};
+
 class Player : public GameObject
 {
 public:
@@ -78,6 +86,8 @@ private:
 
 	bool isWall_;
 	XMFLOAT3 wallNormal_;
+
+	Playerstate state_;
 
 	/////アニメーション関連の変数////
 	std::unordered_map<AnimationState, AnimationData> animData_;	// アニメーション情報の配列（キー：状態名）

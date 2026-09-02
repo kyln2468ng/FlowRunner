@@ -69,11 +69,26 @@ void Player::Initialize()
 	LoadAnimation();
 	//SetState(AnimationState::IDLE);
 	Camera::SetMouseControl(true);
+
+	state_ = Playerstate::IDLE;
 }
 
 void Player::Update()
 {
 	UpdateAnimation();
+
+	switch (state_)
+	{
+	case IDLE:
+		break;
+	case WALK:
+		break;
+	case STATE_MAX:
+		break;
+	default:
+		break;
+	}
+
 
 	///アニメーションのテスト用
 	if (Input::IsKeyDown(DIK_W) || Input::IsKeyDown(DIK_A) || Input::IsKeyDown(DIK_S)||Input::IsKeyDown(DIK_D)) {
@@ -264,13 +279,6 @@ WallHitData Player::DetectWall(const XMVECTOR& vPos, const XMVECTOR& move, const
 	//移動方向
 	XMVECTOR moveDir = move;
 
-	//if (!XMVector3Equal(move, XMVectorZero())) {
-	//	moveDir = XMVector3Normalize(move);
-	//}
-	//else {
-	//	moveDir = transform_.rotate_.Forward();
-	//}
-
 	if (isWall_) {
 		moveDir = -XMLoadFloat3(&wallNormal_);
 	}
@@ -422,7 +430,7 @@ void Player::WallJump(const WallHitData& wall)
 void Player::LoadAnimation()
 {
 	AddAnimation(AnimationState::IDLE, "model/baseModel.fbx");
-	AddAnimation(AnimationState::WALK, "model/workAnimModel.fbx");
+	AddAnimation(AnimationState::WALK, "model/Walking.fbx");
 
 	LoadAnimData("Assets/model/AnimationData.csv");
 }
