@@ -105,6 +105,18 @@ void Stage::Initialize()
 		
 	}
 
+	Transform t;
+	t.position_ = { 5.0f, -3.0, 10.0f };
+	t.scale_ = { 2,5,2 };
+	t.Calculation();
+	Block block{};
+	block.handle = hModelColl_;
+	block.type = DEFAULT;
+	block.transform = t;
+	Model::SetTransform(hModelColl_, block.transform);
+	models_.push_back(block);
+	Model::SetRayCastTarget(block.handle, true);
+
 	/*
 	int h = Model::Load("BoxDefault.fbx");
 	Transform t;

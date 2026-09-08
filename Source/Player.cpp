@@ -23,6 +23,11 @@ namespace
 
 	float drawDist = 0;
 	XMVECTOR m;
+
+	//
+	//挙動
+	//アニメーション
+	//
 }
 
 Player::Player(GameObject* parent)
@@ -67,10 +72,10 @@ void Player::Initialize()
 	//model_->Load("model/testAnim.fbx");
 
 	LoadAnimation();
-	//SetState(AnimationState::IDLE);
+	SetState(AnimationState::IDLE);
 	Camera::SetMouseControl(true);
 
-	state_ = Playerstate::IDLE;
+	state_ = PlayerState::IDLE;
 }
 
 void Player::Update()
@@ -80,194 +85,24 @@ void Player::Update()
 	switch (state_)
 	{
 	case IDLE:
+		UpdateIdle();
 		break;
 	case WALK:
+		UpdateWalk();
 		break;
-	case STATE_MAX:
+	case JUMP:
+		UpdateJump();
 		break;
-	default:
+	case FALL:
+		UpdateFall();
+		break;
+	case WALL:
+		UpdateWall();
+		break;
+	case WALL_JUMP:
+		UpdateWallJump();
 		break;
 	}
-
-
-	///アニメーションのテスト用
-	if (Input::IsKeyDown(DIK_W) || Input::IsKeyDown(DIK_A) || Input::IsKeyDown(DIK_S)||Input::IsKeyDown(DIK_D)) {
-		SetState(AnimationState::WALK);
-	}
-	//else if (Input::IsKeyUp(DIK_W) || Input::IsKeyUp(DIK_A) || Input::IsKeyUp(DIK_S) || Input::IsKeyUp(DIK_D)) {
-	//	SetState(AnimationState::IDLE);
-	//}
-
-	if (Input::IsKeyDown(DIK_P)) {
-		SetState(AnimationState::WALK);
-	}
-
-
-	//視点移動をする
-	if (Input::IsKey(DIK_RIGHT)) {
-		//transform_.rotate_.y += param_.MOVE_SPEED;
-		transform_.SetVectorRotation(XMFLOAT3(0, 10, 0));
-	}
-	if (Input::IsKey(DIK_LEFT)) {
-		//transform_.rotate_.y -= param_.MOVE_SPEED;
-		transform_.SetVectorRotation(XMFLOAT3(0, 10, 0));
-	}
-
-	XMVECTOR vPos = XMLoadFloat3(&transform_.position_);
-	//XMMATRIX mRot = XMMatrixRotationRollPitchYaw(transform_.rotate_.x, transform_.rotate_.y, 0);
-	XMMATRIX mRot = XMMatrixRotationQuaternion(transform_.rotate_.quaternion_);
-		
-	XMVECTOR move = XMVectorZero();
-
-	float inputX = 0.0f;
-	float inputZ = 0.0f;
-
-	if (Input::IsKey(DIK_W)) {
-		inputZ += 1.0f;
-	}
-	if (Input::IsKey(DIK_S)) {
-		inputZ -= 1.0f;
-	}
-	if (Input::IsKey(DIK_A)) {
-		inputX -= 1.0f;
-	}
-	if (Input::IsKey(DIK_D)) {
-		inputX += 1.0f;
-	}
-
-	Stage* st = (Stage*)FindObject("Stage");
-	if (st && st->IsEdhitorMode()) {
-		velocity_ = {};
-		isWall_ = false;
-		return;
-	}
-
-	if (inputX != 0.0f || inputZ != 0.0f) {
-		float angle = atan2f(inputX, inputZ);
-		transform_.SetVectorRotation(XMFLOAT3(0, XMConvertToDegrees(angle), 0));
-	}
-
-	XMVECTOR forward = transform_.rotate_.Forward();
-	XMVECTOR right = transform_.rotate_.Right();
-
-	forward = XMVectorSetY(forward, 0.0f);
-	right = XMVectorSetY(right, 0.0f);
-
-	forward = XMVector3Normalize(forward);
-	right = XMVector3Normalize(right);
-
-	if (Input::IsKey(DIK_W)) {
-		move += forward;
-	}
-	if (Input::IsKey(DIK_S)) {
-		move -= forward;
-	}
-	if (Input::IsKey(DIK_A)) {
-		move -= right;
-	}
-	if (Input::IsKey(DIK_D)) {
-		move += right;
-	}
-	move = XMVectorSet(inputX, 0.0f, inputZ, 0.0f);
-
-	/// プレイヤーから見たレイで壁を認識
-	WallHitData WallData = DetectWall(vPos, forward, right);
-
-	bool justJumped = false;
-	if (Input::IsKeyDown(DIK_SPACE) && onGround_)// && coolTime_ < 0.0f)
-	{
-		velocity_.y = JumpV0;
-		onGround_ = false;
-
-		isWall_ = false;
-		WallData.isHit = false;
-		justJumped = true;
-	}
-
-	if (!XMVector3Equal(move, XMVectorZero())) {
-		move = XMVector3Normalize(move);
-	}
-
-	move *= param_.MOVE_SPEED;
-
-
-	if (WallData.isHit && Input::IsKeyDown(DIK_S) && Input::IsKeyDown(DIK_SPACE)) {
-		WallJump(WallData);
-	}
-	else if (WallData.isHit) {
-		WallCollision(vPos, move, WallData);
-
-		WallMove(move, WallData);
-
-		WallCling(WallData);
-	}
-	else if (WallData.isHit == false) {
-		//velocity_.y -= param_.GRAVITY;
-	}
-
-	vPos += move;
-	vPos += XMLoadFloat3(&velocity_);
-	velocity_.x *= 0.9f;
-	velocity_.z *= 0.9f;
-
-	//if (isWall_) {
-	//	WallCling(WallData);
-	//}
-
-
-	DirectX::XMStoreFloat3(&transform_.position_, vPos);
-
-	Camera::SetTarget(transform_.position_);
-
-	//transform_.position_.y -= gravity_;
-
-	XMFLOAT3 pos = transform_.position_;
-	float playerHeight = 1.0f;
-	RayCastData data = {
-		{ pos.x, pos.y, pos.z, 1},
-		{0.0f,-1.0f,0.0f,0.0f}
-	};
-	data.maxDist = playerHeight + fabs(velocity_.y) + 0.2f; //ここは一旦後で修正
-
-	float groundY = 0.0f;
-	bool isGround = false;
-	
-	if (st && st->hitObject(data, hModel_)) {
-		if (data.isHit && data.dist <= data.maxDist) {
-			if (velocity_.y <= 0.0f) {
-				groundY = data.hitPos.y;
-				isGround = true;
-			}
-		}
-	}
-
-	velocity_.y -= param_.GRAVITY;
-	// 重力はすでに velocity に反映済みとする
-	float nextY = transform_.position_.y + velocity_.y;
-	float nextFoot = nextY - playerHeight;
-
-	// 落下中 & 地面を超えるなら
-	if (velocity_.y < 0.0f && nextFoot <= groundY && isGround)
-	{
-		// 着地
-		transform_.position_.y = groundY + playerHeight;
-		velocity_.y = 0.0f;
-		onGround_ = true;
-	}
-	else
-	{
-		transform_.position_.y = nextY;
-		onGround_ = false;
-	}
-
-	/// 値検証用変数 ///
-	//drawDist = closeDist;
-
-	//transform_.position_.y += velocity_;
-	//m = move;
-
-	
-	
 }
 
 WallHitData Player::DetectWall(const XMVECTOR& vPos, const XMVECTOR& move, const XMVECTOR& right)
@@ -293,7 +128,7 @@ WallHitData Player::DetectWall(const XMVECTOR& vPos, const XMVECTOR& move, const
 
 	}
 
-	float playerRadius = 0.5f;
+	float playerRadius = 0.1f;
 
 	std::vector<XMVECTOR> offsets = {
 		XMVectorZero(),
@@ -310,7 +145,7 @@ WallHitData Player::DetectWall(const XMVECTOR& vPos, const XMVECTOR& move, const
 			{ XMVectorGetX(rayStartVec), XMVectorGetY(rayStartVec), XMVectorGetZ(rayStartVec) , 1 },
 			{ XMVectorGetX(moveDir), XMVectorGetY(moveDir), XMVectorGetZ(moveDir), 0 }
 		};
-		wallRay.maxDist = 0.6f;
+		wallRay.maxDist = 0.5f;
 
 		if (st && st->hitObject(wallRay,hModel_) && wallRay.isHit) {
 
@@ -427,6 +262,296 @@ void Player::WallJump(const WallHitData& wall)
 	XMStoreFloat3(&velocity_, jumpDir);	
 }
 
+void Player::UpdateIdle()
+{
+	if (onGround_ == false) {
+		state_ = FALL;
+	}
+
+	if (Input::IsKeyDown(DIK_SPACE) && onGround_) {
+		velocity_.y = JumpV0;
+		onGround_ = false;
+		isWall_ = false;
+		state_ = JUMP;
+		return;
+	}
+
+	if (Input::IsKey(DIK_W) ||	Input::IsKey(DIK_A) ||	Input::IsKey(DIK_S) ||	Input::IsKey(DIK_D)) {
+		SetState(AnimationState::WALK);
+		state_ = WALK;
+	}
+}
+
+void Player::UpdateWalk()
+{
+	if (!Input::IsKey(DIK_W) &&	!Input::IsKey(DIK_A) &&	!Input::IsKey(DIK_S) &&	!Input::IsKey(DIK_D)) {
+		SetState(AnimationState::IDLE);
+		state_ = IDLE;
+	}
+
+
+	XMVECTOR vPos = XMLoadFloat3(&transform_.position_);
+
+	XMVECTOR cameraForward = Camera::GetForward();
+	XMVECTOR cameraRight = Camera::GetRight();
+
+	XMVECTOR move = XMVectorZero();
+
+	float inputX = 0.0f;
+	float inputZ = 0.0f;
+
+	if (Input::IsKey(DIK_W)) {
+		move += cameraForward;
+	}
+	if (Input::IsKey(DIK_S)) {
+		move -= cameraForward;
+	}
+	if (Input::IsKey(DIK_A)) {
+		move -= cameraRight;
+	}
+	if (Input::IsKey(DIK_D)) {
+		move += cameraRight;
+	}
+
+	Stage* st = (Stage*)FindObject("Stage");
+	if (st && st->IsEdhitorMode()) {
+		velocity_ = {};
+		isWall_ = false;
+		return;
+	}
+
+	// プレイヤーの向きを入力方向に合わせる
+	bool isMove = !XMVector3Equal(move, XMVectorZero());
+	if (isMove) {
+		// 移動方向を正規化
+		move = XMVector3Normalize(move);
+
+		// 移動方向にプレイヤーの向きを合わせる
+		float moveX = XMVectorGetX(move);
+		float moveZ = XMVectorGetZ(move);
+
+		float angle = atan2f(moveX, moveZ);
+
+		transform_.SetVectorRotation(XMFLOAT3(0, XMConvertToDegrees(angle), 0));
+	}
+
+	XMVECTOR forward = transform_.rotate_.Forward();
+	XMVECTOR right = transform_.rotate_.Right();
+
+	forward = XMVectorSetY(forward, 0.0f);
+	right = XMVectorSetY(right, 0.0f);
+
+	forward = XMVector3Normalize(forward);
+	right = XMVector3Normalize(right);
+
+	/*if (Input::IsKey(DIK_W)) {
+		move += forward;
+	}
+	if (Input::IsKey(DIK_S)) {
+		move -= forward;
+	}
+	if (Input::IsKey(DIK_A)) {
+		move -= right;
+	}
+	if (Input::IsKey(DIK_D)) {
+		move += right;
+	}
+
+	move = XMVectorSet(inputX, 0.0f, inputZ, 0.0f);*/
+
+	// プレイヤーから見たレイで壁を認識
+	WallHitData WallData = DetectWall(vPos, forward, right);
+
+	if (!XMVector3Equal(move, XMVectorZero())) {
+		move = XMVector3Normalize(move);
+	}
+
+	move *= param_.MOVE_SPEED;
+
+	if (WallData.isHit && Input::IsKeyDown(DIK_S) && Input::IsKeyDown(DIK_SPACE)) {
+		WallJump(WallData);
+	}
+	else if (WallData.isHit) {
+		isWall_ = true;
+		state_ = WALL;
+		return;
+		
+		/*WallCollision(vPos, move, WallData);
+
+		WallMove(move, WallData);
+
+		WallCling(WallData);*/
+	}
+
+	vPos += move;
+	vPos += XMLoadFloat3(&velocity_);
+
+	DirectX::XMStoreFloat3(&transform_.position_, vPos);
+
+	Camera::SetTarget(transform_.position_);
+
+	if (Input::IsKeyDown(DIK_SPACE) && onGround_) {
+		velocity_.x = XMVectorGetX(move);
+		velocity_.z = XMVectorGetZ(move);
+		velocity_.y = JumpV0;
+		onGround_ = false;
+
+		isWall_ = false;
+		WallData.isHit = false;
+
+		state_ = JUMP;
+	}
+}
+
+void Player::UpdateJump()
+{
+	velocity_.y -= param_.GRAVITY;
+
+	XMVECTOR vPos = XMLoadFloat3(&transform_.position_);
+
+	vPos += XMLoadFloat3(&velocity_);
+
+	DirectX::XMStoreFloat3(&transform_.position_, vPos);
+
+	Camera::SetTarget(transform_.position_);
+
+	if (velocity_.y <= 0.0f) {
+		state_ = FALL;
+	}
+
+}
+
+void Player::UpdateFall()
+{
+	Stage* st = (Stage*)FindObject("Stage");
+
+	XMFLOAT3 pos = transform_.position_;
+	float groundDist = 0.01f;
+
+	RayCastData data = {
+		{ pos.x, pos.y, pos.z, 1 },
+		{ 0.0f, -1.0f, 0.0f, 0.0f }
+	};
+
+	data.maxDist = groundDist + fabs(velocity_.y) + 0.1f;
+
+	float groundY = 0.0f;
+	bool isGround = false;
+
+	if (st && st->hitObject(data, hModel_)) {
+		if (data.isHit && data.dist <= data.maxDist) {
+			if (velocity_.y <= 0.0f) {
+				groundY = data.hitPos.y;
+				isGround = true;
+			}
+		}
+	}
+
+	velocity_.y -= param_.GRAVITY;
+
+	XMVECTOR vPos = XMLoadFloat3(&transform_.position_);
+
+	// X・Y・Zすべて移動
+	vPos += XMLoadFloat3(&velocity_);
+
+	float nextY = XMVectorGetY(vPos);
+	float nextFoot = nextY - groundDist;
+
+	if (velocity_.y < 0.0f && nextFoot <= groundY && isGround) {
+		XMStoreFloat3(&transform_.position_, vPos);
+
+		transform_.position_.y = groundY + groundDist;
+
+		velocity_.x = 0.0f;
+		velocity_.y = 0.0f;
+		velocity_.z = 0.0f;
+
+		onGround_ = true;
+
+		state_ = IDLE;
+		SetState(AnimationState::IDLE);
+	}
+	else {
+		XMStoreFloat3(&transform_.position_, vPos);
+		onGround_ = false;
+	}
+
+	Camera::SetTarget(transform_.position_);
+}
+
+void Player::UpdateWall()
+{
+	XMVECTOR vPos = XMLoadFloat3(&transform_.position_);
+
+	XMVECTOR move = XMVectorZero();
+
+	XMVECTOR forward = transform_.rotate_.Forward();
+	XMVECTOR right = transform_.rotate_.Right();
+
+	forward = XMVectorSetY(forward, 0.0f);
+	right = XMVectorSetY(right, 0.0f);
+
+	forward = XMVector3Normalize(forward);
+	right = XMVector3Normalize(right);
+
+	// プレイヤーから見たレイで壁を認識
+	WallHitData WallData = DetectWall(vPos, forward, right);
+
+	// 壁から離れたらFALL
+	if (!WallData.isHit) {
+		isWall_ = false;
+		state_ = FALL;
+		return;
+	}
+
+	isWall_ = true;
+
+	// 壁ジャンプ
+ 	if (Input::IsKeyDown(DIK_S) && Input::IsKeyDown(DIK_SPACE)) {
+		WallJump(WallData);
+
+		isWall_ = false;
+		onGround_ = false;
+
+		state_ = WALL_JUMP;
+		return;
+	}
+
+	// 壁との衝突
+	WallCollision(vPos, move, WallData);
+
+	// 壁に沿って移動
+	WallMove(move, WallData);
+
+	// 壁に張り付く
+	WallCling(WallData);
+
+	vPos += move;
+
+	DirectX::XMStoreFloat3(&transform_.position_, vPos);
+
+	Camera::SetTarget(transform_.position_);
+
+
+}
+
+void Player::UpdateWallJump()
+{
+	velocity_.y -= param_.GRAVITY;
+
+	XMVECTOR vPos = XMLoadFloat3(&transform_.position_);
+
+	vPos += XMLoadFloat3(&velocity_);
+
+	DirectX::XMStoreFloat3(&transform_.position_, vPos);
+
+	Camera::SetTarget(transform_.position_);
+
+	if (velocity_.y <= 0.0f) {
+		state_ = FALL;
+	}
+}
+
 void Player::LoadAnimation()
 {
 	AddAnimation(AnimationState::IDLE, "model/baseModel.fbx");
@@ -473,8 +598,7 @@ void Player::UpdateAnimation()
 
 	float animSpeed = currentAnimData_->speed;
 
-	if (currentState_ == AnimationState::WALK)
-	{
+	if (currentState_ == AnimationState::WALK) {
 		animSpeed = GetWalkAnimSpeed();
 	}
 
@@ -485,18 +609,15 @@ void Player::UpdateAnimation()
 
 	bool isLoop = false;
 
-	if (currentAnimData_->loop)
-	{
+	if (currentAnimData_->loop)	{
 		if (currentFrame_ > currentAnimData_->endFrame)
 		{
 			currentFrame_ = currentAnimData_->startFrame;
 			isLoop = true;
 		}
 	}
-	else
-	{
-		if (currentFrame_ > currentAnimData_->endFrame)
-		{
+	else {
+		if (currentFrame_ > currentAnimData_->endFrame)	{
 			currentFrame_ = currentAnimData_->endFrame;
 		}
 	}
@@ -558,8 +679,12 @@ int Player::GetFrame() const
 
 AnimationState Player::StringToState(const string& (str))
 {
-	if (str == "IDLE") return AnimationState::IDLE;
-	if (str == "WALK") return AnimationState::WALK;
+	if (str == "IDLE") 
+		return AnimationState::IDLE;
+	
+	if (str == "WALK") 
+		return AnimationState::WALK;
+
 
 	return AnimationState::STATE_MAX;
 }

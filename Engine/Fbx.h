@@ -17,15 +17,13 @@ struct RayCastData
 {
 	XMFLOAT4 start;	//Rayの始点
 	XMFLOAT4 dir;	//Rayの方向（正規化してあること）
-	bool isHit;		//当たったかどうか
-	float dist;		//始点からの距離
-	float maxDist; // レイの最大値
+	bool isHit = false;		//当たったかどうか
+	float dist = FLT_MAX;		//始点からの距離
+	float maxDist = FLT_MAX; // レイの最大値
 
 	XMFLOAT3 hitPos;   //レイが当たった場所
 	XMFLOAT3 localHit;
 	XMFLOAT3 hitNormal; // ヒットした面の法線
-
-
 };
 
 //struct FBX_VERTEX

@@ -685,7 +685,7 @@ void FbxParts::RayCast(RayCastData& data)
 			bool result = Direct3D::Intersect(start, dir, ver[0], ver[1], ver[2], &dist);
 
 
-			if (result && dist < closest)
+			if (result && dist < closest && dist <= data.maxDist)
 			{
 				hit = true;
 				closest = dist;

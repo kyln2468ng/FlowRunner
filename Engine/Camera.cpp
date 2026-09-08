@@ -34,8 +34,6 @@ void Camera::Update()
 {
     if (mouseControl_) {
 
-
-
         //Input::SetMousePosition(LOWORD(lParam), HIWORD(lParam));
         XMVECTOR moveVec = Input::GetMouseDelta();
 
@@ -70,7 +68,7 @@ void Camera::Update()
         //
         //Model::RayCastAll(camRay);
 
-        position_ = XMVectorLerp(position_, desiredPosition, 0.1f);
+        position_ = XMVectorLerp(position_, desiredPosition, 0.5f); //ここで追従速度の調整
 
         //ビュー行列の作成
         viewMatrix_ = XMMatrixLookAtLH(position_, target_, XMVectorSet(0, 1, 0, 0));
@@ -134,4 +132,26 @@ XMFLOAT3 Camera::GetTarget()
     XMFLOAT3 tage = { 0,0,0 };
     XMStoreFloat3(&tage, target_);
     return tage;
+}
+
+XMVECTOR Camera::GetForward()
+{
+    XMVECTOR forward = target_ - position_;
+
+    forward = XMVectorSetY(forward, 0.0f);
+    forward = XMVector3Normalize(forward);
+
+    return forward;
+}
+
+XMVECTOR Camera::GetRight()
+{
+    XMVECTOR forward = GetForward();
+
+    XMVECTOR up = XMVectorSet(0, 1, 0, 0);
+
+    XMVECTOR right = XMVector3Cross(up, forward);
+    right = XMVector3Normalize(right);
+
+    return right;
 }

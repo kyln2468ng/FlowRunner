@@ -31,13 +31,17 @@ enum class AnimationState
 	STATE_MAX
 };
 
-enum Playerstate
+enum PlayerState
 {
 	IDLE,
 	WALK,
-	//RUN,
+	JUMP,
+	FALL,
+	WALL,
+	WALL_JUMP,
 	STATE_MAX
 };
+
 
 class Player : public GameObject
 {
@@ -61,6 +65,13 @@ private:
 	void WallCollision(XMVECTOR& vPos, XMVECTOR& move, const WallHitData& wall);//壁判定。めり込み防止と押し戻し
 	void WallMove(XMVECTOR& move, const WallHitData& wall);
 	void WallJump(const WallHitData& wall);
+
+	void UpdateIdle();
+	void UpdateWalk();
+	void UpdateJump();
+	void UpdateFall();
+	void UpdateWall();
+	void UpdateWallJump();
 
 	///////アニメーション関連の関数///////////
 	void LoadAnimData(const std::string& filePath);		// アニメーションのロード。アニメーション情報を読み込む（パラメータ）
@@ -87,7 +98,7 @@ private:
 	bool isWall_;
 	XMFLOAT3 wallNormal_;
 
-	Playerstate state_;
+	PlayerState state_;
 
 	/////アニメーション関連の変数////
 	std::unordered_map<AnimationState, AnimationData> animData_;	// アニメーション情報の配列（キー：状態名）

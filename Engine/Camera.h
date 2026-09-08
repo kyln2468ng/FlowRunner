@@ -33,4 +33,7 @@ namespace Camera
 
 	XMFLOAT3 GetPosition();
 	XMFLOAT3 GetTarget();
+
+	XMVECTOR GetForward();
+	XMVECTOR GetRight();
 };
