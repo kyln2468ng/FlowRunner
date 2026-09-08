@@ -39,6 +39,11 @@ void PlayScene::Update()
 		SceneManager* sceneOb = (SceneManager*)FindObject("SceneManager");
 		sceneOb->ChangeScene(SCENE_ID_CLEAR);
 	}
+
+	if (stage_->isDead()) {
+		SceneManager* sceneOb = (SceneManager*)FindObject("SceneManager");
+		sceneOb->ChangeScene(SCENE_ID_GAMEOVER);
+	}
 }
 
 void PlayScene::Draw()

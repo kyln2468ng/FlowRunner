@@ -64,6 +64,7 @@ public:
 
 	bool IsGoal();
 
+	bool isDead();
 
 	//bool CollideLine(RayCastData& data); //ステージオブジェクトとのレイキャスト取る
 	//int  GetModelCount() const;
@@ -115,4 +116,7 @@ private:
 	std::vector<StageObject*> stageObjects_;
 	Goal* goal;
 	bool isGoal_;
+
+	float deathHeight_;
+	bool isDead_;
 };
