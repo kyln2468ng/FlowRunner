@@ -14,14 +14,14 @@ float pitch_;
 bool mouseControl_;
 
 namespace {
-    static float distance_ = -8.0f;
-    static float height_ = 5.0f;
+    static float distance_ = -10.0f;
+    static float height_ = 8.0f;
 }
 
 //初期化
 void Camera::Initialize()
 {
-    position_ = XMVectorSet(0, 3, -10, 0);	//カメラの位置
+    position_ = XMVectorSet(0, 5, -10, 0);	//カメラの位置
     target_ = XMVectorSet(0, 0, 0, 0);	//カメラの焦点
 
     //プロジェクション行列
@@ -33,8 +33,6 @@ void Camera::Initialize()
 void Camera::Update()
 {
     if (mouseControl_) {
-
-        //Input::SetMousePosition(LOWORD(lParam), HIWORD(lParam));
         XMVECTOR moveVec = Input::GetMouseDelta();
 
         constexpr float DegToRad = XM_PI / 180.0f; //constexprのままにするかは一旦仮
@@ -57,16 +55,8 @@ void Camera::Update()
         XMVECTOR offset = XMVectorSet(0.0f, height_, distance_, 0.0f);
         offset = XMVector3Rotate(offset, rot.quaternion_);
 
-        //position_ = target_ + XMVectorSet(0.0f, height_, 0.0f, 0.0f) + offset;
-
         XMVECTOR desiredPosition = target_ + offset;
         XMVECTOR dir = XMVector3Normalize(desiredPosition - target_);
-
-        //RayCastData camRay;
-        //XMStoreFloat4(&camRay.start, target_);
-        //XMStoreFloat4(&camRay.dir, dir);
-        //
-        //Model::RayCastAll(camRay);
 
         position_ = XMVectorLerp(position_, desiredPosition, 0.5f); //ここで追従速度の調整
 

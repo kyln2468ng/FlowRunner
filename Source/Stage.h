@@ -9,11 +9,11 @@ class Enemy;
 class Player;
 class MapEditor;
 class StageObject;
-class Goal; //àÍíUâºÅAå„Ç≈è¡Ç∑
+class Goal; 
 
 namespace
 {
-	const int XSIZE{ 15 };
+	const int XSIZE{ 30 };
 	const int ZSIZE{ 15 };
 	const int MODEL_NUM{ 5 };
 }

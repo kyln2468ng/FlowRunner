@@ -21,13 +21,6 @@ void MapEditor::Initialize(Stage* stage)
 
 void MapEditor::Updata()
 {
-	/*
-	1 レイでhitpos取得
-	2 法線方向にずらす
-	3 グリッド化
-	4 配置
-	*/
-
 	UpdateCamera();
 
 	UpdateRay();

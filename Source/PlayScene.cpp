@@ -1,6 +1,5 @@
 #include "PlayScene.h"
 #include "Player.h"
-#include "Enemy.h"
 #include "../Engine/SceneManager.h"
 #include "Stage.h"
 #include "../Engine/Input.h"
@@ -17,12 +16,6 @@ PlayScene::~PlayScene()
 
 void PlayScene::Initialize()
 {
-	//Player* pPlayer = new Player(this);
-	//pPlayer->Initialize();
-	//childList_.push_back(pPlayer);
-
-	/*Instantiate<Player>(this);
-	Instantiate<Enemy>(this);*/
 	stage_ = (Stage*)Instantiate<Stage>(this);
 	Camera::SetMouseControl(true);
 }

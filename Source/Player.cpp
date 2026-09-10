@@ -1,9 +1,7 @@
 #include "Player.h"
-#include "ChildOden.h"
 #include "../Engine/Model.h"
 #include "../Engine/Input.h"
 #include "../Engine/SphereCollider.h"
-#include "Bullet.h"
 #include "../Engine/SceneManager.h"
 #include "../Engine/Camera.h"
 #include "Stage.h"
@@ -41,10 +39,6 @@ Player::~Player()
 
 void Player::Initialize()
 {
-	//pFbx_ = new Fbx;
-	//pFbx_がnullptrじゃなかった時のチェックあったほういい
-	//pFbx_->Load("OdenA.fbx");
-	//hModel_ = Model::Load("BoxGrass.fbx");//おでんじゃなくしたら判定取れてた
 	hModel_ = Model::Load("model/baseModel.fbx");
 	assert(hModel_ >= 0);
 	transform_.scale_.x = 0.5f;
@@ -53,23 +47,15 @@ void Player::Initialize()
 
 	transform_.position_ = { 0.0f,-1.0,3.0f };
 
-	//子オブジェクトにChildOdenを追加する
-	//pRChildOden = (ChildOden*)Instantiate<ChildOden>(this);
-	//pLChildOden = (ChildOden*)Instantiate<ChildOden>(this);
-	//pRChildOden->SetPosition(2.0f, 1.0f, 0.0f);
-	//pLChildOden->SetPosition(-2.0f, 1.0f, 0.0f);
-
 	SphereCollider* col = new SphereCollider(0.5f);
 	AddCollider(col);
 
 
 	JumpV0 = sqrtf(2.0f * param_.GRAVITY * param_.JUMP_HEIGHT);
 	onGround_ = false;
+	justClimb_ = false;
 	isWall_ = false;
 	velocity_ = { 0.0f, 0.0f, 0.0f };
-	//anim_.SetMaxFrame(60.0f);
-	//model_ = new Fbx();
-	//model_->Load("model/testAnim.fbx");
 
 	LoadAnimation();
 	SetState(AnimationState::IDLE);
@@ -129,11 +115,23 @@ WallHitData Player::DetectWall(const XMVECTOR& vPos, const XMVECTOR& move, const
 	}
 
 	float playerRadius = 0.1f;
+	float playerHeight = 1.8f;
 
 	std::vector<XMVECTOR> offsets = {
+		// 足元
 		XMVectorZero(),
 		right * playerRadius,
-		-right * playerRadius
+		-right * playerRadius,
+
+		// 中央
+		XMVectorSet(0, playerHeight * 0.5f, 0, 0),
+		right* playerRadius + XMVectorSet(0, playerHeight * 0.5f, 0, 0),
+		-right * playerRadius + XMVectorSet(0, playerHeight * 0.5f, 0, 0),
+		
+		// 上
+		XMVectorSet(0, playerHeight * 0.9f, 0, 0),
+		right* playerRadius + XMVectorSet(0, playerHeight * 0.9f, 0, 0),
+		-right * playerRadius + XMVectorSet(0, playerHeight * 0.9f, 0, 0)
 	};
 
 	for (auto& offset : offsets) {
@@ -184,12 +182,9 @@ void Player::WallCling(const WallHitData& wall)
 	XMVECTOR target = wall.hitPos - wall.normal * offset;
 
 	XMVECTOR current = XMLoadFloat3(&transform_.position_);
-	//XMVECTOR newPos = XMVectorLerp(current, target, 0.1f);
-	//XMVECTOR newPos = hitPos - normal * offset;
 	float dist = wall.dist - offset;
 	current -= wall.normal * dist;
 	DirectX::XMStoreFloat3(&transform_.position_, current);
-	//velocity_ = 0.0f;
 }
 
 void Player::WallCollision(XMVECTOR& vPos, XMVECTOR& move, const WallHitData& wall)
@@ -211,31 +206,24 @@ void Player::WallCollision(XMVECTOR& vPos, XMVECTOR& move, const WallHitData& wa
 void Player::WallMove(XMVECTOR& move, const WallHitData& wall)
 {
 	XMVECTOR wallRight = XMVector3Cross(wall.normal, XMVectorSet(0, 1, 0, 0));
-
 	wallRight =	XMVector3Normalize(wallRight);
 
 	XMVECTOR wallUp = XMVector3Cross(wallRight, wall.normal);
-
 	wallUp = XMVector3Normalize(wallUp);
 
 	XMVECTOR wallMove =	XMVectorZero();
-
 	if (Input::IsKey(DIK_W)) {
 		wallMove += wallUp;
 	}
-
 	if (Input::IsKey(DIK_S)) {
 		wallMove -= wallUp;
 	}
-
 	if (Input::IsKey(DIK_A)) {
 		wallMove -= wallRight;
 	}
-
 	if (Input::IsKey(DIK_D)) {
 		wallMove += wallRight;
 	}
-
 	if (Input::IsKeyDown(DIK_SPACE)) {
 		XMVECTOR jumpDir = wall.normal + XMVectorSet(0, 1.0f, 0, 0);
 		jumpDir = XMVector3Normalize(jumpDir);
@@ -243,12 +231,8 @@ void Player::WallMove(XMVECTOR& move, const WallHitData& wall)
 		XMStoreFloat3(&velocity_, jumpDir);
 	}
 
-	if (!XMVector3Equal(
-		wallMove,
-		XMVectorZero()))
-	{
-		wallMove =
-			XMVector3Normalize(wallMove);
+	if (!XMVector3Equal(wallMove, XMVectorZero())) {
+		wallMove =	XMVector3Normalize(wallMove);
 	}
 
 	move = wallMove *  param_.MOVE_SPEED;
@@ -260,6 +244,39 @@ void Player::WallJump(const WallHitData& wall)
 	jumpDir = XMVector3Normalize(jumpDir);
 	jumpDir = XMVectorScale(jumpDir, JumpV0);
 	XMStoreFloat3(&velocity_, jumpDir);	
+}
+
+bool Player::IsWallTop(const XMVECTOR& vPos, const XMVECTOR& forward, float& groundY)
+{
+	Stage* st = (Stage*)FindObject("Stage");
+
+	if (!st) {
+		return false;
+	}
+
+	// 頭より少し上からレイを出す
+	XMVECTOR start = vPos + forward * 0.3f;
+	start += XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
+
+	RayCastData data = {
+		{
+			XMVectorGetX(start),
+			XMVectorGetY(start),
+			XMVectorGetZ(start),
+			1.0f
+		},
+		{ 0.0f, -1.0f, 0.0f, 0.0f }
+	};
+
+	data.maxDist = 2.0f;
+
+
+	if (!st->hitObject(data, hModel_) || !data.isHit)
+	{
+		return false;
+	}
+
+	return true;
 }
 
 void Player::UpdateIdle()
@@ -288,7 +305,7 @@ void Player::UpdateWalk()
 		SetState(AnimationState::IDLE);
 		state_ = IDLE;
 	}
-
+	
 
 	XMVECTOR vPos = XMLoadFloat3(&transform_.position_);
 
@@ -320,6 +337,34 @@ void Player::UpdateWalk()
 		return;
 	}
 
+	//
+	float groundDist = 0.1f;
+
+	RayCastData data = {
+		{
+			transform_.position_.x,
+			transform_.position_.y,
+			transform_.position_.z,
+			1.0f
+		},
+		{ 0.0f, -1.0f, 0.0f, 0.0f }
+	};
+
+	data.maxDist = groundDist;
+
+	if (justClimb_)	{
+		justClimb_ = false;
+	}
+	else {
+		// 下向きレイによる通常の落下判定
+		if (!st->hitObject(data, hModel_) || !data.isHit)
+		{
+			state_ = FALL;
+			onGround_ = false;
+			return;
+		}
+	}
+
 	// プレイヤーの向きを入力方向に合わせる
 	bool isMove = !XMVector3Equal(move, XMVectorZero());
 	if (isMove) {
@@ -344,23 +389,8 @@ void Player::UpdateWalk()
 	forward = XMVector3Normalize(forward);
 	right = XMVector3Normalize(right);
 
-	/*if (Input::IsKey(DIK_W)) {
-		move += forward;
-	}
-	if (Input::IsKey(DIK_S)) {
-		move -= forward;
-	}
-	if (Input::IsKey(DIK_A)) {
-		move -= right;
-	}
-	if (Input::IsKey(DIK_D)) {
-		move += right;
-	}
-
-	move = XMVectorSet(inputX, 0.0f, inputZ, 0.0f);*/
-
 	// プレイヤーから見たレイで壁を認識
-	WallHitData WallData = DetectWall(vPos, forward, right);
+	WallHitData wallData = DetectWall(vPos, forward, right);
 
 	if (!XMVector3Equal(move, XMVectorZero())) {
 		move = XMVector3Normalize(move);
@@ -368,19 +398,10 @@ void Player::UpdateWalk()
 
 	move *= param_.MOVE_SPEED;
 
-	if (WallData.isHit && Input::IsKeyDown(DIK_S) && Input::IsKeyDown(DIK_SPACE)) {
-		WallJump(WallData);
-	}
-	else if (WallData.isHit) {
+	if (wallData.isHit) {
 		isWall_ = true;
 		state_ = WALL;
 		return;
-		
-		/*WallCollision(vPos, move, WallData);
-
-		WallMove(move, WallData);
-
-		WallCling(WallData);*/
 	}
 
 	vPos += move;
@@ -391,13 +412,13 @@ void Player::UpdateWalk()
 	Camera::SetTarget(transform_.position_);
 
 	if (Input::IsKeyDown(DIK_SPACE) && onGround_) {
-		velocity_.x = XMVectorGetX(move);
-		velocity_.z = XMVectorGetZ(move);
+		velocity_.x = XMVectorGetX(move) * 1.5f;
+		velocity_.z = XMVectorGetZ(move) * 1.5f;
 		velocity_.y = JumpV0;
 		onGround_ = false;
 
 		isWall_ = false;
-		WallData.isHit = false;
+		wallData.isHit = false;
 
 		state_ = JUMP;
 	}
@@ -409,6 +430,18 @@ void Player::UpdateJump()
 
 	XMVECTOR vPos = XMLoadFloat3(&transform_.position_);
 
+	WallHitData wallData = DetectWall(
+		vPos,
+		transform_.rotate_.Forward(),
+		transform_.rotate_.Right()
+	);
+
+	if (wallData.isHit) {
+		isWall_ = true;
+		state_ = WALL;
+		return;
+	}
+
 	vPos += XMLoadFloat3(&velocity_);
 
 	DirectX::XMStoreFloat3(&transform_.position_, vPos);
@@ -418,7 +451,6 @@ void Player::UpdateJump()
 	if (velocity_.y <= 0.0f) {
 		state_ = FALL;
 	}
-
 }
 
 void Player::UpdateFall()
@@ -490,25 +522,40 @@ void Player::UpdateWall()
 
 	forward = XMVectorSetY(forward, 0.0f);
 	right = XMVectorSetY(right, 0.0f);
-
+	
 	forward = XMVector3Normalize(forward);
 	right = XMVector3Normalize(right);
 
 	// プレイヤーから見たレイで壁を認識
-	WallHitData WallData = DetectWall(vPos, forward, right);
+	WallHitData wallData = DetectWall(vPos, forward, right);
 
-	// 壁から離れたらFALL
-	if (!WallData.isHit) {
+	isWall_ = true;
+
+	if (!wallData.isHit) {
+		float groundY = 0.0f;
+		if (IsWallTop(vPos, forward, groundY))
+		{
+			// 壁の上に乗る
+			transform_.position_.y = groundY + 0.1f;
+			velocity_.y = 0.0f;
+			isWall_ = false;
+			justClimb_ = true;
+
+			state_ = IDLE;
+			SetState(AnimationState::IDLE);
+			return;
+		}
+
+		//壁から離れたらFALL
 		isWall_ = false;
 		state_ = FALL;
 		return;
 	}
 
-	isWall_ = true;
 
 	// 壁ジャンプ
- 	if (Input::IsKeyDown(DIK_S) && Input::IsKeyDown(DIK_SPACE)) {
-		WallJump(WallData);
+ 	if (Input::IsKeyDown(DIK_S) && Input::IsKeyDown(DIK_SPACE) || Input::IsMouseButtonDown(0)) {
+ 		WallJump(wallData);
 
 		isWall_ = false;
 		onGround_ = false;
@@ -518,21 +565,19 @@ void Player::UpdateWall()
 	}
 
 	// 壁との衝突
-	WallCollision(vPos, move, WallData);
+	WallCollision(vPos, move, wallData);
 
 	// 壁に沿って移動
-	WallMove(move, WallData);
+	WallMove(move, wallData);
 
 	// 壁に張り付く
-	WallCling(WallData);
+	WallCling(wallData);
 
 	vPos += move;
 
 	DirectX::XMStoreFloat3(&transform_.position_, vPos);
 
 	Camera::SetTarget(transform_.position_);
-
-
 }
 
 void Player::UpdateWallJump()
@@ -610,8 +655,7 @@ void Player::UpdateAnimation()
 	bool isLoop = false;
 
 	if (currentAnimData_->loop)	{
-		if (currentFrame_ > currentAnimData_->endFrame)
-		{
+		if (currentFrame_ > currentAnimData_->endFrame)	{
 			currentFrame_ = currentAnimData_->startFrame;
 			isLoop = true;
 		}
@@ -706,27 +750,9 @@ float Player::GetWalkAnimSpeed()
 
 void Player::Draw()
 {
-	/*if (pFbx_)
-	{
-		pFbx_->Draw(transform_);
-	}*/
-			
-
 	Model::SetFrame(hModel_, GetFrame());
 	Model::SetTransform(hModel_, transform_);
 	Model::Draw(hModel_);
-	
-	char buf[128];
-	//sprintf_s(buf, "dist: %.2f\n", drawDist);
-	
-	XMFLOAT3 mx;
-	XMStoreFloat3(&mx, m);
-	
-	sprintf_s(buf, "move: %.2f %.2f %.2f\n", mx.x, mx.y, mx.z);
-	sprintf_s(buf, "pos: %.2f %.2f %.2f\n", transform_.position_.x, transform_.position_.y, transform_.position_.z);
-	
-	//OutputDebugStringA(buf);
-
 }
 
 void Player::Release()
@@ -734,15 +760,6 @@ void Player::Release()
 	KillMe();
 }
 
-void Player::OnCollision(GameObject* pTarget)
-{
-	if (pTarget->GetObjectName() == "Enemy")
-	{
-		this->Release();
-		SceneManager* sceneOb = (SceneManager*)FindObject("SceneManager");
-		sceneOb->ChangeScene(SCENE_ID_GAMEOVER);
-	}
-}
 
 
 

@@ -143,10 +143,7 @@
     <ClInclude Include="Engine\CsvReader.h" />
     <ClInclude Include="Engine\FbxParts.h" />
     <ClInclude Include="Engine\Quaternion.h" />
-    <ClInclude Include="Source\Bullet.h" />
-    <ClInclude Include="Source\ChildOden.h" />
     <ClInclude Include="Source\ClearScene.h" />
-    <ClInclude Include="Source\Enemy.h" />
     <ClInclude Include="Engine\Camera.h" />
     <ClInclude Include="Engine\Direct3D.h" />
     <ClInclude Include="Engine\Fbx.h" />
@@ -179,10 +176,7 @@
     <ClCompile Include="Engine\CsvReader.cpp" />
     <ClCompile Include="Engine\FbxParts.cpp" />
     <ClCompile Include="Engine\Quaternion.cpp" />
-    <ClCompile Include="Source\Bullet.cpp" />
-    <ClCompile Include="Source\ChildOden.cpp" />
     <ClCompile Include="Source\ClearScene.cpp" />
-    <ClCompile Include="Source\Enemy.cpp" />
     <ClCompile Include="Engine\Camera.cpp" />
     <ClCompile Include="Engine\Direct3D.cpp" />
     <ClCompile Include="Engine\Fbx.cpp" />

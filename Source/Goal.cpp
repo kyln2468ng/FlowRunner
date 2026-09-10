@@ -16,8 +16,8 @@ Goal::~Goal()
 void Goal::Initialize()
 {
 	gModel_ = Model::Load("BoxGrass.fbx");
-	transform_.position_ = { 3.0f,0.0f,15.0f };
-	transform_.scale_ = { 2.0f,2.0f,2.0f };
+	transform_.position_ = { 3.0f,-2.0f,10.0f };
+	transform_.scale_ = { 1.0f,1.0f,1.0f };
 	transform_.Calculation();
 
 	SphereCollider* col = new SphereCollider(1.0f);

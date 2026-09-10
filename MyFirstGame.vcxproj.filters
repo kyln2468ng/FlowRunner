@@ -63,15 +63,6 @@
     <ClInclude Include="Engine\Texture.h">
       <Filter>ソース ファイル\Engine</Filter>
     </ClInclude>
-    <ClInclude Include="Source\Bullet.h">
-      <Filter>ソース ファイル\Scene\Play</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\ChildOden.h">
-      <Filter>ソース ファイル\Scene\Play</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\Enemy.h">
-      <Filter>ソース ファイル\Scene\Play</Filter>
-    </ClInclude>
     <ClInclude Include="Source\Player.h">
       <Filter>ソース ファイル\Scene\Play</Filter>
     </ClInclude>
@@ -171,15 +162,6 @@
       <Filter>ソース ファイル\Engine</Filter>
     </ClCompile>
     <ClCompile Include="Source\PlayScene.cpp">
-      <Filter>ソース ファイル\Scene\Play</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\Bullet.cpp">
-      <Filter>ソース ファイル\Scene\Play</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\ChildOden.cpp">
-      <Filter>ソース ファイル\Scene\Play</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\Enemy.cpp">
       <Filter>ソース ファイル\Scene\Play</Filter>
     </ClCompile>
     <ClCompile Include="Source\Player.cpp">

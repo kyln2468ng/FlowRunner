@@ -53,7 +53,6 @@ public:
 	void Update() override;
 	void Draw() override;
 	void Release() override;
-	void OnCollision(GameObject* pTarget) override;
 
 	XMFLOAT3 GetPos() { return transform_.position_; }
 	int GetHandle() { return hModel_; }
@@ -65,6 +64,7 @@ private:
 	void WallCollision(XMVECTOR& vPos, XMVECTOR& move, const WallHitData& wall);//壁判定。めり込み防止と押し戻し
 	void WallMove(XMVECTOR& move, const WallHitData& wall);
 	void WallJump(const WallHitData& wall);
+	bool IsWallTop(const XMVECTOR& vPos, const XMVECTOR& forward, float& groundY);
 
 	void UpdateIdle();
 	void UpdateWalk();
@@ -81,20 +81,14 @@ private:
 	bool SetState(AnimationState state);			// アニメーションの状態切り替え
 	int GetFrame() const;								// 現在のフレーム取得
 	AnimationState StringToState(const std::string& (str));
-
 	float GetWalkAnimSpeed();
 
 	/////////////////////////////////////////
-
-	ChildOden* pRChildOden;
-	ChildOden* pLChildOden;
-	Bullet* bullet_;
 	int hModel_;
 	bool onGround_;
-	//float velocityY;
+	bool justClimb_;
 	PlayerParamConfig param_;
 	XMFLOAT3 velocity_;
-
 	bool isWall_;
 	XMFLOAT3 wallNormal_;
 
